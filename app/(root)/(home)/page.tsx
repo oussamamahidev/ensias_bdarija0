@@ -8,36 +8,11 @@ import HomeFilers from "@/components/home/HomeFilers";
 import { title } from "process";
 import NoResult from "@/components/shared/NoResult";
 import QuestionCard from "@/components/cards/QuestionCard";
-export default function Home() {
-  const questions = [
-    {
-      _id: "1",
-      title: "What is the difference between state and props? ",
-      tags: [
-        { _id: "1", name: "react" },
-        { _id: "2", name: "javascript" },
-      ],
-      author: { _id: "1", name: "John Doe", picture: "/assets/icons/avatar.svg" },
-      upvotes: 10,
-      views: 100,
-      answers: [],
-      createdAt: new Date("2023-09-01T12:10:01.000Z"),
-    },
-    {
-      _id: "2",
-      title: "Bind errors after upgrading to NextJS14",
-      tags: [
-        { _id: "1", name: "next" },
-        { _id: "2", name: "react" },
-        { _id: "3", name: "webdev" },
-      ],
-      author: { _id: "2", name: "Jane Doe", picture: "/assets/icons/avatar.svg" },
-      upvotes: 10,
-      views: 0,
-      answers: [],
-      createdAt: new Date("2023-11-01T20:01:39.000Z"),
-    },
-  ];
+import { getQuestions } from "@/lib/actions/question.action";
+
+
+export default async  function Home() {
+  const { questions } = await getQuestions({});
   return (
     <>
       <div className="flex w-full flex-col-reverse justify-between gap-4 sm:flex-row sm:items-center" >

@@ -1,18 +1,26 @@
-import React from 'react'
 import Question from "@/components/forms/Question";
+import { getUserById } from "@/lib/actions/user.action";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import React from "react";
 
+const Page = async () => {
+  const userId='clerk_123456'
 
-const AskQuestion = () => {
+  if (!userId) {
+    redirect("/sign-in");
+  }
+
+  const mongoUser = await getUserById({ userId });
+
   return (
-    <section className="container mx-auto px-4" aria-label="Ask a question">
-      <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-        Ask a Question
-      </h1>
+    <div>
+      <h1 className="h1-bold text-dark100_light900">Ask a question</h1>
       <div className="mt-9">
-        <Question />
+        <Question mongoUserId={JSON.stringify(mongoUser?._id)} />
       </div>
-    </section>
-  )
-}
+    </div>
+  );
+};
 
-export default AskQuestion
+export default Page;
