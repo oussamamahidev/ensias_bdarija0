@@ -98,3 +98,28 @@ export async function getAllUsers(params: GetAllUsersParams) {
     throw error;
   }
 }
+
+export async function generateUniqueUsername(firstName: string | null, lastName: string | null) {
+  // Create base username from full name
+  const baseUsername = `${firstName}${lastName ? lastName : ''}`
+    .toLowerCase()
+    .replace(/\s+/g, '') // Remove spaces
+    .replace(/[^a-zA-Z0-9]/g, '') // Remove special characters
+  
+  let username = baseUsername
+  let counter = 1
+
+  // Keep checking until we find a unique username
+  while (true) {
+    // Check if username exists in database
+    const existingUser = await User.findOne({ username })
+    
+    if (!existingUser) {
+      return username
+    }
+
+    // If username exists, append counter and try again
+    username = `${baseUsername}${counter}`
+    counter++
+  }
+}
