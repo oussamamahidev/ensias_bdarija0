@@ -60,7 +60,7 @@ console.log(eventType)
     const mongoUser = await createUser({
       clerkId: id,
       name: `${first_name}${last_name ? ` ${last_name}` : ""}`,
-      username: username!,
+      username: username! ? username :`${first_name}${last_name ? ` ${last_name}` : ""}`,
       email: email_addresses[0].email_address,
       picture: image_url,
     });
