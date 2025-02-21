@@ -4,7 +4,15 @@ const nextConfig: NextConfig = {
   experimental: {
     serverActions: {}, // ✅ Fix: Change from true → {}
   },
-  transpilePackages: ["mongoose"], // ✅ Use this instead of serverComponentsExternalPackages
+
+  images:{
+    remotePatterns:[
+      {
+        protocol: "https",
+        hostname:'img.clerk.com'
+      }
+    ]
+  }
 };
 
 export default nextConfig;
