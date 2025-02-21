@@ -12,13 +12,25 @@ import {
 import { revalidatePath } from "next/cache";
 import Question from "@/database/question.model";
 
+// Connect to database once at the module level
+let isConnected = false;
+const ensureConnection = async () => {
+  if (!isConnected) {
+    await connectToDatabase();
+    isConnected = true;
+  }
+};
+
 export async function getUserById(params: GetUserByIdParams) {
   try {
-    console.log('user being called')
-    await connectToDatabase(); // FIX: Await database connection
+    await ensureConnection();
 
     const { userId } = params;
     const user = await User.findOne({ clerkId: userId });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
 
     return user;
   } catch (error) {
@@ -29,10 +41,14 @@ export async function getUserById(params: GetUserByIdParams) {
 
 export async function createUser(userParam: CreateUserParams) {
   try {
-    console.log('Creating user')
-    await connectToDatabase(); // FIX: Await database connection
+    await ensureConnection();
 
     const newUser = await User.create(userParam);
+    
+    if (!newUser) {
+      throw new Error("Failed to create user");
+    }
+
     return newUser;
   } catch (error) {
     console.error("🔴 Error creating user:", error);
@@ -42,14 +58,13 @@ export async function createUser(userParam: CreateUserParams) {
 
 export async function updateUser(params: UpdateUserParams) {
   try {
-    console.log("Updating user")
-    await connectToDatabase(); // FIX: Await database connection
+    await ensureConnection();
 
     const { clerkId, updateData, path } = params;
     const updatedUser = await User.findOneAndUpdate(
       { clerkId },
       updateData,
-      { new: true }
+      { new: true, runValidators: true }
     );
 
     if (!updatedUser) {
@@ -66,20 +81,35 @@ export async function updateUser(params: UpdateUserParams) {
 
 export async function deleteUser(userParam: DeleteUserParams) {
   try {
-    await connectToDatabase(); // FIX: Await database connection
+    await ensureConnection();
 
     const { clerkId } = userParam;
-    const user = await User.findOneAndDelete({ clerkId }); // FIX: Use findOneAndDelete instead of findByIdAndDelete
+    
+    // Use transaction to ensure atomicity
+    const session = await User.startSession();
+    let deletedUser;
 
-    if (!user) {
-      throw new Error("User not found");
+    try {
+      await session.withTransaction(async () => {
+        const user = await User.findOneAndDelete({ clerkId }).session(session);
+        
+        if (!user) {
+          throw new Error("User not found");
+        }
+
+        // Delete all questions associated with this user
+        await Question.deleteMany({ author: user._id }).session(session);
+        deletedUser = user;
+      });
+    } finally {
+      await session.endSession();
     }
 
-    // Delete all questions associated with this user
-    await Question.deleteMany({ author: user._id });
+    if (!deletedUser) {
+      throw new Error("Failed to delete user");
+    }
 
-    console.log("✅ User and related questions deleted successfully.");
-    return user;
+    return deletedUser;
   } catch (error) {
     console.error("🔴 Error deleting user:", error);
     throw error;
@@ -89,9 +119,13 @@ export async function deleteUser(userParam: DeleteUserParams) {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function getAllUsers(params: GetAllUsersParams) {
   try {
-    await connectToDatabase(); // FIX: Await database connection
+    await ensureConnection();
 
-    const users = await User.find({}).sort({ createdAt: -1 });
+    const users = await User.find({})
+      .sort({ createdAt: -1 })
+      .select('-password') // Exclude sensitive data
+      .lean(); // Convert to plain JS objects for better performance
+
     return { users };
   } catch (error) {
     console.error("🔴 Error fetching all users:", error);
@@ -100,26 +134,46 @@ export async function getAllUsers(params: GetAllUsersParams) {
 }
 
 export async function generateUniqueUsername(firstName: string | null, lastName: string | null) {
-  // Create base username from full name
-  const baseUsername = `${firstName}${lastName ? lastName : ''}`
-    .toLowerCase()
-    .replace(/\s+/g, '') // Remove spaces
-    .replace(/[^a-zA-Z0-9]/g, '') // Remove special characters
-  
-  let username = baseUsername
-  let counter = 1
+  try {
+    await ensureConnection();
 
-  // Keep checking until we find a unique username
-  while (true) {
-    // Check if username exists in database
-    const existingUser = await User.findOne({ username })
-    
-    if (!existingUser) {
-      return username
+    // Handle empty/null names
+    if (!firstName && !lastName) {
+      throw new Error("Both first name and last name cannot be empty");
     }
 
-    // If username exists, append counter and try again
-    username = `${baseUsername}${counter}`
-    counter++
+    // Create base username from full name
+    const baseUsername = `${firstName || ''}${lastName || ''}`
+      .toLowerCase()
+      .replace(/\s+/g, '') // Remove spaces
+      .replace(/[^a-zA-Z0-9]/g, '') // Remove special characters
+      .slice(0, 20); // Limit length
+    
+    if (baseUsername.length < 3) {
+      throw new Error("Username is too short after sanitization");
+    }
+
+    let username = baseUsername;
+    let counter = 1;
+    const MAX_ATTEMPTS = 100; // Prevent infinite loops
+
+    // Keep checking until we find a unique username
+    while (counter <= MAX_ATTEMPTS) {
+      // Check if username exists in database
+      const existingUser = await User.findOne({ username }).lean();
+      
+      if (!existingUser) {
+        return username;
+      }
+
+      // If username exists, append counter and try again
+      username = `${baseUsername}${counter}`;
+      counter++;
+    }
+
+    throw new Error("Could not generate unique username after maximum attempts");
+  } catch (error) {
+    console.error("🔴 Error generating unique username:", error);
+    throw error;
   }
 }
