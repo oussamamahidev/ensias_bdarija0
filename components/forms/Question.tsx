@@ -22,12 +22,13 @@ import { QuestionSchema } from "@/lib/validation"; // ✅ Import the schema
 import { createQuestion } from "@/lib/actions/question.action";
 import { useRouter,usePathname } from "next/navigation";
 
-const type :any = 'create';
+const type : string = 'create';
 
 interface Props {
   mongoUserId:string;
   }
 const Question = ({mongoUserId}: Props) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const editorRef = useRef<any>(null);
   const [isSubmitting,setIsSubmitting]= useState(false);
 
@@ -55,7 +56,7 @@ const Question = ({mongoUserId}: Props) => {
     })
     router.push('/');
    }catch(error){
-
+    console.log(error);
    }finally{
     setIsSubmitting(false);
    }
@@ -63,6 +64,7 @@ const Question = ({mongoUserId}: Props) => {
 
   const handleInputKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     field: any
   ) => {
     if (e.key === "Enter" && field.name === "tags") {
@@ -88,6 +90,7 @@ const Question = ({mongoUserId}: Props) => {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handelTagRemove = (tag: string, field: any) => {
     const newTags= field.value.filter((t : string)=>t!==tag) ;
     form.setValue('tags', newTags);
@@ -133,7 +136,7 @@ const Question = ({mongoUserId}: Props) => {
                 <Editor
                   apiKey={process.env.NEXT_PUBLIC_TINY_EDITOR_API_KEY}
                   onInit={(evt, editor) => {
-                    // @ts-ignore
+      
                     editorRef.current = editor;
                   }}
                   onBlur={field.onBlur}

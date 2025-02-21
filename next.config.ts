@@ -2,10 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   experimental: {
-    serverActions: true,
+    serverActions: {}, // ✅ Fix: Change from true → {}
   },
-  mdxRs: true, 
-  serverComponentsExternalPackages: ["mongoose"], 
+  transpilePackages: ["mongoose"], // ✅ Use this instead of serverComponentsExternalPackages
 };
 
 export default nextConfig;
