@@ -23,7 +23,7 @@ const SpaceGrotesk= Space_Grotesk({
 })
 
 export const metadata: Metadata = {
-  title: 'DevFlow Application',
+  title: 'D2sFlow Application',
   description: 'Une plateforme communautaire où les développeurs peuvent poser des questions, partager leurs connaissances et collaborer sur des problèmes techniques. Grâce à un système de votes et de tags, les utilisateurs trouvent rapidement les meilleures réponses et solutions',
   icons: {
     icon: '/public/assets/images/site-logo.svg'
