@@ -14,6 +14,7 @@ import Question from "@/database/question.model";
 
 export async function getUserById(params: GetUserByIdParams) {
   try {
+    console.log('user being called')
     await connectToDatabase(); // FIX: Await database connection
 
     const { userId } = params;
@@ -28,6 +29,7 @@ export async function getUserById(params: GetUserByIdParams) {
 
 export async function createUser(userParam: CreateUserParams) {
   try {
+    console.log('Creating user')
     await connectToDatabase(); // FIX: Await database connection
 
     const newUser = await User.create(userParam);
@@ -40,6 +42,7 @@ export async function createUser(userParam: CreateUserParams) {
 
 export async function updateUser(params: UpdateUserParams) {
   try {
+    console.log("Updating user")
     await connectToDatabase(); // FIX: Await database connection
 
     const { clerkId, updateData, path } = params;

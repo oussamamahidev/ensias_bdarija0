@@ -14,7 +14,7 @@ export async function POST(req: Request) {
       "Please add WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local"
     );
   }
-
+console.log(WEBHOOK_SECRET);
   // Get the headers
   const headerPayload = headers();
   const svix_id = (await headerPayload).get("svix-id");
@@ -27,11 +27,11 @@ export async function POST(req: Request) {
       status: 400,
     });
   }
-
+console.log(svix_id) 
   // Get the body
   const payload = await req.json();
   const body = JSON.stringify(payload);
-
+console.log(body)
   // Create a new SVIX instance with your secret.
   const wh = new Webhook(WEBHOOK_SECRET);
 
@@ -52,7 +52,7 @@ export async function POST(req: Request) {
   }
 
   const eventType = evt.type;
-
+console.log(eventType)
   if (eventType === "user.created") {
     const { id, email_addresses, image_url, username, first_name, last_name } =
       evt.data;
@@ -64,6 +64,8 @@ export async function POST(req: Request) {
       email: email_addresses[0].email_address,
       picture: image_url,
     });
+    console.log("create user",mongoUser);
+
     return NextResponse.json({ message: "OK", user: mongoUser });
   }
 
@@ -81,6 +83,8 @@ export async function POST(req: Request) {
       },
       path: `/profile/${id}`,
     });
+    console.log("creatupdatee user",mongoUser);
+
     return NextResponse.json({ message: "OK", user: mongoUser });
   }
 
