@@ -2,7 +2,7 @@ import Link from 'next/link';
 import React from 'react'
 import RenderTag from '../shared/RenderTag';
 import Metric from '../shared/Metric';
-import { ArrowUp } from 'lucide-react';
+
 import { getTimestamp, formatAndDivideNumber } from '@/lib/utils';
 
 interface Props{

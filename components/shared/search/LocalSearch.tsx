@@ -12,7 +12,7 @@ interface CustomInputTypes{
     otherClasses: string
 }
 const LocalSearch = ({
-    route,
+   
     iconPosition,
     imgSrc,
     placeholder,

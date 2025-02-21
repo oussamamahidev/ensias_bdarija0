@@ -1,10 +1,10 @@
-"use client"
-
-import { zodResolver } from "@hookform/resolvers/zod"
-import { ControllerRenderProps, useForm } from "react-hook-form"
-import { z } from "zod"
-import React, { useCallback, useRef } from "react"
-import { Button } from "@/components/ui/button"
+"use client";
+import React, { useRef, useState } from "react";
+import { Editor } from "@tinymce/tinymce-react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -13,97 +13,102 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { QuestionSchema } from "@/lib/validation"
-import { Badge } from "../ui/badge"
-import Image from "next/image"
-import { Editor } from "@tinymce/tinymce-react";
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Badge } from "../ui/badge";
+import Image from "next/image";
+import { QuestionSchema } from "@/lib/validation"; // ✅ Import the schema
 
-const Question = () => {
-  const editorRef=  useRef(null)
+import { createQuestion } from "@/lib/actions/question.action";
+import { useRouter,usePathname } from "next/navigation";
+
+const type : string = 'create';
+
+interface Props {
+  mongoUserId:string;
+  }
+const Question = ({mongoUserId}: Props) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const editorRef = useRef<any>(null);
+  const [isSubmitting,setIsSubmitting]= useState(false);
+
+  const router= useRouter();
+  const pathname= usePathname();
   const form = useForm<z.infer<typeof QuestionSchema>>({
     resolver: zodResolver(QuestionSchema),
     defaultValues: {
       title: "",
-      explanation:"",
+      explanation: "",
       tags: []
-    },
-  })
-  const handleInputKeyDown = useCallback(
-    (
-      e: KeyboardEvent<HTMLInputElement>,
-      field: ControllerRenderProps<
-        {
-          title: string;
-          explanation: string;
-          tags: string[];
-        },
-        "tags"
-      >
-    ) => {
-      if (e.key === "Enter" && field.name === "tags") {
-        e.preventDefault();
+    },  
+  });
 
-        const tagInput = e.target as HTMLInputElement;
-        const tagValue = tagInput.value.trim();
+  async function onSubmit(values: z.infer<typeof QuestionSchema>) {
 
-        if (tagValue !== "") {
-          if (tagValue.length > 15) {
-            return form.setError("tags", {
-              type: "required",
-              message: "Tag must be less than 15 characters.",
-            });
-          }
+    setIsSubmitting(true);
+   try{
+    await createQuestion({
+      title: values.title,
+      content: values.explanation,
+      tags: values.tags,
+      author: JSON.parse(mongoUserId),
+      path: pathname
+    })
+    router.push('/');
+   }catch(error){
+    console.log(error);
+   }finally{
+    setIsSubmitting(false);
+   }
+  }
 
-          if (!field.value.includes(tagValue as never)) {
-            form.setValue("tags", [...field.value, tagValue]);
-            tagInput.value = "";
-            form.clearErrors("tags");
-          }
+  const handleInputKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    field: any
+  ) => {
+    if (e.key === "Enter" && field.name === "tags") {
+      e.preventDefault();
+      const tagInput = e.target as HTMLInputElement;
+      const tagValue = tagInput.value.trim();
+
+      if (tagValue !== "") {
+        if (tagValue.length > 15) {
+          return form.setError("tags", {
+            type: "required",
+            message: "Tag must be less than 15 characters.",
+          });
+        }
+        if (!field.value.includes(tagValue)) {
+          form.setValue("tags", [...field.value, tagValue]);
+          tagInput.value = "";
+          form.clearErrors("tags");
         } else {
           form.trigger();
         }
       }
-    },
-    [form]
-  );
+    }
+  };
 
-  const handleTagRemove = useCallback(
-    (
-      tag: string,
-      field: ControllerRenderProps<
-        {
-          title: string;
-          explanation: string;
-          tags: string[];
-        },
-        "tags"
-      >
-    ) => {
-      const newTags = field.value.filter((t: string) => t !== tag);
-      form.setValue("tags", newTags);
-    },
-    [form]
-  );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handelTagRemove = (tag: string, field: any) => {
+    const newTags= field.value.filter((t : string)=>t!==tag) ;
+    form.setValue('tags', newTags);
+  };
 
-  // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof QuestionSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values)
-  }
-  return(
+  return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}
-      className="flex w-full flex-col gap-10">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="flex w-full flex-col gap-10">
+        
+        {/* Question Title Field */}
         <FormField
           control={form.control}
-          title="title"
+          name="title"
           render={({ field }) => (
             <FormItem className="flex w-full flex-col">
               <FormLabel className="paragraph-semibold text-dark400_light800">
-              Question Title <span className="text-primary-500">*</span></FormLabel>
+                Question Title <span className="text-primary-500">*</span>
+              </FormLabel>
               <FormControl className="mt-3.5">
                 <Input
                   className="no-focus paragraph-regular background-light800_dark300 light-border-2 text-dark300_light700 min-h-[56px] border"
@@ -118,7 +123,7 @@ const Question = () => {
             </FormItem>
           )}
         />
-         <FormField
+        <FormField
           control={form.control}
           name="explanation"
           render={({ field }) => (
@@ -128,10 +133,10 @@ const Question = () => {
                 <span className="text-primary-500">*</span>
               </FormLabel>
               <FormControl className="mt-3.5">
-              <Editor
+                <Editor
                   apiKey={process.env.NEXT_PUBLIC_TINY_EDITOR_API_KEY}
                   onInit={(evt, editor) => {
-                   
+      
                     editorRef.current = editor;
                   }}
                   onBlur={field.onBlur}
@@ -162,6 +167,7 @@ const Question = () => {
                       "bold italic forecolor | alignleft aligncenter " +
                       "alignright alignjustify | bullist numlist",
                     content_style: "body { font-family:Inter; font-size:16px }",
+                    
                   }}
                 />
               </FormControl>
@@ -194,7 +200,7 @@ const Question = () => {
                         <Badge
                           key={tag}
                           className="subtle-medium background-light800_dark300 text-light400_light500 flex items-center justify-center gap-2 rounded-md border-none px-4 py-2 capitalize"
-                          onClick={() => handleTagRemove(tag, field)}>
+                          >
                           {tag}
                           <Image
                             src="/assets/icons/close.svg"
@@ -202,6 +208,7 @@ const Question = () => {
                             width={12}
                             height={12}
                             className="cursor-pointer object-contain invert-0 dark:invert"
+                            onClick={() => handelTagRemove(tag, field)}
                           />
                         </Badge>
                       ))}
@@ -216,13 +223,25 @@ const Question = () => {
               <FormMessage className="text-red-500" />
             </FormItem>
           )}
+
         />
-        <Button type="submit">Submit</Button>
+
+        <Button type="submit" className="primary-gradient w-fit !text-light-900 
+        " disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+            {type === 'edit' ? 'Editing...' : 'Posting...'}
+            </>
+          ):(
+            <>
+            {type === 'edit' ? 'Edit Question' : 'Post Question'}
+            </>
+            
+          ) }
+        </Button>
       </form>
     </Form>
-  )
-}
+  );
+};
 
-export default Question
-
-
+export default Question;
