@@ -1,11 +1,11 @@
 import React from 'react'
 import Link from 'next/link'
 
-import LocalSearch from '@/components/shared/search/LocalSearch'
 import Filter from '@/components/shared/Filter'
 import { UserFilters } from '@/constants/filters'
 import { getAllUsers } from '@/lib/actions/user.action'
 import UserCard from '@/components/cards/UserCard'
+import LocalSearch from '@/components/shared/search/LocalSearch'
 const page =async () => {
     const result = await getAllUsers({})
   return (
@@ -14,7 +14,7 @@ const page =async () => {
         <h1 className="h1-bold text-dark100_light900">All Users</h1>
         
       <div className="mt-11 flex justify-between gap-5 max-sm:flex-col sm:items-center">
-        <LocalSearch 
+        <LocalSearch
         route='/community'
         iconPosition="left"
         imgSrc="/assets/icons/search.svg"

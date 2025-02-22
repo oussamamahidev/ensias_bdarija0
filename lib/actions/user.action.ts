@@ -91,6 +91,7 @@ export async function getAllUsers(params: GetAllUsersParams) {
   try {
     await connectToDatabase(); // FIX: Await database connection
 
+    //const {page= 1,pageSize=20 , filter, searchQuery}= params;
     const users = await User.find({}).sort({ createdAt: -1 });
     return { users };
   } catch (error) {
