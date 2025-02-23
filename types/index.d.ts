@@ -41,6 +41,7 @@ export interface URLProps {
   searchParams: { [key: string]: string | undefined };
 }
 
+
 export interface BadgeCounts {
   GOLD: number;
   SILVER: number;
