@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Answer from '@/components/forms/Answer';
 import AllAnswers from '@/components/shared/AllAnswers';
 import Metric from '@/components/shared/Metric';
@@ -10,44 +11,41 @@ import { URLProps } from '@/types';
 import { auth } from '@clerk/nextjs/server';
 import Image from 'next/image';
 import Link from 'next/link';
+import React from 'react'
 
-const Page = async ({ params, searchParams }: URLProps) => {
-  try {
-    // Get question data
-    const result = await getQuestionById({ questionId: params.id });
-    
-    if (!result) {
-      throw new Error('Question not found');
-    }
 
-    // Get user data
-    const { userId: clerkId } = await auth();
+
+const Page = async ({ params,searchParams }: URLProps) => {
+
+ 
+  const result = await getQuestionById({ questionId: params.id });
+  const { userId  : clerkId } = await auth();
+  
     let mongoUser;
-
+   
     if (clerkId) {
-      mongoUser = await getUserById({ userId: clerkId });
+      mongoUser = await getUserById({ userId : clerkId});
     }
 
-    if (!mongoUser) {
-      throw new Error('User not found');
-    }
+  
+   
 
     return (
       <>
         <div className="flex-start w-full flex-col">
           <div className="flex w-full flex-col-reverse justify-between gap-5 sm:flex-row sm:items-center sm:gap-2">
             <Link
-              href={`/profile/${result.author?.clerkId}`}
+              href={`/profile/${result?.author?.clerkId}`}
               className="flex items-center justify-start gap-1">
               <Image
-                src={result.author?.picture ?? "/assets/icons/avatar.svg"}
+                src={result?.author?.picture ?? "/assets/icons/avatar.svg" }
                 className="rounded-full"
                 width={22}
                 height={22}
                 alt="profile"
               />
               <p className="paragraph-semibold text-dark300_light700">
-                {result.author?.name}
+                {result?.author?.name}
               </p>
             </Link>
             <div className="flex justify-end">
@@ -55,38 +53,38 @@ const Page = async ({ params, searchParams }: URLProps) => {
             </div>
           </div>
           <h2 className="h2-semibold text-dark200_light900 mt-3.5 w-full text-left">
-            {result.title}
+            {result?.title}
           </h2>
         </div>
-
+  
         <div className="mb-8 mt-5 flex flex-wrap gap-4">
           <Metric
             imgUrl="/assets/icons/clock.svg"
             alt="clock icon"
-            value={` asked ${getTimestamp(result.createdAt)}`}
+            value={` asked ${getTimestamp(result?.createdAt)}`}
             title=""
             textStyles="small-medium text-dark400_light800"
           />
           <Metric
             imgUrl="/assets/icons/message.svg"
             alt="message"
-            value={formatAndDivideNumber(result.answers?.length || 0)}
+            value={formatAndDivideNumber(result?.answer?.length)}
             title=" Answers"
             textStyles="small-medium text-dark400_light800"
           />
           <Metric
             imgUrl="/assets/icons/eye.svg"
             alt="eye"
-            value={formatAndDivideNumber(result.views || 0)}
+            value={formatAndDivideNumber(result?.views)}
             title=" Views"
             textStyles="small-medium text-dark400_light800"
           />
         </div>
-
-        <ParseHtml data={result.content} />
-
+  
+        <ParseHtml data={result.content } />
+  
         <div className="mt-8 flex flex-wrap gap-2">
-          {result.tags?.map((tag: any) => (
+          {result?.tags.map((tag : any) => (
             <RenderTag
               key={tag._id}
               _id={tag._id}
@@ -94,29 +92,20 @@ const Page = async ({ params, searchParams }: URLProps) => {
               showCount={false}
             />
           ))}
-        </div>
+        </div>  
 
-        <AllAnswers
-          questionId={result._id}
-          userId={mongoUser._id.toString()}
-          totalANswers={result.answers?.length || 0}
+        <AllAnswers 
+          questionId={(result._id)}
+          userId={JSON.stringify(mongoUser._id)}
+          totalANswers={result?.answer?.length}
         />
-
         <Answer
           question={result.content}
-          questionId={result._id.toString()}
-          authorId={mongoUser._id.toString()}
+          questionId={JSON.stringify(result._id)}
+          authorId={JSON.stringify(mongoUser._id)}
         />
       </>
     );
-  } catch (error) {
-    console.error('Error in question page:', error);
-    return (
-      <div className="flex-center w-full h-full">
-        <p className="text-dark200_light900">Something went wrong</p>
-      </div>
-    );
-  }
-};
-
-export default Page;
+  };
+  
+  export default Page;
