@@ -7,22 +7,18 @@ import RenderTag from '@/components/shared/RenderTag';
 import { getQuestionById } from '@/lib/actions/question.action';
 import { getUserById } from '@/lib/actions/user.action';
 import { formatAndDivideNumber, getTimestamp } from '@/lib/utils';
+import { URLProps } from '@/types';
 import { auth } from '@clerk/nextjs/server';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react'
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface Props{
-  params: {
-    id: string;
-  }
-}
-const Page = async ({ params }: Props) => {
 
-  
-  const { id } = await Promise.resolve(params);
-  const result = await getQuestionById({ questionId: id });
+
+const Page = async ({ params,searchParams }: URLProps) => {
+
+ 
+  const result = await getQuestionById({ questionId: params.id });
   const { userId  : clerkId } = await auth();
   
     let mongoUser;
@@ -30,6 +26,8 @@ const Page = async ({ params }: Props) => {
     if (clerkId) {
       mongoUser = await getUserById({ userId : clerkId});
     }
+
+  
    
 
     return (
