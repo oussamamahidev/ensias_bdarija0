@@ -21,6 +21,7 @@ import { QuestionSchema } from "@/lib/validation"; // ✅ Import the schema
 
 import { createQuestion } from "@/lib/actions/question.action";
 import { useRouter,usePathname } from "next/navigation";
+import { useTheme } from "@/context/ThemeProvider";
 
 const type : string = 'create';
 
@@ -30,6 +31,7 @@ interface Props {
 const Question = ({mongoUserId}: Props) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const editorRef = useRef<any>(null);
+  const {mode}= useTheme();
   const [isSubmitting,setIsSubmitting]= useState(false);
 
   const router= useRouter();
@@ -129,7 +131,7 @@ const Question = ({mongoUserId}: Props) => {
           render={({ field }) => (
             <FormItem className="flex w-full flex-col gap-3">
               <FormLabel className="paragraph-semibold text-dark400_light800">
-                Detailed explanation of your problem?{" "}
+                Detailed explanation of your problem?
                 <span className="text-primary-500">*</span>
               </FormLabel>
               <FormControl className="mt-3.5">
@@ -167,7 +169,8 @@ const Question = ({mongoUserId}: Props) => {
                       "bold italic forecolor | alignleft aligncenter " +
                       "alignright alignjustify | bullist numlist",
                     content_style: "body { font-family:Inter; font-size:16px }",
-                    
+                     skin: ( mode ) === 'dark'? 'oxide-dark': 'oxide',
+                    content_css: mode === 'dark' ?'dark' : 'light'
                   }}
                 />
               </FormControl>
@@ -226,7 +229,7 @@ const Question = ({mongoUserId}: Props) => {
 
         />
 
-        <Button type="submit" className="primary-gradient w-fit !text-light-900 
+        <Button type="submit" className="primary-gradient w-fit !text-light-900  rounded
         " disabled={isSubmitting}>
           {isSubmitting ? (
             <>
