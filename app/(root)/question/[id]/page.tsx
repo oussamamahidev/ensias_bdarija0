@@ -4,6 +4,7 @@ import AllAnswers from '@/components/shared/AllAnswers';
 import Metric from '@/components/shared/Metric';
 import ParseHtml from '@/components/shared/ParseHtml';
 import RenderTag from '@/components/shared/RenderTag';
+import Votes from '@/components/shared/Votes';
 import { getQuestionById } from '@/lib/actions/question.action';
 import { getUserById } from '@/lib/actions/user.action';
 import { formatAndDivideNumber, getTimestamp } from '@/lib/utils';
@@ -26,8 +27,7 @@ const Page = async ({ params }: { params: Params }) => {
     if (clerkId) {
       mongoUser = await getUserById({ userId : clerkId});
     }
-
-  
+    console.log("mongo user",mongoUser);
    
 
     return (
@@ -49,7 +49,16 @@ const Page = async ({ params }: { params: Params }) => {
               </p>
             </Link>
             <div className="flex justify-end">
-              VOTING
+            <Votes
+              type="Question"
+              itemId={JSON.stringify(result._id)}
+              userId={JSON.stringify(mongoUser?._id)}
+              upvotes={result.upvotes.length}
+              hasAlreadyUpvoted={result.upvotes.includes(mongoUser?._id)}
+              downvotes={result.downvotes.length}
+              hasAlreadyDownvoted={result.downvotes.includes(mongoUser?._id)}
+              hasSaved={mongoUser?.saved.includes(result._id)}
+            />
             </div>
           </div>
           <h2 className="h2-semibold text-dark200_light900 mt-3.5 w-full text-left">
@@ -96,7 +105,7 @@ const Page = async ({ params }: { params: Params }) => {
 
         <AllAnswers 
           questionId={(result._id)}
-          userId={JSON.stringify(mongoUser._id)}
+          userId={(mongoUser._id)}
           totalANswers={result?.answer?.length}
         />
         <Answer
