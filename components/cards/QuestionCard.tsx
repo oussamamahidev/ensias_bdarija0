@@ -7,6 +7,7 @@ import { getTimestamp, formatAndDivideNumber } from '@/lib/utils';
 
 interface Props{
     _id: string;
+    clerkId?: string| undefined| null;
     title: string;
     tags: {
         _id: string;
@@ -17,7 +18,8 @@ interface Props{
         name: string;
         picture: string;
     }
-    upvotes: string[]
+    upvotes: string[];
+    downvotes: string[];
     views: number
     answers: Array<object>;
     createdAt: Date;
@@ -25,11 +27,13 @@ interface Props{
 }
 const QuestionCard = ({
     _id,
+    clerkId,
     title,
     tags,
     author,
     upvotes,
     views,
+    downvotes,
     answers,
     createdAt
 }: Props) => {
@@ -50,7 +54,7 @@ const QuestionCard = ({
             
         </div>
         <div className='mt-3.5 flex flex-wrap gap-2 rounded-sm'>
-                {tags.map(tag =>(
+                {tags?.map(tag =>(
                     <RenderTag 
                     key={tag._id}
                     _id={tag._id}

@@ -11,10 +11,12 @@ import {
   GetUserByIdParams,
   ToggleSaveQuestionParams,
   GetSavedQuestionsParams,
+  GetUserStatsParams,
 } from "./shared.types";
 import { revalidatePath } from "next/cache";
 import Question from "@/database/question.model";
 import Tag from "@/database/tag.model";
+import Answer from "@/database/answer.model";
 
 export async function getUserById(params: GetUserByIdParams) {
   try {
@@ -187,6 +189,89 @@ export async function getSavedQuestions (params: GetSavedQuestionsParams){
     const getSavedQuestions= user.saved;
     console.log(getSavedQuestions);
     return {questions: getSavedQuestions};
+  }catch(err){
+    console.log(err);
+    throw err;
+  }
+}
+
+export async function getUserInfo (params: GetUserByIdParams){
+
+  try{
+    connectToDatabase();
+    const {userId}=params;
+    const user = await User.findOne({clerkId: userId});
+
+    if(!user){
+      throw new Error("User not Found");
+    }
+    const totalQuestions = await Question.countDocuments({
+      author: user._id
+    })
+
+    const totalAnswers = await Answer.countDocuments({
+      author: user._id
+    })
+
+    return{
+      user,
+      totalQuestions,
+      totalAnswers
+    }
+  }catch(err){
+    console.log(err);
+    throw err;
+  }
+}
+
+export async function getUserQuestion (params: GetUserStatsParams){
+
+  try{
+    connectToDatabase();
+    const  { userId } =  params;
+    const totalQuestions= await Question.countDocuments(
+      {
+        author: userId
+      }
+    )
+    console.log("hna total dyal les questions",totalQuestions)
+    const userQuestions= await Question.find({
+      author: userId
+    })
+    .sort({views: -1,upvotes: -1})
+    .populate('tags','_id name ')
+    .populate('author', 'clerkId name picture')
+
+    console.log(" hado user questions",userQuestions);
+
+    return {totalQuestions, questions: userQuestions}
+  }catch(err){
+    console.log(err);
+    throw err;
+  }
+} 
+
+export async function getUserAnswers (params: GetUserStatsParams){
+
+  try{
+    connectToDatabase();
+    const  { userId } =  params;
+    const totalAnswers= await Answer.countDocuments(
+      {
+        author: userId
+      }
+    )
+    console.log("hna total dyal les questions",totalAnswers)
+    const userAnswers= await Answer.find({
+      author: userId
+    })
+    .sort({upvotes: -1})
+    .populate('question','_id title ')
+    .populate('author', 'clerkId name picture')
+
+    console.log(" hado user questions",userAnswers);
+
+    return {totalAnswers, answers: userAnswers}
   }catch(err){
     console.log(err);
     throw err;
