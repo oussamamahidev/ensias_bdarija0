@@ -7,9 +7,10 @@ import React from 'react'
 type Params = { id: string };
 type SearchParams = { [key: string]: string | undefined };
 
-const Page = async ({ params, searchParams }: { params: Params; searchParams: SearchParams }) => {
+const Page = async ({ params, searchParams }: { params: Promise<Params>; searchParams: SearchParams }) => {
+  const {id} = await params;
     const result = await getQuestionByTagId({
-        tagId: params.id,
+        tagId: id,
         searchQuery : searchParams.q
     })
     console.log(result);
