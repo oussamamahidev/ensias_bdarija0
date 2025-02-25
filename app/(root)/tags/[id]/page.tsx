@@ -3,14 +3,17 @@ import NoResult from '@/components/shared/NoResult'
 import LocalSearch from '@/components/shared/search/LocalSearch'
 
 import { getQuestionByTagId } from '@/lib/actions/tag.actions'
-import { URLProps } from '@/types'
 import React from 'react'
 
 
-const Page = async ({ params, searchParams }: URLProps) => {
+
+type Params = Promise<{ id: string }>;
+const Page = async ({ params }: { params: Params }) => {
+
+ const {id} = await params;
   const result = await getQuestionByTagId({
-    tagId: params.id,
-    searchQuery: searchParams.q,
+    tagId: id,
+
   });
   return (
 
