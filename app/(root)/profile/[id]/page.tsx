@@ -13,12 +13,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react'
 
-interface PageProps {
+interface URLProps {
   params: Promise<{ id: string }>;
-  searchParams: { [key: string]: string | undefined };
+  searchParams: Promise<{ [key: string]: string | undefined }>;
 }
 
-const Page = async ({ params, searchParams }: PageProps) => {
+const Page = async ({ params, searchParams }: URLProps) => {
   const { id } = await params;
   const { userId: clerkId } = await auth();
   const userInfo = await getUserInfo({ userId: id });
