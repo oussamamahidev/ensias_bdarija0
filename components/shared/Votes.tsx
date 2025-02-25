@@ -35,32 +35,15 @@ const Votes = ({
 }: Props) => {
   const pathname= usePathname();
   const router= useRouter();
+
   useEffect(() => {
-    // Create a flag to track if we've already called viewQuestion
-    let isViewed = false;
-
-    const handleView = async () => {
-      if (!itemId || isViewed) return;
-
-      try {
-        isViewed = true;
-        await viewQuestion({
-          questionId: JSON.parse(itemId),
-          userId: userId ? JSON.parse(userId) : undefined,
-        });
-      } catch (error) {
-        console.error('Error viewing question:', error);
-      }
-    };
-
-    if (type === 'Question') {
-      handleView();
+    if (type === "Question") {
+      viewQuestion({
+        questionId: JSON.parse(itemId),
+        userId: userId ? JSON.parse(userId) : undefined,
+      });
     }
-
-    return () => {
-      isViewed = false;
-    };
-  }, [itemId, userId, type]);
+  }, [itemId, type, userId,router]);
   const handelSave =async ()=>{
 
     await toggleSaveQuestion({
