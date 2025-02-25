@@ -7,22 +7,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 import { getUserInfo } from '@/lib/actions/user.action';
 import { getJoinedDate } from '@/lib/utils';
-import { URLProps } from '@/types';
 import { SignedIn } from '@clerk/nextjs';
 import { auth } from '@clerk/nextjs/server';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react'
 
+interface PageProps {
+  params: Promise<{ id: string }>;
+  searchParams: { [key: string]: string | undefined };
+}
 
-
-const Page = async ({ params, searchParams}: URLProps) => {
-  
-
-    const { userId : clerkId}= await  auth();
- 
-
- const userInfo = await getUserInfo({userId: params.id})
+const Page = async ({ params, searchParams }: PageProps) => {
+  const { id } = await params;
+  const { userId: clerkId } = await auth();
+  const userInfo = await getUserInfo({ userId: id });
   return (
     <>
     <div className="flex flex-col-reverse items-start justify-between sm:flex-row">
