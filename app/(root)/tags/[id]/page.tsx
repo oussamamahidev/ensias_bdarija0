@@ -1,10 +1,15 @@
 import QuestionCard from '@/components/cards/QuestionCard'
 import NoResult from '@/components/shared/NoResult'
 import LocalSearch from '@/components/shared/search/LocalSearch'
-import { Iquestion } from '@/database/question.model'
 import { getQuestionByTagId } from '@/lib/actions/tag.actions'
-import { URLProps } from '@/types'
 import React from 'react'
+
+export interface URLProps {
+  params: {
+    id: string;
+  };
+  searchParams: { [key: string]: string | undefined };
+}
 
 const Page = async ({params, searchParams}: URLProps) => {
     const result = await getQuestionByTagId({
