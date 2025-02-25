@@ -4,16 +4,17 @@ import LocalSearch from '@/components/shared/search/LocalSearch'
 import { getQuestionByTagId } from '@/lib/actions/tag.actions'
 
 import React from 'react'
+
 type Params = { id: string };
 type SearchParams = { [key: string]: string | undefined };
 
-const Page = async ({ params, searchParams }: { params: Promise<Params>; searchParams: SearchParams }) => {
-  const {id} = await params;
-    const result = await getQuestionByTagId({
-        tagId: id,
-        searchQuery : searchParams.q
-    })
-    console.log(result);
+const Page = async ({ params, searchParams }: { params: Params; searchParams: SearchParams }) => {
+  const { id } = params; // `params` is NOT a Promise, no need to await
+
+  const result = await getQuestionByTagId({
+    tagId: id,
+    searchQuery: searchParams.q, // Extracting query param `q`
+  });
   return (
 
     <>
