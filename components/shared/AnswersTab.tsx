@@ -1,10 +1,10 @@
 
-import { SearchParamsProps } from '@/types';
+import { SearchParamsProps, SearchParamsPropss } from '@/types';
 import React from 'react'
 import QuestionCard from '../cards/QuestionCard';
 import { getUserAnswers } from '@/lib/actions/user.action';
 import AnswerCard from '../cards/AnswerCard';
-interface Props extends SearchParamsProps {
+interface Props extends SearchParamsPropss {
   userId: string;
   clerkId?: string | null;
 }
