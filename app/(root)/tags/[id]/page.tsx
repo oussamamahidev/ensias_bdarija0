@@ -1,20 +1,23 @@
 import QuestionCard from '@/components/cards/QuestionCard'
 import NoResult from '@/components/shared/NoResult'
 import LocalSearch from '@/components/shared/search/LocalSearch'
-import { getQuestionByTagId } from '@/lib/actions/tag.actions'
 
+import { getQuestionByTagId } from '@/lib/actions/tag.actions'
+import { URLProps } from '@/types'
 import React from 'react'
 
-type Params = { id: string };
-type SearchParams = { [key: string]: string | undefined };
-
-const Page = async ({ params, searchParams }: { params: Params; searchParams: SearchParams }) => {
-  const { id } = params; // `params` is NOT a Promise, no need to await
-
-  const result = await getQuestionByTagId({
-    tagId: id,
-    searchQuery: searchParams.q, // Extracting query param `q`
-  });
+export  async function Page({
+  params,
+  searchParams,
+}: {
+  params: { id: string };
+  searchParams: Record<string, string | undefined>;
+}) {
+    const result = await getQuestionByTagId({
+        tagId: params.id,
+        searchQuery : searchParams.q
+    })
+    console.log(result);
   return (
 
     <>
