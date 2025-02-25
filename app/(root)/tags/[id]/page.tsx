@@ -36,6 +36,7 @@ const Page = async ({ params }: { params: Params }) => {
                 key={question._id}
                 _id={question._id}
                 title={question.title}
+                downvotes={question.downvotes}
                 tags={question.tags}
                 author={question.author}
                 upvotes={question.upvotes}
