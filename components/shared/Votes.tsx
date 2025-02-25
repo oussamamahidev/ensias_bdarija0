@@ -1,13 +1,14 @@
 "use client"
 
 import { downvoteAnswer, upvoteAnswer } from '@/lib/actions/answer.action';
+import { viewQuestion } from '@/lib/actions/interaction.action';
 import { downvoteQuestion, upvoteQuestion } from '@/lib/actions/question.action';
 import { toggleSaveQuestion } from '@/lib/actions/user.action';
 import { formatAndDivideNumber } from '@/lib/utils';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { useRouter } from 'next/router';
-import React from 'react'
+import { useRouter } from 'next/navigation';
+import React, { useEffect } from 'react'
 
 interface Props {
   type: string;
@@ -33,7 +34,33 @@ const Votes = ({
   hasSaved,
 }: Props) => {
   const pathname= usePathname();
-  // const router= useRouter();
+  const router= useRouter();
+  useEffect(() => {
+    // Create a flag to track if we've already called viewQuestion
+    let isViewed = false;
+
+    const handleView = async () => {
+      if (!itemId || isViewed) return;
+
+      try {
+        isViewed = true;
+        await viewQuestion({
+          questionId: JSON.parse(itemId),
+          userId: userId ? JSON.parse(userId) : undefined,
+        });
+      } catch (error) {
+        console.error('Error viewing question:', error);
+      }
+    };
+
+    if (type === 'Question') {
+      handleView();
+    }
+
+    return () => {
+      isViewed = false;
+    };
+  }, [itemId, userId, type]);
   const handelSave =async ()=>{
 
     await toggleSaveQuestion({
