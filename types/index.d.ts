@@ -54,3 +54,21 @@ export interface IFilterOptions {
   name: string;
   value: string;
 }
+
+// Basic params type for all dynamic routes
+export type DynamicParams<T> = Promise<T>;
+
+// Specific params types for each route
+export interface TagPageParams {
+  id: string;
+}
+
+export interface QuestionPageParams {
+  id: string;
+}
+
+// Page props types
+export interface PageProps<T> {
+  params: DynamicParams<T>;
+  searchParams?: { [key: string]: string | undefined };
+}

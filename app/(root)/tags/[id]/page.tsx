@@ -2,6 +2,7 @@ import QuestionCard from '@/components/cards/QuestionCard'
 import NoResult from '@/components/shared/NoResult'
 import LocalSearch from '@/components/shared/search/LocalSearch'
 import { getQuestionByTagId } from '@/lib/actions/tag.actions'
+import { PageProps, TagPageParams } from '@/types'
 import React from 'react'
 
 export interface URLProps {
@@ -11,12 +12,19 @@ export interface URLProps {
   searchParams: { [key: string]: string | undefined };
 }
 
-const Page = async ({params, searchParams}: URLProps) => {
+const Page = async ({ params, searchParams }: PageProps<TagPageParams>)=> {
+
+
+    const { id } = await params;
+
+    if (!id) {
+      throw new Error('Tag ID is required');
+    }
+
     const result = await getQuestionByTagId({
-        tagId: params.id,
-        searchQuery : searchParams.q
-    })
-    console.log(result);
+      tagId: id,
+      searchQuery: searchParams?.q
+    });
   return (
 
     <>
