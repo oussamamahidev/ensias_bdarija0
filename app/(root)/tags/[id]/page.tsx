@@ -6,18 +6,12 @@ import { getQuestionByTagId } from '@/lib/actions/tag.actions'
 import { URLProps } from '@/types'
 import React from 'react'
 
-export  async function Page({
-  params,
-  searchParams,
-}: {
-  params: { id: string };
-  searchParams: Record<string, string | undefined>;
-}) {
-    const result = await getQuestionByTagId({
-        tagId: params.id,
-        searchQuery : searchParams.q
-    })
-    console.log(result);
+
+const Page = async ({ params, searchParams }: URLProps) => {
+  const result = await getQuestionByTagId({
+    tagId: params.id,
+    searchQuery: searchParams.q,
+  });
   return (
 
     <>
