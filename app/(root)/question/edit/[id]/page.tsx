@@ -5,13 +5,16 @@ import { getUserById } from "@/lib/actions/user.action";
 import { ParamsProps } from "@/types";
 import { auth } from "@clerk/nextjs/server";
 
-const Page = async ({ params }: ParamsProps) => {
+interface EditPageProps {
+    params: Promise<{ id: string }>;
+  }
+const Page = async ({ params }: EditPageProps) => {
   const { userId } =await auth();
-
+  const { id } = await params;
   if (!userId) return null;
 
   const mongoUser = await getUserById({ userId });
-  const result = await getQuestionById({questionId: params.id})
+  const result = await getQuestionById({questionId: id})
   return (
     <>
       <h1 className="h1-bold text-dark100_light900">Edit Profile</h1>
