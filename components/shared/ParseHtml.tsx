@@ -1,10 +1,14 @@
 "use client";
 
 import React, { useEffect } from "react";
-
 import Prism from "prismjs";
 import parse from "html-react-parser";
 
+// Import Prism core styles
+import "prismjs/themes/prism.css";
+import "prismjs/themes/prism-dark.css";
+
+// Import language support
 import "prismjs/components/prism-python";
 import "prismjs/components/prism-java";
 import "prismjs/components/prism-c";
@@ -25,19 +29,43 @@ import "prismjs/components/prism-go";
 import "prismjs/components/prism-bash";
 import "prismjs/components/prism-sql";
 import "prismjs/components/prism-mongodb";
+
+// Import plugins
 import "prismjs/plugins/line-numbers/prism-line-numbers.js";
 import "prismjs/plugins/line-numbers/prism-line-numbers.css";
 
-interface Props {
+interface ParseHTMLProps {
   data: string;
+  className?: string;
 }
 
-const ParseHTML = ({ data }: Props) => {
+const ParseHTML = ({ data, className = "" }: ParseHTMLProps) => {
   useEffect(() => {
-    Prism.highlightAll();
-  }, []);
+    if (typeof window !== 'undefined') {
+      Prism.highlightAll();
+    }
+  }, [data]);
 
-  return <div className={"markdown w-full min-w-full"}>{parse(data)}</div>;
+  if (!data) return null;
+
+  try {
+    return (
+      <div 
+        className={`markdown prose w-full min-w-full dark:prose-invert 
+          prose-pre:bg-transparent prose-pre:p-0 
+          ${className}`}
+      >
+        {parse(data)}
+      </div>
+    );
+  } catch (error) {
+    console.error('Error parsing HTML:', error);
+    return (
+      <div className="text-dark200_light900">
+        Failed to parse content
+      </div>
+    );
+  }
 };
 
 export default ParseHTML;
