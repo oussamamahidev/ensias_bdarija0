@@ -9,17 +9,18 @@ import { getSavedQuestions } from "@/lib/actions/user.action";
 import { auth } from "@clerk/nextjs/server";
 
 interface HomePageProps {
-  searchParams: Promise<{ [key: string]: string | undefined }>
+  searchParams: Promise<{ [q: string]: string | undefined }>;
 }
 export default async  function Home({searchParams}:HomePageProps) {
+  
+  const {q}= await searchParams;
   const { userId } = await  auth();
-  const params = await searchParams;
   console.log(userId);
   if(!userId) return null;
 
   const {questions}= await getSavedQuestions({
     clerkId: userId,
-    searchQuery: params.q,
+    searchQuery: q,
   });
   console.log("hna kaytsaviw questions",questions);
   return (
