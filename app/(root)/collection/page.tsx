@@ -7,17 +7,18 @@ import NoResult from "@/components/shared/NoResult";
 import QuestionCard from "@/components/cards/QuestionCard";
 import { getSavedQuestions } from "@/lib/actions/user.action";
 import { auth } from "@clerk/nextjs/server";
+import { SearchParamsProps } from "@/types";
 
-export default async  function Home() {
+export default async  function Home({searchParams}:SearchParamsProps) {
   
   const { userId } = await  auth();
   console.log(userId);
   if(!userId) return null;
 
   const {questions}= await getSavedQuestions({
-
-
     clerkId: userId,
+    searchQuery: searchParams.q,
+
   });
   console.log("hna kaytsaviw questions",questions);
   return (

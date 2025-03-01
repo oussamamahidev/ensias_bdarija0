@@ -28,16 +28,23 @@ export async function getAllTags(params : GetAllTagsParams ){
 
     try{
         await connectToDatabase();
-        const tags = await Tag.find({});
+        const {searchQuery} = params;
+        const query: FilterQuery<typeof Tag> = {};
+        if (searchQuery) {
+          query.$or = [
+            { name: { $regex: new RegExp(searchQuery, "i") } },  
+          ];
+        }
+        const tags = await Tag.find(query);
         return {tags};
-    }catch(err){
+    }catch(err){ 
         console.log(err);
         throw err;
 }
 }
 
 
-export async function getQuestionByTagId(params : GetQuestionsByTagIdParams ){
+export async function  getQuestionByTagId(params : GetQuestionsByTagIdParams ){
 
     try{
         await connectToDatabase();
@@ -70,19 +77,17 @@ export async function getQuestionByTagId(params : GetQuestionsByTagIdParams ){
         throw err;
 }
 }
-
-export async function getHotTags(){
-
-  try{
+export async function getTopPopularTags() {
+  try {
     connectToDatabase();
-    const hotTags = await Tag.aggregate([
-      {$project : {name: 1, numberofQuestion: {$size :"$questions"}}},
-      {$sort :{numberOfQuestion: -1}},
-      {$limit :5}
-    ])
-    return hotTags;
-  }catch(err){
-    console.log(err);
-    throw err;
+    const popularTags = await Tag.aggregate([
+      { $project: { name: 1, numberOfQuestions: { $size: "$questions" } } },
+      { $sort: { numberOfQuestions: -1 } },
+      { $limit: 5 },
+    ]);
+    return popularTags;
+  } catch (error) {
+    console.error(error);
+    throw error;
   }
 }

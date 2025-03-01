@@ -8,10 +8,13 @@ import HomeFilers from "@/components/home/HomeFilers";
 import NoResult from "@/components/shared/NoResult";
 import QuestionCard from "@/components/cards/QuestionCard";
 import { getQuestions } from "@/lib/actions/question.action";
+import { SearchParamsProps } from "@/types";
 
 
-export default async  function Home() {
-  const { questions } = await getQuestions({});
+export default async  function Home({searchParams}:SearchParamsProps) {
+  const { questions } = await getQuestions({
+    searchQuery: searchParams.q,
+  });
   return (
     <>
       <div className="flex w-full flex-col-reverse justify-between gap-4 sm:flex-row sm:items-center" >

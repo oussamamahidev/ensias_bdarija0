@@ -8,15 +8,23 @@ import User from "@/database/user.model";
 import { revalidatePath } from "next/cache";
 import Answer from "@/database/answer.model";
 import Interaction from "@/database/interaction.model";
+import { FilterQuery } from "mongoose";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function getQuestions(params: GetQuestionsParams) {
     try {
-        console.log("🔵 Connecting to database...");
+        
         await connectToDatabase();
-        console.log("🟢 Connected to database!");
-
-        const questions = await Question.find({})
+        const { searchQuery} = params;
+        
+        const query: FilterQuery<typeof Question> = {};
+        if (searchQuery) {
+          query.$or = [
+            { title: { $regex: new RegExp(searchQuery, "i") } },
+            { content: { $regex: new RegExp(searchQuery, "i") } },
+          ];
+        }
+        const questions = await Question.find(query)
             .populate({ path: "tags", model: Tag })
             .populate({ path: "author", model: User })
             .sort({createdAt: -1})

@@ -6,13 +6,18 @@ import { getQuestionByTagId } from '@/lib/actions/tag.actions'
 import React from 'react'
 
 
+interface URLProps {
+  params: Promise<{ id: string }>;
+  searchParams: { [key: string]: string | undefined };
+}
 
-type Params = Promise<{ id: string }>;
-const Page = async ({ params }: { params: Params }) => {
+
+const Page = async ({ params, searchParams }: URLProps) => {
 
  const {id} = await params;
   const result = await getQuestionByTagId({
     tagId: id,
+    searchQuery: searchParams.q,
 
   });
   return (
@@ -21,7 +26,7 @@ const Page = async ({ params }: { params: Params }) => {
     <h1 className="h1-bold text-dark100_light900"> {result.tagTitle}</h1>
     <div className="mt-11 w-full">
       <LocalSearch
-        route="/collection"
+        route={`/tags/${id}`}
         iconPosition="left"
         imgSrc="/assets/icons/search.svg"
         placeholder="Search for tag questions"
