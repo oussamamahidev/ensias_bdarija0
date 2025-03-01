@@ -10,10 +10,14 @@ import QuestionCard from "@/components/cards/QuestionCard";
 import { getQuestions } from "@/lib/actions/question.action";
 import { SearchParamsProps } from "@/types";
 
-
-export default async  function Home({searchParams}:SearchParamsProps) {
+interface HomePageProps {
+  searchParams: Promise<{ [q: string]: string | undefined }>;
+}
+export default async  function Home({searchParams}:HomePageProps) {
+  
+  const {q}= await searchParams;
   const { questions } = await getQuestions({
-    searchQuery: searchParams.q,
+    searchQuery: q,
   });
   return (
     <>

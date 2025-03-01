@@ -9,9 +9,13 @@ import LocalSearch from '@/components/shared/search/LocalSearch'
 import { SearchParamsProps } from '@/types'
 
 
-const page =async ({searchParams}:SearchParamsProps) => {
+interface HomePageProps {
+  searchParams: Promise<{ [q: string]: string | undefined }>;
+}
+const page =async ({searchParams}:HomePageProps) => {
+  const {q}= await searchParams;
     const result = await getAllUsers({
-      searchQuery: searchParams.q,
+      searchQuery: q,
     })
   return (
     <>
