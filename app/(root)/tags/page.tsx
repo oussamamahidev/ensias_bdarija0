@@ -6,11 +6,14 @@ import { getAllTags } from '@/lib/actions/tag.actions'
 import { SearchParamsProps } from '@/types'
 import Link from 'next/link'
 import React from 'react'
+interface HomePageProps {
+  searchParams: Promise<{ [q: string]: string | undefined }>;
+}
+const page = async ({searchParams}:HomePageProps) => {
 
-const page = async ({searchParams}:SearchParamsProps) => {
-
+  const {q}= await searchParams;
     const result = await getAllTags({
-      searchQuery: searchParams.q,
+      searchQuery: q,
     })
   return (
     <>

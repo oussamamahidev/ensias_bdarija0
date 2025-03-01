@@ -8,16 +8,17 @@ import React from 'react'
 
 interface URLProps {
   params: Promise<{ id: string }>;
-  searchParams: { [key: string]: string | undefined };
+  searchParams: Promise<{ [q: string]: string | undefined }>;
 }
 
 
 const Page = async ({ params, searchParams }: URLProps) => {
 
  const {id} = await params;
+ const {q}= await searchParams;
   const result = await getQuestionByTagId({
     tagId: id,
-    searchQuery: searchParams.q,
+    searchQuery: q,
 
   });
   return (
