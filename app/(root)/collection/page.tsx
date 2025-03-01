@@ -7,18 +7,23 @@ import NoResult from "@/components/shared/NoResult";
 import QuestionCard from "@/components/cards/QuestionCard";
 import { getSavedQuestions } from "@/lib/actions/user.action";
 import { auth } from "@clerk/nextjs/server";
-import { SearchParamsProps } from "@/types";
 
-export default async  function Home({searchParams}:SearchParamsProps) {
-  
+interface HomePageProps {
+  searchParams: Promise<{ 
+    q?: string;
+    [key: string]: string | undefined;
+  }>;
+}
+
+export default async  function Home({searchParams}:HomePageProps) {
   const { userId } = await  auth();
+  const params = await searchParams;
   console.log(userId);
   if(!userId) return null;
 
   const {questions}= await getSavedQuestions({
     clerkId: userId,
-    searchQuery: searchParams.q,
-
+    searchQuery: params.q,
   });
   console.log("hna kaytsaviw questions",questions);
   return (
