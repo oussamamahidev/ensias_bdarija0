@@ -9,12 +9,8 @@ import { getSavedQuestions } from "@/lib/actions/user.action";
 import { auth } from "@clerk/nextjs/server";
 
 interface HomePageProps {
-  searchParams: Promise<{ 
-    q?: string;
-    [key: string]: string | undefined;
-  }>;
+  searchParams: Promise<{ [key: string]: string | undefined }>
 }
-
 export default async  function Home({searchParams}:HomePageProps) {
   const { userId } = await  auth();
   const params = await searchParams;
