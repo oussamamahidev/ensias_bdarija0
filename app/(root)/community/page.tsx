@@ -13,9 +13,10 @@ interface HomePageProps {
   searchParams: Promise<{ [q: string]: string | undefined }>;
 }
 const page =async ({searchParams}:HomePageProps) => {
-  const {q}= await searchParams;
+  const {q,filter}= await searchParams;
     const result = await getAllUsers({
       searchQuery: q,
+      filter:filter
     })
   return (
     <>

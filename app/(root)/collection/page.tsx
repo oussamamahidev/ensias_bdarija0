@@ -13,7 +13,7 @@ interface HomePageProps {
 }
 export default async  function Home({searchParams}:HomePageProps) {
   
-  const {q}= await searchParams;
+  const {q,filter}= await searchParams;
   const { userId } = await  auth();
   console.log(userId);
   if(!userId) return null;
@@ -21,6 +21,7 @@ export default async  function Home({searchParams}:HomePageProps) {
   const {questions}= await getSavedQuestions({
     clerkId: userId,
     searchQuery: q,
+    filter:filter
   });
   console.log("hna kaytsaviw questions",questions);
   return (

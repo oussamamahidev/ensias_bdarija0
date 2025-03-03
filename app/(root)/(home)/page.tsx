@@ -8,16 +8,17 @@ import HomeFilers from "@/components/home/HomeFilers";
 import NoResult from "@/components/shared/NoResult";
 import QuestionCard from "@/components/cards/QuestionCard";
 import { getQuestions } from "@/lib/actions/question.action";
-import { SearchParamsProps } from "@/types";
+
 
 interface HomePageProps {
-  searchParams: Promise<{ [q: string]: string | undefined }>;
+  searchParams: Promise<{ [key: string]: string | undefined }>;
 }
 export default async  function Home({searchParams}:HomePageProps) {
   
-  const {q}= await searchParams;
+  const {q,filter}= await searchParams;
   const { questions } = await getQuestions({
     searchQuery: q,
+    filter: filter
   });
   return (
     <>
