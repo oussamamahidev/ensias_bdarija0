@@ -7,23 +7,26 @@ import NoResult from "@/components/shared/NoResult";
 import QuestionCard from "@/components/cards/QuestionCard";
 import { getSavedQuestions } from "@/lib/actions/user.action";
 import { auth } from "@clerk/nextjs/server";
+import Pagination from "@/components/shared/search/Pagination";
 
 interface HomePageProps {
   searchParams: Promise<{ [q: string]: string | undefined }>;
 }
 export default async  function Home({searchParams}:HomePageProps) {
   
-  const {q,filter}= await searchParams;
+  const {q,filter,page}= await searchParams;
   const { userId } = await  auth();
   console.log(userId);
   if(!userId) return null;
 
-  const {questions}= await getSavedQuestions({
+  const result= await getSavedQuestions({
     clerkId: userId,
     searchQuery: q,
-    filter:filter
+    filter:filter,
+    page: parseInt(String(page? + page:1))
+
   });
-  console.log("hna kaytsaviw questions",questions);
+  
   return (
     <>
     <h1 className="h1-bold text-dark100_light900">Saved Questions</h1>
@@ -41,8 +44,8 @@ export default async  function Home({searchParams}:HomePageProps) {
       />
     </div>
     <div className="mt-10 flex w-full flex-col gap-6">
-      {questions?.length > 0 ? (
-        questions.map((question: any) => (
+      {result.questions?.length > 0 ? (
+      result.questions.map((question: any) => (
           <QuestionCard
             key={question._id}
             _id={question._id}
@@ -66,8 +69,11 @@ export default async  function Home({searchParams}:HomePageProps) {
       )}
     </div>
     <div className="mt-10">
-      
-    </div>
+      <Pagination 
+        pageNumber={page ? + page :1}
+        isNext={result.isNext|| false}
+      />
+      </div>
   </>
   );
 }

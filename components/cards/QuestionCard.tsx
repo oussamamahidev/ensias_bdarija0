@@ -36,7 +36,7 @@ const QuestionCard = ({
     author,
     upvotes,
     views,
-    answers = [], // Provide default empty array
+    answers , // Provide default empty array
     createdAt
 }: Props) => {
     const showActionButtons = clerkId && clerkId === author.clerkId;
@@ -90,13 +90,13 @@ const QuestionCard = ({
                     title="Votes"
                     textStyles='small-medium text-dark400_light800'
                 />
-                <Metric
-                    imgUrl="/assets/icons/message.svg"
-                    alt="Message"
-                    value={formatAndDivideNumber(answers.length)}
-                    title=" Answers"
-                    textStyles="small-medium text-dark400_light800"
-                />
+                 <Metric
+            imgUrl="/assets/icons/message.svg"
+            alt="Message"
+            value={formatAndDivideNumber(answers?.length||0)}
+            title=" Answers"
+            textStyles="small-medium text-dark400_light800"
+          />
                 <Metric
                     imgUrl="/assets/icons/eye.svg"
                     alt="eye"

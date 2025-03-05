@@ -37,37 +37,41 @@ export async function createAnswer(params: CreateAnswerParams){
 
 export async function getAnswers(params:GetAnswersParams) {
 
-    try{
-        await connectToDatabase();
-        const {questionId,sortBy}= params;
-        let sortOptions = {};
-        switch (sortBy) {
-          case "highestUpvotes":
-            sortOptions = { upvotes: -1 };
-            break;
-          case "lowestUpvotes":
-            sortOptions = { upvotes: 1 };
-            break;
-          case "recent":
-            sortOptions = { createdAt: -1 };
-            break;
-          case "old":
-            sortOptions = { createdAt: 1 };
-            break;
-          default:
-            break;
-        }
-        const answers = await Answer.find({question: questionId})
-        .populate("author", "_id clerkId name picture")
-        .sort(sortOptions);
-        console.log({answers});
-        return {answers};
-        
-
-    }catch(err){
-        console.log(err);
-        throw err;
+  try {
+    connectToDatabase();
+    const { questionId, sortBy, page = 1, pageSize = 10 } = params;
+    const skipAmount = (page - 1) * pageSize;
+    let sortOptions = {};
+    switch (sortBy) {
+      case "highestUpvotes":
+        sortOptions = { upvotes: -1 };
+        break;
+      case "lowestUpvotes":
+        sortOptions = { upvotes: 1 };
+        break;
+      case "recent":
+        sortOptions = { createdAt: -1 };
+        break;
+      case "old":
+        sortOptions = { createdAt: 1 };
+        break;
+      default:
+        break;
     }
+    const answers = await Answer.find({ question: questionId })
+      .populate("author", "_id clerkId name picture")
+      .sort(sortOptions)
+      .skip(skipAmount)
+      .limit(pageSize);
+    const totalAnswer = await Answer.countDocuments({
+      question: questionId,
+    });
+    const isNext = totalAnswer > skipAmount + answers.length;
+    return { answers, isNext };
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 
 }
 

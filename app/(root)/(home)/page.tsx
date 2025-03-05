@@ -8,6 +8,7 @@ import HomeFilers from "@/components/home/HomeFilers";
 import NoResult from "@/components/shared/NoResult";
 import QuestionCard from "@/components/cards/QuestionCard";
 import { getQuestions } from "@/lib/actions/question.action";
+import Pagination from "@/components/shared/search/Pagination";
 
 
 interface HomePageProps {
@@ -15,10 +16,11 @@ interface HomePageProps {
 }
 export default async  function Home({searchParams}:HomePageProps) {
   
-  const {q,filter}= await searchParams;
-  const { questions } = await getQuestions({
+  const {q,filter,page}= await searchParams;
+  const result  = await getQuestions({
     searchQuery: q,
-    filter: filter
+    filter: filter,
+    page: parseInt(String(page? + page:1))
   });
   return (
     <>
@@ -51,8 +53,8 @@ export default async  function Home({searchParams}:HomePageProps) {
       
       <div className="mt-10 flex w-full flex-col gap-6 ">
 
-        {questions.length>0 ?
-        questions.map((question) =>(
+        {result.questions.length>0 ?
+        result.questions.map((question) =>(
           <QuestionCard 
           key={question._id}
           _id={question._id}
@@ -62,7 +64,7 @@ export default async  function Home({searchParams}:HomePageProps) {
           upvotes={question.upvotes}
           downvotes={question.downsvotes}
           views={question.views}
-          answers={question.answers}
+          answers={question.answer}
           createdAt={question.createdAt}
           />
         ))
@@ -73,6 +75,12 @@ export default async  function Home({searchParams}:HomePageProps) {
         linktitle='Ask a Question'
         />
       }
+      </div>
+      <div className="mt-10">
+      <Pagination 
+        pageNumber={page ? + page :1}
+        isNext={result.isNext|| false}
+      />
       </div>
     </>
   );

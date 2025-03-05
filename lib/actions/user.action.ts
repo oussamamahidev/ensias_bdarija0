@@ -17,6 +17,7 @@ import { revalidatePath } from "next/cache";
 import Question from "@/database/question.model";
 import Tag from "@/database/tag.model";
 import Answer from "@/database/answer.model";
+import { pages } from "next/dist/build/templates/app-page";
 
 export async function getUserById(params: GetUserByIdParams) {
   try {
@@ -97,8 +98,9 @@ export async function getAllUsers(params: GetAllUsersParams) {
   try {
     await connectToDatabase(); 
 
-    const { searchQuery,filter}= params;
-
+    connectToDatabase();
+    const { searchQuery, filter, page = 1, pageSize =10} = params;
+    const skipAmount = (page - 1) * pageSize;
     const query: FilterQuery<typeof User> = {};
     if (searchQuery) {
       query.$or = [
@@ -120,8 +122,14 @@ export async function getAllUsers(params: GetAllUsersParams) {
       default:
         break;
     }
-    const users = await User.find(query).sort(sortOptions);
-    return { users };
+    const users = await User.find(query)
+    .skip(skipAmount)
+      .limit(pageSize)
+      .sort(sortOptions);
+      
+    const totalUsers = await User.countDocuments(query);
+    const isNext = totalUsers > skipAmount + users.length;
+    return { users, isNext };
   } catch (error) {
     console.error("🔴 Error fetching all users:", error);
     throw error;
@@ -182,60 +190,56 @@ export async function toggleSaveQuestion(params: ToggleSaveQuestionParams){
   }
 }
 
-export async function getSavedQuestions (params: GetSavedQuestionsParams){
-
-  try{
+export async function getSavedQuestions(params: GetSavedQuestionsParams) {
+  try {
     connectToDatabase();
-    
-
-    const { clerkId, searchQuery ,filter} = params;  
+    const { clerkId, searchQuery, filter, page = 1, pageSize = 1 } = params;
+    const skipAmount = (page - 1) * pageSize;
     const query: FilterQuery<typeof Question> = searchQuery
       ? { title: { $regex: new RegExp(searchQuery, "i") } }
       : {};
-      console.log(query);
-
-
-      let sortOptions = {};
-      switch (filter) {
-        case "most_recent":
-          sortOptions = { createdAt: -1 };
-          break;
-        case "oldest":
-          sortOptions = { createdAt: 1 };
-          break;
-        case "most_voted":
-          sortOptions = { upvotes: -1 };
-          break;
-        case "most_viewed":
-          sortOptions = { views: -1 };
-          break;
-        case "most_answered":
-          sortOptions = { answer: -1 };
-          break;
-        default:
-          break;
-      }
-      const user = await User.findOne({ clerkId }).populate({
-        path: "saved",
-        match: query,
-        options: {
-          sort: sortOptions,
-          
-        },
-        populate: [
-          { path: "tags", model: Tag, select: "_id name" },
-          { path: "author", model: User, select: "_id clerkId name picture" },
-        ],
-      });
-      if (!user) {
-        throw new Error("User not found");
-      }
-    const getSavedQuestions= user.saved;
-    console.log(getSavedQuestions);
-    return {questions: getSavedQuestions};
-  }catch(err){
-    console.log(err);
-    throw err;
+    let sortOptions = {};
+    switch (filter) {
+      case "most_recent":
+        sortOptions = { createdAt: -1 };
+        break;
+      case "oldest":
+        sortOptions = { createdAt: 1 };
+        break;
+      case "most_voted":
+        sortOptions = { upvotes: -1 };
+        break;
+      case "most_viewed":
+        sortOptions = { views: -1 };
+        break;
+      case "most_answered":
+        sortOptions = { answers: -1 };
+        break;
+      default:
+        break;
+    }
+    const user = await User.findOne({ clerkId }).populate({
+      path: "saved",
+      match: query,
+      options: {
+        sort: sortOptions,
+        skip: skipAmount,
+        limit: pageSize + 1,
+      },
+      populate: [
+        { path: "tags", model: Tag, select: "_id name" },
+        { path: "author", model: User, select: "_id clerkId name picture" },
+      ],
+    });
+    if (!user) {
+      throw new Error("User not found");
+    }
+    const isNext = user.saved.length > pageSize;
+    const savedQuestions = user.saved;
+    return { questions: savedQuestions, isNext };
+  } catch (error) {
+    console.log(error);
+    throw error;
   }
 }
 
@@ -270,55 +274,43 @@ export async function getUserInfo (params: GetUserByIdParams){
 
 export async function getUserQuestion (params: GetUserStatsParams){
 
-  try{
+  try {
     connectToDatabase();
-    const  { userId } =  params;
-    const totalQuestions= await Question.countDocuments(
-      {
-        author: userId
-      }
-    )
-    console.log("hna total dyal les questions",totalQuestions)
-    const userQuestions= await Question.find({
-      author: userId
-    })
-    .sort({views: -1,upvotes: -1})
-    .populate('tags','_id name ')
-    .populate('author', 'clerkId name picture')
-
-    console.log(" hado user questions",userQuestions);
-
-    return {totalQuestions, questions: userQuestions}
-  }catch(err){
-    console.log(err);
-    throw err;
+    const { userId, page = 1, pageSize = 1 } = params;
+    const skipAmount = (page - 1) * pageSize;
+    const totalQuestions = await Question.countDocuments({ author: userId });
+    const userQuestions = await Question.find({ author: userId })
+      .sort({ createdAt: -1, views: -1, upvotes: -1 })
+      .skip(skipAmount)
+      .limit(pageSize)
+      .populate("tags", "_id name")
+      .populate("author", "_id clerkId name picture");
+    const isNext = totalQuestions > skipAmount + userQuestions.length;
+    return { totalQuestions, questions: userQuestions, isNext };
+  } catch (error) {
+    console.log(error);
+    throw error;
   }
 } 
 
 export async function getUserAnswers (params: GetUserStatsParams){
 
-  try{
+  try {
     connectToDatabase();
-    const  { userId } =  params;
-    const totalAnswers= await Answer.countDocuments(
-      {
-        author: userId
-      }
-    )
-    console.log("hna total dyal les questions",totalAnswers)
-    const userAnswers= await Answer.find({
-      author: userId
-    })
-    .sort({upvotes: -1})
-    .populate('question','_id title ')
-    .populate('author', 'clerkId name picture')
-
-    console.log(" hado user questions",userAnswers);
-
-    return {totalAnswers, answers: userAnswers}
-  }catch(err){
-    console.log(err);
-    throw err;
+    const { userId, page = 1, pageSize = 5 } = params;
+    const skipAmount = (page - 1) * pageSize;
+    const totalAnswers = await Answer.countDocuments({ author: userId });
+    const userAnswers = await Answer.find({ author: userId })
+      .sort({ upvotes: -1 })
+      .skip(skipAmount)
+      .limit(pageSize)
+      .populate("question", "_id title")
+      .populate("author", "_id clerkId name picture");
+    const isNext = totalAnswers > skipAmount + userAnswers.length;
+    return { totalAnswers, answers: userAnswers, isNext};
+  } catch (error) {
+    console.log(error);
+    throw error;
   }
 }
 

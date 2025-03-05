@@ -7,16 +7,18 @@ import { getAllUsers } from '@/lib/actions/user.action'
 import UserCard from '@/components/cards/UserCard'
 import LocalSearch from '@/components/shared/search/LocalSearch'
 import { SearchParamsProps } from '@/types'
+import Pagination from '@/components/shared/search/Pagination'
 
 
 interface HomePageProps {
   searchParams: Promise<{ [q: string]: string | undefined }>;
 }
 const page =async ({searchParams}:HomePageProps) => {
-  const {q,filter}= await searchParams;
+  const {q,filter,page}= await searchParams;
     const result = await getAllUsers({
       searchQuery: q,
-      filter:filter
+      filter:filter,
+      page: parseInt(String(page? + page:1))
     })
   return (
     <>
@@ -51,8 +53,15 @@ const page =async ({searchParams}:HomePageProps) => {
                     Join to be the first!!
                 </Link>
             </div>
+
         )}
       </section>
+      <div className="mt-10">
+      <Pagination 
+        pageNumber={page ? + page :1}
+        isNext={result.isNext|| false}
+      />
+      </div>
     </>
   )
 }
