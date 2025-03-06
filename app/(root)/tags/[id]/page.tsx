@@ -33,7 +33,7 @@ const Page = async ({ params, searchParams }: URLProps) => {
   const result = await getQuestionByTagId({
     tagId: id,
     searchQuery: q,
-    page: parseInt(String(page? + page:1))
+    page: parseInt(page || "1"),
 
   });
 

@@ -43,7 +43,7 @@ export default async  function Home({searchParams}:HomePageProps) {
   const result  = await getQuestions({
     searchQuery: q,
     filter: filter,
-    page: parseInt(String(page? + page:1))
+    page: parseInt(page || "1"),
   });
   return (
     <>
