@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input'
 import { formUrlQuery, removeKeysFromQuery } from '@/lib/utils'
 import Image from 'next/image'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
 
 interface CustomInputTypes {
     route: string,
@@ -53,7 +53,8 @@ const LocalSearch = ({
     }, [search, router, route, searchParams, query])
 
     return (
-        <div className="mt-10 flex w-full items-center gap-4 bg-gray-100 dark:bg-gray-800 px-6 py-3 rounded-xl shadow-md transition-all duration-300 focus-within:ring-2 focus-within:ring-indigo-400 border border-gray-300 dark:border-gray-600">
+        <Suspense>
+      <div className="mt-10 flex w-full items-center gap-4 bg-gray-100 dark:bg-gray-800 px-6 py-3 rounded-xl shadow-md transition-all duration-300 focus-within:ring-2 focus-within:ring-indigo-400 border border-gray-300 dark:border-gray-600">
             {iconPosition === 'left' && (
                 <Image 
                     src={imgSrc}
@@ -71,6 +72,7 @@ const LocalSearch = ({
                 className='w-full bg-transparent border-none focus:outline-none text-gray-900 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 text-sm'
             />
         </div>
+    </Suspense>
     )
 }
 

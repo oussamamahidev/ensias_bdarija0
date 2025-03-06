@@ -4,7 +4,7 @@ import { HomePageFilters } from "@/constants/filters";
 import { Button } from "../ui/button";
 import { formUrlQuery } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
-import {  useState } from "react";
+import {  Suspense, useState } from "react";
 
 
 const HomeFilters = () => {
@@ -35,7 +35,8 @@ const HomeFilters = () => {
   );
 
   return (
-    <div className="mt-10 hidden flex-wrap gap-3 md:flex">
+    <Suspense>
+      <div className="mt-10 hidden flex-wrap gap-3 md:flex">
       {HomePageFilters.map((item) => (
         <Button
           key={item.value}
@@ -51,6 +52,7 @@ const HomeFilters = () => {
         </Button>
       ))}
     </div>
+    </Suspense>
   );
 };
 

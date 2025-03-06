@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react'
+import React, { Suspense } from 'react'
 import {
     Select,
     SelectContent,
@@ -36,7 +36,8 @@ const Filter = ({ filters, otherClasses, containerClasses }: Props) => {
     }
     
     return (
-        <div className={`relative ${containerClasses}`}>
+        <Suspense>
+            <div className={`relative ${containerClasses}`}>
             <Select onValueChange={handleUpdateParams} defaultValue={paramFilter || undefined}>
                 <SelectTrigger className={`w-full bg-gradient-to-r from-gray-200 to-gray-300 dark:from-dark-500 dark:to-dark-700 px-6 py-3 rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl focus:ring-4 focus:ring-indigo-400 ${otherClasses}`}>
                     <div className="line-clamp-1 flex-1 text-left text-gray-800 dark:text-gray-200">
@@ -58,6 +59,7 @@ const Filter = ({ filters, otherClasses, containerClasses }: Props) => {
                 </SelectContent>
             </Select>
         </div>
+        </Suspense>
     );
 };
 
