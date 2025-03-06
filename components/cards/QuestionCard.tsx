@@ -24,7 +24,7 @@ interface Props {
     upvotes: string[];
     downvotes: string[];
     views: number;
-    answers?: IAnswer[]; // Make answers optional
+    answers?: IAnswer[];
     createdAt: Date;
 }
 
@@ -36,21 +36,20 @@ const QuestionCard = ({
     author,
     upvotes,
     views,
-    answers , // Provide default empty array
+    answers,
     createdAt
 }: Props) => {
     const showActionButtons = clerkId && clerkId === author.clerkId;
 
     return (
-        <div className='card-wrapper rounded-[10px] p-9 sm:px-11'>
+        <div className='bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-[1.02] border border-gray-200 dark:border-gray-700'>
             <div className='flex flex-col-reverse items-start justify-between gap-5 sm:flex-row'>
                 <div>
-                    <span className='subtle-reglar text-dark400_light700
-                    line-clamp-1 flex sm:hidden'>
+                    <span className='text-gray-500 dark:text-gray-400 text-sm flex sm:hidden'>
                         {getTimestamp(createdAt)}
                     </span>
                     <Link href={`/question/${_id}`}>
-                        <h3 className='sm:h3-semibold base-semibold text-dark200_light900 line-clamp-1 flex-1'>
+                        <h3 className='sm:text-lg font-semibold text-gray-900 dark:text-gray-200 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors line-clamp-1'>
                             {title}
                         </h3>
                     </Link>
@@ -64,16 +63,17 @@ const QuestionCard = ({
                     )}
                 </SignedIn>
             </div>
-            <div className='mt-3.5 flex flex-wrap gap-2 rounded-sm'>
+            <div className='mt-4 flex flex-wrap gap-2'>
                 {tags?.map(tag => (
                     <RenderTag
                         key={tag._id}
                         _id={tag._id}
                         name={tag.name}
+                        
                     />
                 ))}
             </div>
-            <div className='flex-between mt-6 w-full flex-wrap gap-3'>
+            <div className='flex justify-between mt-6 flex-wrap gap-3 text-gray-700 dark:text-gray-300'>
                 <Metric
                     imgUrl={author?.picture || '/assets/icons/avatar.svg'}
                     alt="user"
@@ -81,28 +81,28 @@ const QuestionCard = ({
                     title={` - asked ${getTimestamp(createdAt)}`}
                     href={`/profile/${author?._id}`}
                     isAuthor
-                    textStyles='small-medium text-dark400_light800'
+                    textStyles='text-sm'
                 />
                 <Metric
                     imgUrl="/assets/icons/like.svg"
                     alt="Upvotes"
                     value={formatAndDivideNumber(upvotes.length)}
                     title="Votes"
-                    textStyles='small-medium text-dark400_light800'
+                    textStyles='text-sm'
                 />
-                 <Metric
-            imgUrl="/assets/icons/message.svg"
-            alt="Message"
-            value={formatAndDivideNumber(answers?.length||0)}
-            title=" Answers"
-            textStyles="small-medium text-dark400_light800"
-          />
+                <Metric
+                    imgUrl="/assets/icons/message.svg"
+                    alt="Message"
+                    value={formatAndDivideNumber(answers?.length || 0)}
+                    title="Answers"
+                    textStyles="text-sm"
+                />
                 <Metric
                     imgUrl="/assets/icons/eye.svg"
-                    alt="eye"
+                    alt="Views"
                     value={formatAndDivideNumber(views)}
                     title="Views"
-                    textStyles='small-medium text-dark400_light800'
+                    textStyles='text-sm'
                 />
             </div>
         </div>
