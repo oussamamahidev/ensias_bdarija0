@@ -27,8 +27,7 @@ export default async function AskQuestionPage() {
   const mongoUser = await getUserById({ userId })
 
   if (!mongoUser) {
-    // Handle case where user exists in Clerk but not in MongoDB
-    // You might want to create the user or show an error
+    
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
         <h1 className="h2-bold text-dark100_light900">User profile not found</h1>
