@@ -82,18 +82,14 @@ export async function createQuestion(params: CreateQuestionParams) {
       });
 
       await Interaction.create({
-        user:author,
+        user: author,
         action: "ask_question",
         question: question._id,
         tags: tagDocuments,
-      })
-
-      await User.findByIdAndUpdate(author,
-        {$inc:{reputation:5}}
-      )
-
+      });
+      // Increment author's reputation by +5 for creating a question
+      await User.findByIdAndUpdate(author, { $inc: { reputation: 5 } });
       revalidatePath(path);
-
   } catch (err) {
     console.error("Error creating question:", err);
     throw err;
