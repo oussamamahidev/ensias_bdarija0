@@ -3,6 +3,7 @@ import NoResult from "@/components/shared/NoResult";
 import LocalSearch from "@/components/shared/search/LocalSearch";
 import Pagination from "@/components/shared/search/Pagination";
 import { getQuestionByTagId } from "@/lib/actions/tag.actions";
+import { Suspense } from "react";
 
 
 interface URLProps {
@@ -63,7 +64,9 @@ const Page = async ({ params, searchParams }: URLProps) => {
       </div>
 
       <div className="mt-10">
+      <Suspense fallback={<p>Loa</p>}>
       <Pagination pageNumber={page ? +page : 1} isNext={result.isNext|| false} />
+      </Suspense>
       </div>
     </>
   );

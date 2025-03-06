@@ -7,6 +7,7 @@ import { QuestionFilters } from "@/constants/filters";
 import { getSavedQuestions } from "@/lib/actions/user.action";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 interface HomePageProps {
   searchParams: Promise<{ [q: string]: string | undefined }>;
@@ -68,7 +69,9 @@ export default async  function Home({searchParams}:HomePageProps) {
         )}
       </div>
       <div className="mt-10">
+      <Suspense fallback={<p>Loa</p>}>
       <Pagination pageNumber={page ? +page : 1} isNext={result.isNext|| false} />
+      </Suspense>
       </div>
     </>
   );

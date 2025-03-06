@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { HomePageFilters } from "@/constants/filters";
 import { getQuestions } from "@/lib/actions/question.action";
 import Link from "next/link";
+import { Suspense } from "react";
 
 
 interface HomePageProps {
@@ -74,7 +75,9 @@ export default async  function Home({searchParams}:HomePageProps) {
         )}
       </div>
       <div className="mt-10">
+      <Suspense fallback={<p>Loa</p>}>
       <Pagination pageNumber={page ? +page : 1} isNext={result.isNext|| false} />
+      </Suspense>
       </div>
     </>
   );
