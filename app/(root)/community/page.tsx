@@ -8,6 +8,7 @@ import { getAllUsers } from "@/lib/actions/user.action";
 
 import Link from "next/link";
 import { Suspense } from "react";
+import Loading from "./loading";
 
 
 interface HomePageProps {
@@ -50,7 +51,7 @@ const page =async ({searchParams}:HomePageProps) => {
         )}
       </section>
       <div className="mt-10">
-      <Suspense key={q}  fallback={<p>Loa</p>}>
+      <Suspense key={q}  fallback={<Loading />}>
       <Pagination pageNumber={page ? +page : 1} isNext={result.isNext|| false} />
       </Suspense>
       </div>

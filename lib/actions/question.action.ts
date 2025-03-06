@@ -136,7 +136,7 @@ export async function upvoteQuestion(params: QuestionVoteParams){
     }
       //increment author repatition by -10for upvoting a question
       await User.findByIdAndUpdate(userId, {
-        $inc: {reputation :hasAlreadyUpvoted? -1:1}
+        $inc: {reputation :hasAlreadyUpvoted? -2:2}
       })
 
       await User.findByIdAndUpdate(question.author, {
@@ -174,8 +174,13 @@ export async function downvoteQuestion(params: QuestionVoteParams){
       throw new Error("Question not found");
     }
     
-      //increment author repatition by -10for upvoting a question
-
+// Increment user's reputation
+await User.findByIdAndUpdate(userId, {
+  $inc: { reputation: hasAlreadyDownvoted ? -2 : 2 },
+});
+await User.findByIdAndUpdate(question.author, {
+  $inc: { reputation: hasAlreadyDownvoted ? -10 : 10 },
+});
       revalidatePath(path);
   } catch(err){
     console.log(err);

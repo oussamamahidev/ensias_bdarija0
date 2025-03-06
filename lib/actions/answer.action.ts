@@ -6,6 +6,7 @@ import { AnswerVoteParams, CreateAnswerParams, DeleteAnswerParams, GetAnswersPar
 import Question from "@/database/question.model";
 import { revalidatePath } from "next/cache";
 import Interaction from "@/database/interaction.model";
+import User from "@/database/user.model";
 
 
 
@@ -21,12 +22,21 @@ export async function createAnswer(params: CreateAnswerParams){
         });
         console.log('creating',author)
         
-        await Question.findByIdAndUpdate(question,{
+       const questionObject= await Question.findByIdAndUpdate(question,{
             $push: {answer: newAnswer._id}
         })
 
-        //to do
-        // newAnswer.save();
+       
+        await Interaction.create({
+          user:author,
+          action: 'answer',
+          question,
+          answer: newAnswer._id,
+          tags:questionObject.tags
+        })
+         await User.findByIdAndUpdate(author, {
+                $inc: {reputation : 10}
+              })
         revalidatePath(path);
         console.log({newAnswer});
     }catch(err){
@@ -100,7 +110,14 @@ export async function upvoteAnswer(params: AnswerVoteParams){
         throw new Error("Answer not found");
       }
         //increment author repatition by -10for upvoting a question
-  
+
+         await User.findByIdAndUpdate(userId, {
+                $inc: {reputation :hasAlreadyUpvoted? -2: 2}
+              })
+
+              await User.findByIdAndUpdate(answer.author, {
+                $inc: {reputation :hasAlreadyUpvoted? -10: 10}
+              })
         revalidatePath(path);
     } catch(err){
       console.log(err);
@@ -134,7 +151,13 @@ export async function upvoteAnswer(params: AnswerVoteParams){
       }
       
         //increment author repatition by -10for upvoting a question
-  
+        await User.findByIdAndUpdate(userId, {
+          $inc: {reputation :hasAlreadyDownvoted? -2: 2}
+        })
+
+        await User.findByIdAndUpdate(answer.author, {
+          $inc: {reputation :hasAlreadyDownvoted? -10: 10}
+        })
         revalidatePath(path);
     } catch(err){
       console.log(err);
