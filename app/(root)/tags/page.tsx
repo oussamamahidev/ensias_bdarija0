@@ -66,7 +66,7 @@ const page = async ({searchParams}:HomePageProps) => {
         )}
       </section>
       <div className="mt-10">
-      <Suspense fallback={<p>Loa</p>}>
+      <Suspense key={q}  fallback={<p>Loa</p>}>
       <Pagination pageNumber={page ? +page : 1} isNext={result.isNext|| false} />
       </Suspense>
       </div>
