@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect, useState } from 'react'
+import React, { Suspense  ,useEffect, useState } from 'react'
 import {ReloadIcon} from '@radix-ui/react-icons';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
