@@ -10,12 +10,15 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import Loading from "./loading";
 
+// Add this to force dynamic rendering for this route
+export const dynamic = 'force-dynamic';
+
 interface HomePageProps {
-  searchParams: Promise<{ [q: string]: string | undefined }>;
+  searchParams: { [q: string]: string | undefined };
 }
 
 export default async function Home({ searchParams }: HomePageProps) {
-  const { q, filter, page } = await searchParams;
+  const { q, filter, page } = searchParams;
   const { userId } = await auth();
 
   if (!userId) {
@@ -75,7 +78,7 @@ export default async function Home({ searchParams }: HomePageProps) {
         )}
       </div>
       <div className="mt-10">
-        <Suspense key={q} fallback={<Loading />}>
+        <Suspense fallback={<Loading />}>
           <Pagination pageNumber={page ? +page : 1} isNext={result.isNext || false} />
         </Suspense>
       </div>
