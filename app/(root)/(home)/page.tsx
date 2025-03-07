@@ -11,38 +11,38 @@ import Link from "next/link";
 import { Suspense } from "react";
 import Loading from "./loading";
 
-
 import type { Metadata } from "next";
 import { auth } from "@clerk/nextjs/server";
 
-export const metadata : Metadata = {
-  title:'Home | D2sFlow',
+export const metadata: Metadata = {
+  title: 'Home | D2sFlow',
 }
+
 interface HomePageProps {
   searchParams: Promise<{ [key: string]: string | undefined }>;
 }
-export default async  function Home({searchParams}:HomePageProps) {
+
+export default async function Home({ searchParams }: HomePageProps) {
   const { userId } = await auth();
   let result;
   
-  const {q,filter,page}= await searchParams;
+  const { q, filter, page } = await searchParams;
 
-  if(filter==='recommended'){
-    if(userId){
-      result  = await getRecommendedQuestions({
+  if (filter === 'recommended') {
+    if (userId) {
+      result = await getRecommendedQuestions({
         userId,
         searchQuery: q,
         page: parseInt(page || "1"),
       });
-    }else{
+    } else {
       result = {
         questions: [],
         isNext: false,
       };
     }
-
-  }else{
-    result  = await getQuestions({
+  } else {
+    result = await getQuestions({
       searchQuery: q,
       filter: filter,
       page: parseInt(page || "1"),
@@ -60,20 +60,26 @@ export default async  function Home({searchParams}:HomePageProps) {
         </Link>
       </div>
       <div className="mt-11 flex justify-between gap-5 max-sm:flex-col sm:items-center">
-        <LocalSearch
-          route="/"
-          iconPosition="left"
-          imgSrc="/assets/icons/search.svg"
-          placeholder="Search questions..."
-          otherClasses="flex-1"
-        />
-        <Filter
-          filters={HomePageFilters}
-          otherClasses="min-h-[56px] sm:min-w-[170px]"
-          containerClasses="hidden max-md:flex"
-        />
+        <Suspense fallback={<div className="flex-1 h-[56px] bg-light-700/50 dark:bg-dark-500/50 animate-pulse rounded-lg" />}>
+          <LocalSearch
+            route="/"
+            iconPosition="left"
+            imgSrc="/assets/icons/search.svg"
+            placeholder="Search questions..."
+            otherClasses="flex-1"
+          />
+        </Suspense>
+        <Suspense fallback={<div className="h-[56px] w-[170px] bg-light-700/50 dark:bg-dark-500/50 animate-pulse rounded-lg" />}>
+          <Filter
+            filters={HomePageFilters}
+            otherClasses="min-h-[56px] sm:min-w-[170px]"
+            containerClasses="hidden max-md:flex"
+          />
+        </Suspense>
       </div>
-      <HomeFilters />
+      <Suspense fallback={<div className="mt-10 h-14 w-full bg-light-700/50 dark:bg-dark-500/50 animate-pulse rounded-lg" />}>
+        <HomeFilters />
+      </Suspense>
       <div className="mt-10 flex w-full flex-col gap-6">
         {result.questions.length > 0 ? (
           result.questions.map((question) => (
@@ -102,9 +108,9 @@ export default async  function Home({searchParams}:HomePageProps) {
         )}
       </div>
       <div className="mt-10">
-      <Suspense  fallback={<Loading />}>
-      <Pagination pageNumber={page ? +page : 1} isNext={result.isNext|| false} />
-      </Suspense>
+        <Suspense fallback={<Loading />}>
+          <Pagination pageNumber={page ? +page : 1} isNext={result.isNext || false} />
+        </Suspense>
       </div>
     </>
   );
