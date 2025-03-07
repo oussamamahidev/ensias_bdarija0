@@ -1,3 +1,4 @@
+
 import QuestionCard from "@/components/cards/QuestionCard";
 import Filter from "@/components/shared/Filter";
 import NoResult from "@/components/shared/NoResult";
@@ -10,15 +11,12 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import Loading from "./loading";
 
-// Add this to force dynamic rendering for this route
-export const dynamic = 'force-dynamic';
-
 interface HomePageProps {
-  searchParams: { [q: string]: string | undefined };
+  searchParams: Promise<{ [q: string]: string | undefined }>;
 }
 
 export default async function Home({ searchParams }: HomePageProps) {
-  const { q, filter, page } = searchParams;
+  const { q, filter, page } = await searchParams;
   const { userId } = await auth();
 
   if (!userId) {
