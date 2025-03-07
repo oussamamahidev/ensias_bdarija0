@@ -1,9 +1,9 @@
-import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
+module.exports = {
   experimental: {
-    serverActions: {}, // ✅ Fix: Change from true → {}
+    missingSuspenseWithCSRBailout: false,
   },
+
 
   images:{
     remotePatterns:[
@@ -32,4 +32,4 @@ const nextConfig: NextConfig = {
  },
 };
 
-export default nextConfig;
+
