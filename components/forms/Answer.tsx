@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import {
@@ -20,6 +19,8 @@ import Image from "next/image";
 import { createAnswer } from "@/lib/actions/answer.action";
 import { usePathname } from "next/navigation";
 import { AnswerSchema } from "@/lib/validation";
+import { LEGAL_TLS_SOCKET_OPTIONS } from "mongodb";
+
 
 interface Props {
   question: string;
@@ -27,14 +28,12 @@ interface Props {
   authorId: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const Answer = ({ questionId, authorId }: Props) => {
+const Answer = ({ question, questionId, authorId }: Props) => {
   const pathname = usePathname();
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const [isSubmittingAI, setSetIsSubmittingAI] = useState(false);
   const { mode } = useTheme();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const editorRef = useRef<any>(null);
+  const editorRef = useRef(null);
 
   const form = useForm<z.infer<typeof AnswerSchema>>({
     resolver: zodResolver(AnswerSchema),
@@ -54,18 +53,60 @@ const Answer = ({ questionId, authorId }: Props) => {
       });
       form.reset();
       if (editorRef.current) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const editor = editorRef.current as any;
         editor.setContent("");
       }
+     
     } catch (error) {
-      console.log(error);
+      console.error(error);
+      
     } finally {
       setIsSubmitting(false);
     }
   };
 
- 
+  const generateAIAnswer = async (
+    
+  ) => {
+    if (!authorId) return
+    setSetIsSubmittingAI(true)
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/chatgpt`, {
+        method: "POST",
+        body: JSON.stringify({ question }),
+      })
+      const aiAnswer = await response.json()
+      console.log("aianswer....", aiAnswer)
+  
+      // Check if there's an error
+      if (aiAnswer.error) {
+        console.error("AI Answer Error:", aiAnswer.error)
+  
+        // You could show a toast notification here with the error message
+        // For example: toast.error(aiAnswer.error);
+  
+        return
+      }
+  
+      // Only proceed if we have a valid reply
+      if (aiAnswer.reply) {
+        // Convert plain text to HTML format
+        const formattedAnswer = aiAnswer.reply.replace(/\n/g, "<br />")
+        console.log("formattedAnswer:", formattedAnswer)
+  
+        if (editorRef.current) {
+          const editor = editorRef.current as any
+          editor.setContent(formattedAnswer)
+        }
+      }
+    } catch (error) {
+      console.error("Error generating AI answer:", error)
+      // Show a generic error toast
+    } finally {
+      setSetIsSubmittingAI(false)
+    }
+  }
+
 
   const isDarkMode = useMemo(() => mode === "dark", [mode]);
 
@@ -86,7 +127,11 @@ const Answer = ({ questionId, authorId }: Props) => {
 
         <Button
           className="btn light-border-2 gap-1.5 rounded-md px-4 py-2.5 text-primary-500 shadow-none dark:text-primary-500"
-          onClick={()=>{}}>
+          onClick={generateAIAnswer}
+        >
+          {isSubmittingAI ? (
+            <>Generating...</>
+          ) : (
             <>
               <Image
                 src="/assets/icons/stars.svg"
@@ -97,14 +142,15 @@ const Answer = ({ questionId, authorId }: Props) => {
               />
               Generate AI Answer
             </>
-          
+          )}
         </Button>
       </div>
 
       <Form {...form}>
         <form
           className="mt-6 flex w-full flex-col gap-10"
-          onSubmit={form.handleSubmit(handleCreateAnswer)}>
+          onSubmit={form.handleSubmit(handleCreateAnswer)}
+        >
           <FormField
             control={form.control}
             name="answer"
@@ -114,7 +160,7 @@ const Answer = ({ questionId, authorId }: Props) => {
                   <Editor
                     apiKey={process.env.NEXT_PUBLIC_TINY_EDITOR_API_KEY}
                     onInit={(evt, editor) => {
-                    
+                      // @ts-ignore
                       editorRef.current = editor;
                     }}
                     onBlur={field.onBlur}
@@ -159,7 +205,8 @@ const Answer = ({ questionId, authorId }: Props) => {
             <Button
               type="submit"
               className="primary-gradient w-fit text-white"
-              disabled={isSubmitting}>
+              disabled={isSubmitting}
+            >
               {isSubmitting ? "Submitting..." : "Submit"}
             </Button>
           </div>
