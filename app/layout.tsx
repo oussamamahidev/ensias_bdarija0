@@ -10,18 +10,17 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { ThemeProvider } from '@/context/ThemeProvider';
 
-const inter= Inter({
-  subsets: ['latin'],
-  weight: ['100','200','300','400','500','600','700','800','900'],
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-inter",
+});
 
-  variable: '--font-inter'
-})
-
-const SpaceGrotesk= Space_Grotesk({
-  subsets: ['latin'],
-  weight: ['300','400','500','600','700'],
-  variable: '--font-inter-spaceGrotesk'
-})
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-spaceGrotesk",
+});
 
 export const metadata: Metadata = {
   title: 'D2sFlow Application',
@@ -39,7 +38,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       
-        <body className={`${inter.variable}  ${SpaceGrotesk.variable}`}> 
+        <body className={`${inter.variable}  ${spaceGrotesk.variable}`}> 
         <ClerkProvider
         appearance={{
           elements: {

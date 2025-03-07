@@ -6,6 +6,7 @@ import { TagFilters } from "@/constants/filters";
 import { getAllTags } from "@/lib/actions/tag.actions";
 import Link from "next/link";
 import { Suspense } from "react";
+
 interface HomePageProps {
   searchParams: Promise<{ [q: string]: string | undefined }>;
 }

@@ -69,6 +69,6 @@ function fallbackMockResponse(question: string) {
   return NextResponse.json({
     reply: mockResponses[responseType],
     note: "This is a fallback response because the AI service is currently unavailable.",
-  })
+  }) 
 }
 

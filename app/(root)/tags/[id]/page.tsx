@@ -5,7 +5,6 @@ import Pagination from "@/components/shared/search/Pagination";
 import { getQuestionByTagId } from "@/lib/actions/tag.actions";
 import { Suspense } from "react";
 
-
 interface URLProps {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ [q: string]: string | undefined }>;

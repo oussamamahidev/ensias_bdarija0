@@ -19,7 +19,8 @@ import Image from "next/image";
 import { createAnswer } from "@/lib/actions/answer.action";
 import { usePathname } from "next/navigation";
 import { AnswerSchema } from "@/lib/validation";
-import { LEGAL_TLS_SOCKET_OPTIONS } from "mongodb";
+
+import { toast } from "../ui/use-toast";
 
 
 interface Props {
@@ -56,10 +57,17 @@ const Answer = ({ question, questionId, authorId }: Props) => {
         const editor = editorRef.current as any;
         editor.setContent("");
       }
+      toast({
+        title: "Answer submitted successfully",
+        variant: "default",
+      });
      
     } catch (error) {
       console.error(error);
-      
+      toast({
+        title: "Failed to submit answer",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -99,9 +107,17 @@ const Answer = ({ question, questionId, authorId }: Props) => {
           editor.setContent(formattedAnswer)
         }
       }
+      toast({
+        title: "Generated AI answer",
+        variant: "default",
+      });
     } catch (error) {
       console.error("Error generating AI answer:", error)
       // Show a generic error toast
+      toast({
+        title: "Failed to generate AI answer",
+        variant: "destructive",
+      });
     } finally {
       setSetIsSubmittingAI(false)
     }

@@ -6,23 +6,49 @@ import LocalSearch from "@/components/shared/search/LocalSearch";
 import Pagination from "@/components/shared/search/Pagination";
 import { Button } from "@/components/ui/button";
 import { HomePageFilters } from "@/constants/filters";
-import { getQuestions } from "@/lib/actions/question.action";
+import { getQuestions, getRecommendedQuestions } from "@/lib/actions/question.action";
 import Link from "next/link";
 import { Suspense } from "react";
 import Loading from "./loading";
 
 
+import type { Metadata } from "next";
+import { auth } from "@clerk/nextjs/server";
+
+export const metadata : Metadata = {
+  title:'Home | D2sFlow',
+}
 interface HomePageProps {
   searchParams: Promise<{ [key: string]: string | undefined }>;
 }
 export default async  function Home({searchParams}:HomePageProps) {
+  const { userId } = await auth();
+  let result;
   
   const {q,filter,page}= await searchParams;
-  const result  = await getQuestions({
-    searchQuery: q,
-    filter: filter,
-    page: parseInt(page || "1"),
-  });
+
+  if(filter==='recommended'){
+    if(userId){
+      result  = await getRecommendedQuestions({
+        userId,
+        searchQuery: q,
+        page: parseInt(page || "1"),
+      });
+    }else{
+      result = {
+        questions: [],
+        isNext: false,
+      };
+    }
+
+  }else{
+    result  = await getQuestions({
+      searchQuery: q,
+      filter: filter,
+      page: parseInt(page || "1"),
+    });
+  }
+   
   return (
     <>
       <div className="flex w-full flex-col-reverse justify-between gap-4 sm:flex-row sm:items-center">

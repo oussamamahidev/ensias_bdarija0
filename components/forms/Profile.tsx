@@ -36,11 +36,11 @@ const Profile = ({clerkId,user}:Props) => {
     const form = useForm<z.infer<typeof ProfileSchema>>({
         resolver: zodResolver(ProfileSchema),
         defaultValues: {
-          name: parseUser.name ?? "",
-          username: parseUser.username ?? "",
-          portfolioWebsite: parseUser.portfolioWebsite ?? "",
-          location: parseUser.location ?? "",
-          bio: parseUser.bio ?? "",
+          name: parseUser?.name ?? "",
+          username: parseUser?.username ?? "",
+          portfolioWebsite: parseUser?.portfolioWebsite ?? "",
+          location: parseUser?.location ?? "",
+          bio: parseUser?.bio ?? "",
         },
       });
 

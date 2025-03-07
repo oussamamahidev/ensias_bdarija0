@@ -2,6 +2,9 @@ import Navbar from '@/components/shared/navbar/Navbar'
 import React, { Suspense } from 'react'
 import LeftSidbar from '@/components/shared/LeftSidbar'
 import RightSiedbar from '@/components/shared/RightSiedbar'
+import { Toaster } from '@/components/ui/toaster'
+
+
 const Layout = ({children}: {children: React. ReactNode}) => {
   return (
     <div>
@@ -15,10 +18,10 @@ const Layout = ({children}: {children: React. ReactNode}) => {
                     <div className="mx-auto w-full max-w-5xl">
                     <Suspense>{children}</Suspense>
                     </div>
-                </section>
+                </section> 
                 <RightSiedbar />
                 </div>
-                Toaster
+                <Toaster />
         </main>
     </div>
   )

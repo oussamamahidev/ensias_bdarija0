@@ -11,6 +11,7 @@ import { Suspense } from "react";
 import Loading from "./loading";
 
 
+
 interface HomePageProps {
   searchParams: Promise<{ [q: string]: string | undefined }>;
 }
@@ -21,7 +22,6 @@ const page =async ({searchParams}:HomePageProps) => {
       filter:filter,
       page: parseInt(page || "1"),
     })
-
   return (
     <>
       <h1 className="h1-bold text-dark100_light900">All Users</h1>

@@ -1,26 +1,26 @@
 "use client";
 
-import { Input } from '@/components/ui/input'
-import { formUrlQuery, removeKeysFromQuery } from '@/lib/utils'
-import Image from 'next/image'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import React, { Suspense, useEffect, useState } from 'react'
+import { Input } from "@/components/ui/input";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { formUrlQuery, removeKeysFromQuery } from "@/lib/utils";
 
-interface CustomInputTypes {
-    route: string,
-    iconPosition: string,
-    imgSrc: string,
-    placeholder: string,
-    otherClasses: string
+interface CustomInputProps {
+  route: string;
+  iconPosition: string;
+  imgSrc: string;
+  placeholder: string;
+  otherClasses?: string;
 }
 
-const LocalSearch = ({
-    route,
-    iconPosition,
-    imgSrc,
-    placeholder,
-    otherClasses
-}: CustomInputTypes) => {
+const LocalSearchbar = ({
+  route,
+  iconPosition,
+  imgSrc,
+  placeholder,
+  otherClasses,
+}: CustomInputProps) => {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -52,28 +52,37 @@ const LocalSearch = ({
         return () => clearTimeout(delayDebounced);
     }, [search, router, route, searchParams, query])
 
-    return (
-        <Suspense>
-      <div className="mt-10 flex w-full items-center gap-4 bg-gray-100 dark:bg-gray-800 px-6 py-3 rounded-xl shadow-md transition-all duration-300 focus-within:ring-2 focus-within:ring-indigo-400 border border-gray-300 dark:border-gray-600">
-            {iconPosition === 'left' && (
-                <Image 
-                    src={imgSrc}
-                    alt='search icon'
-                    width={20}
-                    height={20}
-                    className='cursor-pointer transition-transform hover:scale-110 filter drop-shadow-md dark:invert'
-                />
-            )}
-            <Input
-                type='text'
-                placeholder={placeholder} 
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className='w-full bg-transparent border-none focus:outline-none text-gray-900 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 text-sm'
-            />
-        </div>
-    </Suspense>
-    )
-}
+  return (
+    <div
+      className={`background-light800_darkgradient flex min-h-[56px] grow items-center gap-4 rounded-[10px] px-4 ${otherClasses}`}
+    >
+      {iconPosition === "left" && (
+        <Image
+          src={imgSrc}
+          alt="search icon"
+          width={24}
+          height={24}
+          className="cursor-pointer"
+        />
+      )}
+      <Input
+        type="text"
+        placeholder={placeholder}
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="paragraph-regular no-focus placeholder text-dark400_light700 border-none bg-transparent shadow-none outline-none"
+      />
+      {iconPosition === "right" && (
+        <Image
+          src={imgSrc}
+          alt="search icon"
+          width={24}
+          height={24}
+          className="cursor-pointer"
+        />
+      )}
+    </div>
+  );
+};
 
-export default LocalSearch
+export default LocalSearchbar;
