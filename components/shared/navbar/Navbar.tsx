@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import React from 'react'
+import React, { Suspense } from 'react'
 import Image from 'next/image'
 import { SignedIn } from '@clerk/nextjs'
 import { UserButton } from "@clerk/nextjs";
@@ -22,8 +22,8 @@ const Navbar = () => {
           D2s<span className="text-primary-500">Overflow</span>
         </p>
       </Link>
-
-      <GlobalSearch />
+      <Suspense>   <GlobalSearch /></Suspense>
+   
       <div className="flex-between gap-5">
         <Theme />
         <SignedIn>
