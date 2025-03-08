@@ -12,10 +12,13 @@ export const QuestionSchema = z.object({
     answer: z.string().min(100)
   })
 
+
+
   export const ProfileSchema = z.object({
-    name: z.string().min(5).max(50),
-    username: z.string().min(5).max(50),
-    bio: z.string().min(10).max(150),
-    portfolioWebsite: z.string().url(),
-    location: z.string().min(5).max(50),
-  });
+    name: z.string().min(3, { message: "Name must be at least 3 characters" }),
+    username: z.string().min(3, { message: "Username must be at least 3 characters" }),
+    portfolioWebsite: z.string().url({ message: "Invalid url" }).optional().or(z.literal("")),
+    location: z.string().min(5, { message: "String must contain at least 5 character(s)" }).optional().or(z.literal("")),
+    bio: z.string().min(10, { message: "String must contain at least 10 character(s)" }).optional().or(z.literal("")),
+  })
+  

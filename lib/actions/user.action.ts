@@ -17,7 +17,7 @@ import { revalidatePath } from "next/cache";
 import Question from "@/database/question.model";
 import Tag from "@/database/tag.model";
 import Answer from "@/database/answer.model";
-import { pages } from "next/dist/build/templates/app-page";
+
 import { BadgeCriteriaType } from "@/types";
 import { assignBadges } from "../utils";
 

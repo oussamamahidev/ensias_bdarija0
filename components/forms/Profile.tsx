@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -19,6 +19,7 @@ import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
 import { ProfileSchema } from "@/lib/validation";
 import { updateUser } from "@/lib/actions/user.action";
+import { toast } from "../ui/use-toast";
 
 interface Props{
 
@@ -60,8 +61,16 @@ const Profile = ({clerkId,user}:Props) => {
               path: pathname,
             });
             router.back();
+            toast({
+              title: "Update Profile successfully",
+              variant: "default",
+            });
           } catch (error) {
             console.log(error);
+            toast({
+              title: "Failed to update profile",
+              variant: "destructive",
+            });
           } finally {
             setIsSubmitting(false);
           }
