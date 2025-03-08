@@ -6,6 +6,7 @@ import { fetchCountries, fetchJobs, fetchLocation } from "@/lib/actions/job.acti
 import type { SearchParamsProps } from "@/types"
 import LocalSearch from "@/components/shared/search/LocalSearch"
 import Pagination from "@/components/shared/search/Pagination"
+import NoResult from "@/components/shared/NoResult"
 
 // Loading fallbacks
 function SearchbarLoading() {
@@ -26,36 +27,42 @@ function JobsLoading() {
   )
 }
 
-const generateJobSearchQuery = (userLocation: string, searchParams?: { [key: string]: string | undefined }) => {
-  if (searchParams) {
-    if (
-      QUERY_SEARCH_PARAMS_KEY in searchParams &&
-      searchParams[QUERY_SEARCH_PARAMS_KEY] &&
-      FILTER_SEARCH_PARAMS_KEY in searchParams &&
-      searchParams[FILTER_SEARCH_PARAMS_KEY]
-    ) {
-      return `${searchParams[QUERY_SEARCH_PARAMS_KEY]} in ${searchParams[FILTER_SEARCH_PARAMS_KEY]}`
-    } else if (QUERY_SEARCH_PARAMS_KEY in searchParams && searchParams[QUERY_SEARCH_PARAMS_KEY]) {
-      return `${searchParams[QUERY_SEARCH_PARAMS_KEY]}`
-    } else if (FILTER_SEARCH_PARAMS_KEY in searchParams && searchParams[FILTER_SEARCH_PARAMS_KEY]) {
-      return `Software Developer in ${searchParams[FILTER_SEARCH_PARAMS_KEY]}`
-    }
+const generateJobSearchQuery = (userLocation: string, resolvedSearchParams: { [key: string]: string | string[] | undefined }) => {
+  if (
+    QUERY_SEARCH_PARAMS_KEY in resolvedSearchParams &&
+    resolvedSearchParams[QUERY_SEARCH_PARAMS_KEY] &&
+    FILTER_SEARCH_PARAMS_KEY in resolvedSearchParams &&
+    resolvedSearchParams[FILTER_SEARCH_PARAMS_KEY]
+  ) {
+    return `${resolvedSearchParams[QUERY_SEARCH_PARAMS_KEY]} in ${resolvedSearchParams[FILTER_SEARCH_PARAMS_KEY]}`
+  } else if (QUERY_SEARCH_PARAMS_KEY in resolvedSearchParams && resolvedSearchParams[QUERY_SEARCH_PARAMS_KEY]) {
+    return `${resolvedSearchParams[QUERY_SEARCH_PARAMS_KEY]}`
+  } else if (FILTER_SEARCH_PARAMS_KEY in resolvedSearchParams && resolvedSearchParams[FILTER_SEARCH_PARAMS_KEY]) {
+    return `Software Developer in ${resolvedSearchParams[FILTER_SEARCH_PARAMS_KEY]}`
   }
+  
   if (userLocation.trim().length === 0) {
     return "Software Developer"
   }
   return `Software Developer in ${userLocation}`
 }
 
-export default async function Jobs({ searchParams }: SearchParamsProps) {
+export default async function Jobs({ 
+  searchParams 
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  // Await searchParams before using it
+  const resolvedSearchParams = await searchParams;
+  
   // Fetch user location
   const userLocation = await fetchLocation()
 
   // Get page number from search params
-  const page = searchParams.page || "1"
+  const page = resolvedSearchParams.page?.toString() || "1"
 
-  // Generate search query
-  const query = generateJobSearchQuery(userLocation, searchParams)
+  // Generate search query with resolved searchParams
+  const query = generateJobSearchQuery(userLocation, resolvedSearchParams)
   console.log("Search query:", query) // Debug log
 
   // Fetch jobs with the generated query
@@ -96,16 +103,13 @@ export default async function Jobs({ searchParams }: SearchParamsProps) {
             return null
           })
         ) : (
-          <div className="paragraph-regular text-dark200_light800 mx-auto max-w-4xl text-center">
-            <p>Oops! We couldn&apos;t find any jobs at the moment.</p>
-            <p className="mt-2">This could be due to:</p>
-            <ul className="mt-2 list-disc pl-5 text-left">
-              <li>API rate limits - The job search API has limited free requests</li>
-              <li>Search query too specific - Try a more general search term</li>
-              <li>Location issues - Try selecting a different location</li>
-            </ul>
-            <p className="mt-4">Try again with different search parameters or check back later.</p>
-          </div>
+          
+          <NoResult
+          link="/jobs"
+              title="Oops! We couldn&apos;t find any jobs at the moment"
+              description="API rate limits - The job search API has limited free requests  Search query too specific - Try a more general search term"
+              linktitle="Try again with different search"
+            />
         )}
       </section>
 
@@ -119,4 +123,3 @@ export default async function Jobs({ searchParams }: SearchParamsProps) {
     </>
   )
 }
-

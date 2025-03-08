@@ -1,5 +1,6 @@
 
 module.exports = {
+  compress: true,
   experimental: {
     missingSuspenseWithCSRBailout: false,
   },

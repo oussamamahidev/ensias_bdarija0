@@ -1,6 +1,6 @@
 "use client";
 
-
+import { FILTER_SEARCH_PARAMS_KEY } from "@/constants";
 import { formUrlQuery } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
@@ -24,13 +24,13 @@ const JobsFilter = ({ filters, otherClasses, containerClasses }: Props) => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const paramFilter = searchParams.get('filter');
+  const paramFilter = searchParams.get(FILTER_SEARCH_PARAMS_KEY);
 
   const handleUpdateParams = useCallback(
     (value: string) => {
       const newUrl = formUrlQuery({
         params: searchParams.toString(),
-        Key: 'filter',
+        Key: FILTER_SEARCH_PARAMS_KEY,
         Value: value,
       });
       router.push(newUrl, { scroll: false });
