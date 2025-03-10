@@ -1,41 +1,60 @@
+import { Suspense } from "react"
+import Filter from "@/components/shared/Filter"
+import { QuestionFilters } from "@/constants/filters"
+import NoResult from "@/components/shared/NoResult"
+import QuestionCard from "@/components/cards/QuestionCard"
+import { getSavedQuestions } from "@/lib/actions/user.action"
+import Pagination from "@/components/shared/search/Pagination"
+import LocalSearchbar from "@/components/shared/search/LocalSearch"
+import { redirect } from "next/navigation"
+import { auth } from "@clerk/nextjs/server"
 
-import QuestionCard from "@/components/cards/QuestionCard";
-import Filter from "@/components/shared/Filter";
-import NoResult from "@/components/shared/NoResult";
-import LocalSearch from "@/components/shared/search/LocalSearch";
-import Pagination from "@/components/shared/search/Pagination";
-import { QuestionFilters } from "@/constants/filters";
-import { getSavedQuestions } from "@/lib/actions/user.action";
-import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
-import { Suspense } from "react";
-import Loading from "./loading";
+// import type { SearchParamsProps } from "@/types"
 
-interface HomePageProps {
-  searchParams: Promise<{ [q: string]: string | undefined }>;
+// Loading fallbacks
+function SearchbarLoading() {
+  return <div className="h-14 w-full rounded-lg bg-light-700 dark:bg-dark-500 animate-pulse" />
 }
 
-export default async function Home({ searchParams }: HomePageProps) {
-  const { q, filter, page } = await searchParams;
-  const { userId } = await auth();
+function FilterLoading() {
+  return <div className="h-10 w-full rounded-lg bg-light-700 dark:bg-dark-500 animate-pulse" />
+}
+
+function QuestionsLoading() {
+  return (
+    <div className="mt-10 flex w-full flex-col gap-6">
+      {[1, 2, 3, 4, 5].map((item) => (
+        <div key={item} className="h-48 w-full rounded-lg bg-light-700 dark:bg-dark-500 animate-pulse" />
+      ))}
+    </div>
+  )
+}
+
+interface Props {
+  searchParams: { [key: string]: string | undefined }
+}
+
+export default async function CollectionPage({ searchParams }: Props) {
+  const { userId } = await auth()
 
   if (!userId) {
-    redirect("/sign-in");
+    redirect("/sign-in")
   }
 
   const result = await getSavedQuestions({
     clerkId: userId,
-    searchQuery: q,
-    filter: filter,
-    page: parseInt(page || "1"),
-  });
+    searchQuery: searchParams.q,
+    filter: searchParams.filter,
+    page: searchParams.page ? +searchParams.page : 1,
+  })
 
   return (
-    <>
+    <div className="bg-white dark:bg-gray-800/80 rounded-xl p-8 shadow-sm border border-gray-100 dark:border-gray-700">
       <h1 className="h1-bold text-dark100_light900">Saved Questions</h1>
+
       <div className="mt-11 flex justify-between gap-5 max-sm:flex-col sm:items-center">
-        <Suspense fallback={<div className="flex-1 h-[56px] bg-light-700/50 dark:bg-dark-500/50 animate-pulse rounded-lg" />}>
-          <LocalSearch
+        <Suspense fallback={<SearchbarLoading />}>
+          <LocalSearchbar
             route="/collection"
             iconPosition="left"
             imgSrc="/assets/icons/search.svg"
@@ -43,15 +62,14 @@ export default async function Home({ searchParams }: HomePageProps) {
             otherClasses="flex-1"
           />
         </Suspense>
-        <Suspense fallback={<div className="h-[56px] w-[170px] bg-light-700/50 dark:bg-dark-500/50 animate-pulse rounded-lg" />}>
-          <Filter
-            filters={QuestionFilters}
-            otherClasses="min-h-[56px] sm:min-w-[170px]"
-          />
+
+        <Suspense fallback={<FilterLoading />}>
+          <Filter filters={QuestionFilters} otherClasses="min-h-[56px] sm:min-w-[170px]" />
         </Suspense>
       </div>
+
       <div className="mt-10 flex w-full flex-col gap-6">
-        {result.questions.length > 0 ? (
+        {result.questions?.length > 0 ? (
           result.questions.map((question: any) => (
             <QuestionCard
               key={question._id}
@@ -60,11 +78,9 @@ export default async function Home({ searchParams }: HomePageProps) {
               tags={question.tags}
               author={question.author}
               upvotes={question.upvotes}
-              downvotes={question.downvotes}
               views={question.views}
               answers={question.answers}
-              createdAt={question.createdAt}
-            />
+              createdAt={question.createdAt} downvotes={[]}            />
           ))
         ) : (
           <NoResult
@@ -75,11 +91,13 @@ export default async function Home({ searchParams }: HomePageProps) {
           />
         )}
       </div>
+
       <div className="mt-10">
-        <Suspense fallback={<Loading />}>
-          <Pagination pageNumber={page ? +page : 1} isNext={result.isNext || false} />
+        <Suspense fallback={<div className="h-10 w-full animate-pulse bg-light-700 dark:bg-dark-500 rounded-lg" />}>
+          <Pagination pageNumber={searchParams.page ? +searchParams.page : 1} isNext={result.isNext} />
         </Suspense>
       </div>
-    </>
-  );
+    </div>
+  )
 }
+

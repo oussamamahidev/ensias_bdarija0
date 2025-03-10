@@ -236,7 +236,7 @@ export async function getHotQuestions(){
     })
     .sort({views :-1, upvotes :-1})//descending order
     .limit(5);
-    return hotQuestions;
+    return JSON.parse(JSON.stringify(hotQuestions));
   }catch(err){
     console.log(err);
     throw err;
@@ -294,7 +294,7 @@ export async function getRecommendedQuestions(params: RecommendedParams) {
       .skip(skipAmount)
       .limit(pageSize);
     const isNext = totalQuestions > skipAmount + recommendedQuestions.length;
-    return { questions: recommendedQuestions, isNext };
+    return JSON.parse(JSON.stringify({ questions: recommendedQuestions, isNext }));
   } catch (error) {
     console.error("Error getting recommended questions:", error);
     throw error;

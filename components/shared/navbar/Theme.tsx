@@ -1,85 +1,92 @@
-"use client";
+"use client"
 
-import { THEME_STORAGE_KEY, themes } from "@/constants";
-import { useTheme } from "@/context/ThemeProvider";
-import { ThemeName } from "@/types";
-import {
-  Menubar,
-  MenubarMenu,
-  MenubarTrigger,
-  MenubarContent,
-  MenubarItem,
-} from "@radix-ui/react-menubar";
-import Image from "next/image";
-import { MouseEvent, useCallback } from "react";
+import { THEME_STORAGE_KEY } from "@/constants"
+import { useTheme } from "@/context/ThemeProvider"
+import type { ThemeName } from "@/types"
+import { type MouseEvent, useCallback, useState } from "react"
+import { Sun, Moon, Monitor } from "lucide-react"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
 
 const Theme = () => {
-  const { mode, setMode } = useTheme();
+  const { mode, setMode } = useTheme()
+  const [isOpen, setIsOpen] = useState(false)
 
   const updateMode = useCallback(
     (value: ThemeName) => (event: MouseEvent) => {
-      event.preventDefault();
-      setMode(value);
+      event.preventDefault()
+      setMode(value)
+      setIsOpen(false)
+
       if (value !== "system") {
-        localStorage.setItem(THEME_STORAGE_KEY, value);
+        localStorage.setItem(THEME_STORAGE_KEY, value)
       } else {
-        localStorage.removeItem(THEME_STORAGE_KEY);
+        localStorage.removeItem(THEME_STORAGE_KEY)
       }
     },
-    [setMode]
-  );
+    [setMode],
+  )
 
   return (
-    <Menubar className="relative border-none bg-transparent shadow-none">
-      <MenubarMenu>
-        <MenubarTrigger className="focus:bg-light-900 data-[state=open]:bg-light-900 dark:focus:bg-dark-200 dark:data-[state=open]:bg-dark-200">
-          {mode === "light" ? (
-            <Image
-              src="/assets/icons/sun.svg"
-              alt="sun"
-              width={20}
-              height={20}
-              className="active-theme"
-            />
-          ) : (
-            <Image
-              src="/assets/icons/moon.svg"
-              alt="moon"
-              width={20}
-              height={20}
-              className="active-theme"
-            />
-          )}
-        </MenubarTrigger>
-        <MenubarContent className="absolute right-[-3rem] mt-3 min-w-[120px] rounded border bg-light-900 py-2 dark:border-dark-400 dark:bg-dark-300">
-          {themes.map((item) => (
-            <MenubarItem
-              key={item.value}
-              onClick={updateMode(item.value)}
-              className="flex cursor-pointer items-center gap-4 px-2.5 py-2 hover:bg-light-800 dark:hover:bg-dark-400"
-            >
-              <Image
-                src={item.icon}
-                alt={item.value}
-                width={16}
-                height={16}
-                className={`${mode === item.value ? "active-theme" : ""}`}
-              />
-              <p
-                className={`body-semibold text-light-500 ${
-                  mode === item.value
-                    ? "text-primary-500"
-                    : "text-dark100_light900"
-                }`}
-              >
-                {item.label}
-              </p>
-            </MenubarItem>
-          ))}
-        </MenubarContent>
-      </MenubarMenu>
-    </Menubar>
-  );
-};
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full w-9 h-9 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        >
+          {mode === "light" ? <Sun className="h-5 w-5 text-orange-500" /> : <Moon className="h-5 w-5 text-blue-400" />}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="end"
+        className="w-40 rounded-xl overflow-hidden p-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg"
+      >
+        <DropdownMenuItem
+          onClick={updateMode("light")}
+          className={`flex items-center gap-2 px-3 py-2.5 cursor-pointer rounded-lg ${
+            mode === "light" ? "bg-gray-100 dark:bg-gray-700" : "hover:bg-gray-50 dark:hover:bg-gray-700"
+          }`}
+        >
+          <Sun className="h-4 w-4 text-orange-500" />
+          <span
+            className={`text-sm ${mode === "light" ? "font-medium text-primary-500" : "text-gray-700 dark:text-gray-200"}`}
+          >
+            Light
+          </span>
+        </DropdownMenuItem>
 
-export default Theme;
+        <DropdownMenuItem
+          onClick={updateMode("dark")}
+          className={`flex items-center gap-2 px-3 py-2.5 cursor-pointer rounded-lg ${
+            mode === "dark" ? "bg-gray-100 dark:bg-gray-700" : "hover:bg-gray-50 dark:hover:bg-gray-700"
+          }`}
+        >
+          <Moon className="h-4 w-4 text-blue-400" />
+          <span
+            className={`text-sm ${mode === "dark" ? "font-medium text-primary-500" : "text-gray-700 dark:text-gray-200"}`}
+          >
+            Dark
+          </span>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem
+          onClick={updateMode("system")}
+          className={`flex items-center gap-2 px-3 py-2.5 cursor-pointer rounded-lg ${
+            mode === "system" ? "bg-gray-100 dark:bg-gray-700" : "hover:bg-gray-50 dark:hover:bg-gray-700"
+          }`}
+        >
+          <Monitor className="h-4 w-4 text-gray-500" />
+          <span
+            className={`text-sm ${mode === "system" ? "font-medium text-primary-500" : "text-gray-700 dark:text-gray-200"}`}
+          >
+            System
+          </span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
+export default Theme
+

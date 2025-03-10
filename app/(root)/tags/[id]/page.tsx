@@ -2,7 +2,8 @@ import QuestionCard from "@/components/cards/QuestionCard";
 import NoResult from "@/components/shared/NoResult";
 import LocalSearch from "@/components/shared/search/LocalSearch";
 import Pagination from "@/components/shared/search/Pagination";
-import { getQuestionByTagId } from "@/lib/actions/tag.actions";
+import { getQuestionsByTagId } from "@/lib/actions/tag.actions";
+
 import { Suspense } from "react";
 
 interface URLProps {
@@ -15,7 +16,7 @@ const Page = async ({ params, searchParams }: URLProps) => {
 
  const {id} = await params;
  const {q,page}= await searchParams;
-  const result = await getQuestionByTagId({
+  const result = await getQuestionsByTagId({
     tagId: id,
     searchQuery: q,
     page: parseInt(page || "1"),

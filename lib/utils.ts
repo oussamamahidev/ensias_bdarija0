@@ -173,3 +173,65 @@ export function formatJobApiResponse(job: any): Job {
     jobCountry: job.job_country,
   };
 }
+
+
+
+export type SerializableData = 
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | SerializableData[]
+  | { [key: string]: SerializableData }; 
+
+export function serializeData(data: unknown, seen = new WeakMap<object, boolean>()): SerializableData {
+  // Handle primitive types
+  if (data === null || data === undefined) return null;
+  if (typeof data !== 'object') return data as SerializableData;
+  
+  // Handle Date objects
+  if (data instanceof Date) return data.toISOString();
+  
+  // Handle arrays
+  if (Array.isArray(data)) {
+    return data.map(item => serializeData(item, seen));
+  }
+  
+  // At this point, we know data is a non-null object
+  const dataObj = data as object;
+  
+  // Detect circular references
+  if (seen.has(dataObj)) {
+    return '[Circular Reference]';
+  }
+  
+  // Add this object to our seen map
+  seen.set(dataObj, true);
+  
+  // Handle MongoDB ObjectId
+  const objWithId = data as { _id?: { toString(): string } };
+  if (objWithId._id && typeof objWithId._id.toString === 'function') {
+    const result: Record<string, SerializableData> = { 
+      ...objWithId as Record<string, unknown>, 
+      _id: objWithId._id.toString() 
+    };
+    
+    // Process other properties
+    for (const [key, value] of Object.entries(result)) {
+      if (key !== '_id') {
+        result[key] = serializeData(value, seen);
+      }
+    }
+    
+    return result;
+  }
+  
+  // Handle regular objects
+  const result: Record<string, SerializableData> = {};
+  for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
+    result[key] = serializeData(value, seen);
+  }
+  
+  return result;
+}

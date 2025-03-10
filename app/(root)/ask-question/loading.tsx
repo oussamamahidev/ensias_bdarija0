@@ -1,22 +1,15 @@
-import { Skeleton } from "@/components/ui/skeleton";
-
-const Loading = () => {
+export default function Loading() {
   return (
-    <section>
-      <Skeleton className="h-12 w-52" />
+    <div className="bg-white dark:bg-gray-800/80 rounded-xl p-8 shadow-sm border border-gray-100 dark:border-gray-700">
+      <div className="h-12 w-52 bg-light-700 dark:bg-dark-500 animate-pulse rounded-lg mb-8" />
 
-      <Skeleton className="mb-12 mt-11 h-14 w-full" />
-
-      <div className="mt-10 flex w-full flex-col gap-6">
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((item) => (
-          <Skeleton
-            key={item}
-            className="card-wrapper h-48 w-full rounded-[10px] p-9 sm:px-11"
-          />
-        ))}
+      <div className="mt-9 flex w-full flex-col gap-6">
+        <div className="h-14 w-full rounded-lg bg-light-700 dark:bg-dark-500 animate-pulse" />
+        <div className="h-64 w-full rounded-lg bg-light-700 dark:bg-dark-500 animate-pulse" />
+        <div className="h-14 w-full rounded-lg bg-light-700 dark:bg-dark-500 animate-pulse" />
+        <div className="h-14 w-full rounded-lg bg-light-700 dark:bg-dark-500 animate-pulse" />
       </div>
-    </section>
-  );
-};
+    </div>
+  )
+}
 
-export default Loading;

@@ -2,7 +2,6 @@
 module.exports = {
   compress: true,
   experimental: {
-    missingSuspenseWithCSRBailout: false,
   },
 
 
@@ -32,5 +31,4 @@ module.exports = {
    ]
  },
 };
-
 
