@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import { getUserById } from "@/lib/actions/user.action"
-import { auth } from "@clerk/nextjs/server"
 import ProfileForm from "@/components/forms/ProfileForm"
+import { auth } from "@clerk/nextjs/server"
 
 // Loading fallback
 function ProfileFormLoading() {
@@ -17,7 +17,7 @@ function ProfileFormLoading() {
 }
 
 const Page = async () => {
-  const { userId } = await auth()
+  const { userId } = await auth();
 
   if (!userId) return null
 
