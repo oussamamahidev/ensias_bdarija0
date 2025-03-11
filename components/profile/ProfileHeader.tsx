@@ -1,332 +1,220 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState } from "react"
+import { motion } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
-import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import { SignedIn } from "@clerk/nextjs"
-import { getJoinedDate } from "@/lib/utils"
-import { MapPin, Globe, Calendar, Edit, Share2, Twitter, Github, Linkedin, ChevronDown, ChevronUp } from "lucide-react"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Badge } from "@/components/ui/badge"
-import { useToast } from "@/components/ui/use-toast"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import confetti from "canvas-confetti"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { SignedIn } from "@clerk/nextjs"
+import { Edit3, Share2, MapPin, Calendar, ExternalLink, Award, Zap, Heart, Sparkles, Flame } from "lucide-react"
+
+// Add this function if it doesn't exist in your utils
+// const getJoinedDate = (date: string) => {
+//   try {
+//     return `${formatDistanceToNow(new Date(date))} ago`
+//   } catch (error) {
+//     return "recently"
+//   }
+// }
 
 interface ProfileHeaderProps {
-  user: any
-  clerkId: string | null
+  user: {
+    _id: string
+    clerkId: string
+    name: string
+    username: string
+    picture: string
+    bio?: string
+    location?: string
+    portfolioWebsite?: string
+    joinedAt: string
+  }
+  clerkId?: string | null
 }
 
 const ProfileHeader = ({ user, clerkId }: ProfileHeaderProps) => {
-  const [mounted, setMounted] = useState(false)
-  const [showBio, setShowBio] = useState(false)
-  const { toast } = useToast()
-  const headerRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  const handleShareProfile = () => {
-    if (navigator.share) {
-      navigator
-        .share({
-          title: `${user.name}'s Profile`,
-          text: `Check out ${user.name}'s profile on D2sOverflow!`,
-          url: window.location.href,
-        })
-        .catch((err) => {
-          console.error("Error sharing:", err)
-        })
-    } else {
-      navigator.clipboard.writeText(window.location.href)
-      toast({
-        title: "Profile link copied to clipboard!",
-        description: "You can now share it with others.",
-      })
-    }
-  }
-
-  const triggerConfetti = () => {
-    if (headerRef.current) {
-      const rect = headerRef.current.getBoundingClientRect()
-      const x = rect.left + rect.width / 2
-      const y = rect.top + rect.height / 2
-
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { x: x / window.innerWidth, y: y / window.innerHeight },
-        colors: ["#FF7000", "#FFB800", "#FF3D00"],
-      })
-    }
-  }
-
-  if (!mounted) return null
-
-  // Mock social links - in a real app, these would come from the user data
-  const socialLinks = {
-    twitter: user.twitter || "https://twitter.com/username",
-    github: user.github || "https://github.com/username",
-    linkedin: user.linkedin || "https://linkedin.com/in/username",
-  }
-
-  // Mock badges - in a real app, these would come from the user data
-  const userBadges = [
-    { id: 1, name: "Early Adopter", icon: "/assets/icons/badges/early-adopter.svg" },
-    { id: 2, name: "Problem Solver", icon: "/assets/icons/badges/problem-solver.svg" },
-    { id: 3, name: "Helpful", icon: "/assets/icons/badges/helpful.svg" },
-  ]
+  const [isHovered, setIsHovered] = useState(false)
 
   return (
-    <div className="w-full" ref={headerRef}>
-      {/* Cover Image with Parallax Effect */}
-      <div className="relative w-full h-64 md:h-80 rounded-xl overflow-hidden group">
+    <div className="w-full">
+      {/* Hero Banner with Parallax Effect */}
+      <div
+        className="relative w-full h-[250px] rounded-xl overflow-hidden group"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {/* Animated Background */}
         <motion.div
-          initial={{ scale: 1 }}
-          whileHover={{ scale: 1.05 }}
-          transition={{ duration: 0.5 }}
-          className="absolute inset-0"
-        >
-          <Image src="/assets/images/profile-cover.jpg" alt="Cover" fill className="object-cover" priority />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-        </motion.div>
+          className="absolute inset-0 transition-transform duration-700"
+          animate={{ scale: isHovered ? 1.05 : 1 }}
+          style={{
+            background: "linear-gradient(135deg, #FFF1E6 0%, #FFB27D 50%, #FF7000 100%)",
+          }}
+        />
 
-        {/* Floating social links */}
-        <div className="absolute bottom-4 right-4 flex gap-2">
-          <Link href={socialLinks.twitter} target="_blank">
-            <motion.div
-              whileHover={{ y: -5, scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              className="bg-white/20 backdrop-blur-md p-2 rounded-full"
-            >
-              <Twitter size={20} className="text-white" />
-            </motion.div>
-          </Link>
-          <Link href={socialLinks.github} target="_blank">
-            <motion.div
-              whileHover={{ y: -5, scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              className="bg-white/20 backdrop-blur-md p-2 rounded-full"
-            >
-              <Github size={20} className="text-white" />
-            </motion.div>
-          </Link>
-          <Link href={socialLinks.linkedin} target="_blank">
-            <motion.div
-              whileHover={{ y: -5, scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              className="bg-white/20 backdrop-blur-md p-2 rounded-full"
-            >
-              <Linkedin size={20} className="text-white" />
-            </motion.div>
-          </Link>
+        {/* Animated Grid Pattern */}
+        <div className="absolute inset-0 bg-grid-pattern opacity-20 transition-opacity duration-700 group-hover:opacity-30" />
+
+        {/* Floating Particles Effect */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="particle-container">
+            {[...Array(15)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute rounded-full bg-white/20 animate-float"
+                style={{
+                  width: `${Math.random() * 20 + 5}px`,
+                  height: `${Math.random() * 20 + 5}px`,
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                  animationDuration: `${Math.random() * 10 + 10}s`,
+                  animationDelay: `${Math.random() * 5}s`,
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Decorative Elements */}
+        <div className="absolute top-1/4 left-1/4 transform -translate-x-1/2 -translate-y-1/2">
+          <Sparkles className="h-8 w-8 text-white/30 animate-float" style={{ animationDelay: "1s" }} />
+        </div>
+        <div className="absolute bottom-1/3 right-1/4 transform translate-x-1/2 translate-y-1/2">
+          <Flame className="h-10 w-10 text-white/20 animate-float" style={{ animationDelay: "2s" }} />
+        </div>
+
+        {/* User Status Badge */}
+        <div className="absolute top-4 left-4 z-10">
+          <Badge className="bg-white/90 dark:bg-gray-800/90 text-primary-500 backdrop-blur-sm px-3 py-1 flex items-center gap-1.5 shadow-sm">
+            <Zap className="h-3.5 w-3.5" />
+            <span>Active Member</span>
+          </Badge>
+        </div>
+
+        {/* Action buttons */}
+        <div className="absolute top-4 right-4 flex gap-2 z-10">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  className="rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-700 shadow-sm transition-all duration-300 hover:scale-105"
+                >
+                  <Share2 className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Share Profile</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  className="rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-700 shadow-sm transition-all duration-300 hover:scale-105"
+                >
+                  <Heart className="h-4 w-4 text-rose-500" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Follow {user.name}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <SignedIn>
+            {clerkId === user.clerkId && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link href="/profile/edit">
+                      <Button className="rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-700 shadow-sm flex items-center gap-2 px-4 transition-all duration-300 hover:scale-105">
+                        <Edit3 className="h-4 w-4" />
+                        Edit Profile
+                      </Button>
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Customize Your Profile</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </SignedIn>
         </div>
       </div>
 
-      <div className="flex flex-col-reverse items-start justify-between sm:flex-row relative">
-        {/* Profile Picture and Info */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="flex flex-col items-start gap-4 lg:flex-row mt-4 sm:mt-0 sm:-mt-16 z-10 w-full"
-        >
-          <div className="relative">
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={triggerConfetti}>
-              <Avatar className="h-36 w-36 border-4 border-white dark:border-gray-800 shadow-lg">
-                <AvatarImage src={user.picture || "/placeholder.svg"} alt="profile picture" className="object-cover" />
-                <AvatarFallback className="text-4xl">{user.name.charAt(0)}</AvatarFallback>
-              </Avatar>
-            </motion.div>
-            {user.badge && (
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.3, type: "spring" }}
-                className="absolute -bottom-2 -right-2 bg-primary-500 text-white rounded-full p-1.5 shadow-lg"
-              >
-                <Image src={`/assets/icons/badges/${user.badge}.svg`} alt="badge" width={24} height={24} />
-              </motion.div>
-            )}
-          </div>
-
-          <div className="mt-3 w-full">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <motion.h2
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 }}
-                  className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white"
-                >
-                  {user.name}
-                </motion.h2>
-                <motion.p
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="text-gray-600 dark:text-gray-400"
-                >
-                  @{user.username}
-                </motion.p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <SignedIn>
-                  {clerkId === user.clerkId && (
-                    <Link href="/profile/edit">
-                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                        <Button className="flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg px-4 py-2 transition-all duration-200 shadow-sm hover:shadow-md">
-                          <Edit size={16} />
-                          <span className="hidden sm:inline">Edit Profile</span>
-                        </Button>
-                      </motion.div>
-                    </Link>
-                  )}
-                </SignedIn>
-
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <motion.div whileHover={{ scale: 1.1, rotate: 15 }} whileTap={{ scale: 0.95 }}>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="rounded-lg border-gray-200 dark:border-gray-700"
-                          onClick={handleShareProfile}
-                        >
-                          <Share2 size={16} />
-                        </Button>
-                      </motion.div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Share Profile</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
+      {/* Profile Info Section */}
+      <div className="flex flex-col-reverse items-start justify-between sm:flex-row mt-4 relative">
+        {/* Profile Picture */}
+        <div className="absolute -top-20 left-8 z-10">
+          <div className="relative group/avatar">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary-500 to-orange-300 blur-sm opacity-70 animate-spin-slow group-hover/avatar:opacity-100" />
+            <div className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-800 overflow-hidden shadow-lg relative z-10">
+              <Image
+                src={user.picture || "/placeholder.svg"}
+                alt="profile picture"
+                width={128}
+                height={128}
+                className="rounded-full object-cover transition-transform duration-500 group-hover/avatar:scale-110"
+              />
             </div>
-
-            {/* Location and Website */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="mt-4 flex flex-wrap items-center gap-3"
-            >
-              {user.location && (
-                <Badge
-                  variant="outline"
-                  className="flex items-center gap-1 py-1 px-2 bg-gray-100/50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300"
-                >
-                  <MapPin size={14} className="text-gray-500" />
-                  <span>{user.location}</span>
-                </Badge>
-              )}
-
-              {user.portfolioWebsite && (
-                <Badge
-                  variant="outline"
-                  className="flex items-center gap-1 py-1 px-2 bg-gray-100/50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300"
-                >
-                  <Globe size={14} className="text-gray-500" />
-                  <Link
-                    href={user.portfolioWebsite}
-                    target="_blank"
-                    className="hover:text-primary-500 transition-colors"
-                  >
-                    Portfolio
-                  </Link>
-                </Badge>
-              )}
-
-              <Badge
-                variant="outline"
-                className="flex items-center gap-1 py-1 px-2 bg-gray-100/50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300"
-              >
-                <Calendar size={14} className="text-gray-500" />
-                <span>Joined {getJoinedDate(user.joinedAt)}</span>
-              </Badge>
-            </motion.div>
-
-            {/* Badges Section */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="mt-4 flex flex-wrap gap-2"
-            >
-              {userBadges.map((badge) => (
-                <TooltipProvider key={badge.id}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <motion.div
-                        whileHover={{ y: -5, scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="bg-gray-100 dark:bg-gray-800 rounded-full p-2"
-                      >
-                        <Image
-                          src={badge.icon || "/placeholder.svg"}
-                          alt={badge.name}
-                          width={24}
-                          height={24}
-                          className="dark:invert-[0.8]"
-                        />
-                      </motion.div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{badge.name}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              ))}
-            </motion.div>
-
-            {/* Bio */}
-            {user.bio && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="mt-4 bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border border-gray-100 dark:border-gray-700"
-              >
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={showBio ? "expanded" : "collapsed"}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <p className={`text-gray-700 dark:text-gray-300 ${!showBio && "line-clamp-2"}`}>{user.bio}</p>
-                  </motion.div>
-                </AnimatePresence>
-
-                {user.bio.length > 150 && (
-                  <button
-                    onClick={() => setShowBio(!showBio)}
-                    className="flex items-center gap-1 text-primary-500 hover:text-primary-600 text-sm mt-2 transition-colors"
-                  >
-                    {showBio ? (
-                      <>
-                        <ChevronUp size={16} />
-                        <span>Show less</span>
-                      </>
-                    ) : (
-                      <>
-                        <ChevronDown size={16} />
-                        <span>Show more</span>
-                      </>
-                    )}
-                  </button>
-                )}
-              </motion.div>
-            )}
           </div>
-        </motion.div>
+        </div>
+
+        {/* User Info */}
+        <div className="mt-16 ml-8 w-full">
+          <div className="flex flex-wrap items-center gap-2 mb-1">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{user.name}</h1>
+            <Badge className="bg-primary-500/20 text-primary-500 hover:bg-primary-500/30">
+              <Award className="h-3 w-3 mr-1" />
+              Contributor
+            </Badge>
+          </div>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">@{user.username}</p>
+
+          {user.bio && <p className="text-gray-700 dark:text-gray-300 max-w-2xl mb-4">{user.bio}</p>}
+
+          <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
+            {user.location && (
+              <div className="flex items-center gap-1.5 group">
+                <MapPin className="h-4 w-4 text-gray-400 dark:text-gray-500 group-hover:text-primary-500 transition-colors" />
+                <span className="group-hover:text-primary-500 transition-colors">{user.location}</span>
+              </div>
+            )}
+
+            {user.portfolioWebsite && (
+              <a
+                href={user.portfolioWebsite}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 hover:text-primary-500 transition-colors"
+              >
+                <ExternalLink className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                <span>Portfolio</span>
+              </a>
+            )}
+
+            <div className="flex items-center gap-1.5">
+              <Calendar className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+              <span>
+                Joined{" "}
+                {user.joinedAt
+                  ? new Date(user.joinedAt).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })
+                  : "recently"}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

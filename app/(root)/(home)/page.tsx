@@ -1,5 +1,6 @@
 import { Suspense } from "react"
 import QuestionCard from "@/components/cards/QuestionCard"
+
 import Filter from "@/components/shared/Filter"
 import NoResult from "@/components/shared/NoResult"
 import LocalSearch from "@/components/shared/search/LocalSearch"
@@ -13,16 +14,16 @@ import { Button } from "@/components/ui/button"
 import { auth } from "@clerk/nextjs/server"
 import HomeHero from "@/components/home/HomeHero"
 import TrendingTopics from "@/components/home/TrendingTopics"
+
 import FeaturedQuestions from "@/components/home/FeaturedQuestions"
 import TopContributors from "@/components/home/TopContributors"
-import { serializeMongoDBDocument } from "@/lib/utils"
 
 import type { Metadata } from "next"
-import StatsCounter from "@/components/home/StatusCounter"
 import HomeFilters from "@/components/home/HomeFilers"
+import StatsCounter from "@/components/home/StatusCounter"
 
 export const metadata: Metadata = {
-  title: "Home | D2sFlow",
+  title: 'Home | D2sFlow',
 }
 
 interface HomePageProps {
@@ -30,35 +31,32 @@ interface HomePageProps {
 }
 
 export default async function Home({ searchParams }: HomePageProps) {
-  // Server-side auth
-  const { userId } = await auth()
-  let result
-
+  const { userId } = await auth();
+  let result;
+  
   const { q, filter, page } = await searchParams;
 
-  if (filter === "recommended") {
+  if (filter === 'recommended') {
     if (userId) {
       result = await getRecommendedQuestions({
         userId,
         searchQuery: q,
-        page: Number.parseInt(page || "1"),
-      })
+        page: parseInt(page || "1"),
+      });
     } else {
       result = {
         questions: [],
         isNext: false,
-      }
+      };
     }
   } else {
     result = await getQuestions({
       searchQuery: q,
       filter: filter,
-      page: Number.parseInt(page || "1"),
-    })
+      page: parseInt(page || "1"),
+    });
   }
-
-  // Serialize MongoDB documents to plain objects
-  const serializedQuestions = serializeMongoDBDocument(result.questions)
+   
 
   // Mock stats for the counter component
   const stats = {
@@ -150,8 +148,8 @@ export default async function Home({ searchParams }: HomePageProps) {
 
       {/* Regular Questions Grid */}
       <div className="mt-10 grid grid-cols-1 gap-6">
-        {serializedQuestions.length > 0 ? (
-          serializedQuestions.map((question: any) => (
+      {result.questions.length > 0 ? (
+          result.questions.map((question:any) => (
             <QuestionCard
               key={question._id}
               _id={question._id}
@@ -163,7 +161,6 @@ export default async function Home({ searchParams }: HomePageProps) {
               views={question.views}
               answers={question.answers}
               createdAt={question.createdAt}
-              currentUserId={userId}
             />
           ))
         ) : (

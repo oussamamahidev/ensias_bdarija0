@@ -176,74 +176,62 @@ export function formatJobApiResponse(job: any): Job {
 
 
 
+export type SerializableData = 
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | SerializableData[]
+  | { [key: string]: SerializableData }; 
 
-export function serializeMongoDBDocument<T>(doc: T): T {
-  if (doc === null || doc === undefined) {
-    return doc
+export function serializeData(data: unknown, seen = new WeakMap<object, boolean>()): SerializableData {
+  // Handle primitive types
+  if (data === null || data === undefined) return null;
+  if (typeof data !== 'object') return data as SerializableData;
+  
+  // Handle Date objects
+  if (data instanceof Date) return data.toISOString();
+  
+  // Handle arrays
+  if (Array.isArray(data)) {
+    return data.map(item => serializeData(item, seen));
   }
-
-  if (Array.isArray(doc)) {
-    return doc.map(serializeMongoDBDocument) as unknown as T
+  
+  // At this point, we know data is a non-null object
+  const dataObj = data as object;
+  
+  // Detect circular references
+  if (seen.has(dataObj)) {
+    return '[Circular Reference]';
   }
-
-  if (doc instanceof Date) {
-    return doc.toISOString() as unknown as T
-  }
-
-  if (doc && typeof doc === "object") {
-    // Handle MongoDB ObjectId (which has a toJSON method)
-    if (doc.constructor?.name === "ObjectId" && typeof (doc as any).toString === "function") {
-      return (doc as any).toString() as unknown as T
+  
+  // Add this object to our seen map
+  seen.set(dataObj, true);
+  
+  // Handle MongoDB ObjectId
+  const objWithId = data as { _id?: { toString(): string } };
+  if (objWithId._id && typeof objWithId._id.toString === 'function') {
+    const result: Record<string, SerializableData> = { 
+      ...objWithId as Record<string, unknown>, 
+      _id: objWithId._id.toString() 
+    };
+    
+    // Process other properties
+    for (const [key, value] of Object.entries(result)) {
+      if (key !== '_id') {
+        result[key] = serializeData(value, seen);
+      }
     }
-
-    // Handle regular objects
-    const serialized: Record<string, any> = {}
-    for (const [key, value] of Object.entries(doc)) {
-      serialized[key] = serializeMongoDBDocument(value)
-    }
-    return serialized as T
+    
+    return result;
   }
-
-  return doc
-}
-
-// Add a function to safely handle MongoDB data in components
-export function safelyGetMongoData<T>(fetchFunction: () => Promise<T>, fallback: T): Promise<T> {
-  return fetchFunction()
-    .then((data) => serializeMongoDBDocument(data))
-    .catch((error) => {
-      console.error("Error fetching MongoDB data:", error)
-      return fallback
-    })
-}
-
-// Format date for display
-export function formatDate(date: Date | string): string {
-  if (!date) return ""
-
-  const dateObj = typeof date === "string" ? new Date(date) : date
-  return dateObj.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  })
-}
-
-// Get time elapsed since date
-export function getTimeElapsed(date: Date | string): string {
-  if (!date) return ""
-
-  const dateObj = typeof date === "string" ? new Date(date) : date
-  const now = new Date()
-  const diffMs = now.getTime() - dateObj.getTime()
-
-  const diffSecs = Math.floor(diffMs / 1000)
-  const diffMins = Math.floor(diffSecs / 60)
-  const diffHours = Math.floor(diffMins / 60)
-  const diffDays = Math.floor(diffHours / 24)
-
-  if (diffDays > 0) return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`
-  if (diffHours > 0) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`
-  if (diffMins > 0) return `${diffMins} minute${diffMins > 1 ? "s" : ""} ago`
-  return "just now"
+  
+  // Handle regular objects
+  const result: Record<string, SerializableData> = {};
+  for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
+    result[key] = serializeData(value, seen);
+  }
+  
+  return result;
 }
