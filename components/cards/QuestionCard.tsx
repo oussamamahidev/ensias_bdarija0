@@ -6,7 +6,6 @@ import Metric from "../shared/Metric"
 import { getTimestamp, formatAndDivideNumber } from "@/lib/utils"
 import { SignedIn } from "@clerk/nextjs"
 import EditDeleteAction from "../shared/EditDeleteAction"
-import type { IAnswer } from "@/database/answer.model"
 import { MessageSquare, Eye, ThumbsUp } from "lucide-react"
 import { motion } from "framer-motion"
 
@@ -24,15 +23,18 @@ interface Props {
     clerkId: string
     picture: string
   }
-  upvotes: string[]
-  downvotes: string[]
+  upvotes: string[] | any[]
+  downvotes?: string[] | any[]
   views: number
-  answers?: IAnswer[]
-  createdAt: Date
+  answers?: any[]
+  createdAt: string | Date
 }
 
 const QuestionCard = ({ _id, currentUserId, title, tags, author, upvotes, views, answers, createdAt }: Props) => {
   const showActionButtons = currentUserId && currentUserId === author.clerkId
+
+  // Convert createdAt to Date if it's a string
+  const createdAtDate = typeof createdAt === "string" ? new Date(createdAt) : createdAt
 
   return (
     <motion.div
@@ -45,7 +47,7 @@ const QuestionCard = ({ _id, currentUserId, title, tags, author, upvotes, views,
         <div className="w-full">
           <div className="flex justify-between items-start">
             <span className="text-gray-500 dark:text-gray-400 text-sm flex sm:hidden mb-2">
-              {getTimestamp(createdAt)}
+              {getTimestamp(createdAtDate)}
             </span>
             <SignedIn>
               {showActionButtons && <EditDeleteAction type="Question" itemId={JSON.stringify(_id)} />}
@@ -70,7 +72,7 @@ const QuestionCard = ({ _id, currentUserId, title, tags, author, upvotes, views,
           imgUrl={author?.picture || "/assets/icons/avatar.svg"}
           alt="user"
           value={author?.name}
-          title={` - asked ${getTimestamp(createdAt)}`}
+          title={` - asked ${getTimestamp(createdAtDate)}`}
           href={`/profile/${author?._id}`}
           isAuthor
           textStyles="text-sm font-medium"
@@ -79,13 +81,13 @@ const QuestionCard = ({ _id, currentUserId, title, tags, author, upvotes, views,
         <div className="flex items-center gap-4 max-sm:flex-wrap max-sm:justify-start">
           <div className="flex items-center gap-1 text-sm">
             <ThumbsUp size={16} className="text-primary-500" />
-            <span>{formatAndDivideNumber(upvotes.length)}</span>
+            <span>{formatAndDivideNumber(Array.isArray(upvotes) ? upvotes.length : 0)}</span>
             <span className="text-gray-500 dark:text-gray-400 ml-1">votes</span>
           </div>
 
           <div className="flex items-center gap-1 text-sm">
             <MessageSquare size={16} className="text-blue-500" />
-            <span>{formatAndDivideNumber(answers?.length || 0)}</span>
+            <span>{formatAndDivideNumber(Array.isArray(answers) ? answers.length : 0)}</span>
             <span className="text-gray-500 dark:text-gray-400 ml-1">answers</span>
           </div>
 
@@ -95,7 +97,7 @@ const QuestionCard = ({ _id, currentUserId, title, tags, author, upvotes, views,
             <span className="text-gray-500 dark:text-gray-400 ml-1">views</span>
           </div>
         </div>
-      </div> 
+      </div>
     </motion.div>
   )
 }

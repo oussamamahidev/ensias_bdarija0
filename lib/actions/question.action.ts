@@ -228,18 +228,19 @@ export async function editQuestion(params: EditQuestionParams) {
   }
 }
 
-export async function getHotQuestions(){
+export const getHotQuestions = async () => {
+  try {
+    // Your existing code to fetch hot questions
+    // ...
+    connectToDatabase()
 
-  try{
-    connectToDatabase();
-    const hotQuestions = await Question.find({
-    })
-    .sort({views :-1, upvotes :-1})//descending order
-    .limit(5);
-    return JSON.parse(JSON.stringify(hotQuestions));
-  }catch(err){
-    console.log(err);
-    throw err;
+    const result = await Question.find().sort({ views: -1, upvotes: -1 }).limit(5).exec()
+
+    // Before returning the result, serialize it to remove MongoDB methods
+    return JSON.parse(JSON.stringify(result))
+  } catch (error) {
+    console.error("Error fetching hot questions:", error)
+    return []
   }
 }
 

@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import { Button } from "../ui/button"
 import { Skeleton } from "../ui/skeleton"
+import { serializeMongoDBDocument } from "@/lib/utils"
 
 const RightSidebar = () => {
   const [hotQuestions, setHotQuestions] = useState<any[]>([])
@@ -44,9 +45,9 @@ const RightSidebar = () => {
         ])
 
         // Serialize the MongoDB documents to plain JavaScript objects
-        setHotQuestions(JSON.parse(JSON.stringify(questionsData)))
-        setPopularTags(JSON.parse(JSON.stringify(tagsData)))
-        setContributors(contributorsData)
+        setHotQuestions(serializeMongoDBDocument(questionsData))
+        setPopularTags(serializeMongoDBDocument(tagsData))
+        setContributors(serializeMongoDBDocument(contributorsData))
       } catch (error) {
         console.error("Error fetching sidebar data:", error)
       } finally {
