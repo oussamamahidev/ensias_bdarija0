@@ -31,7 +31,7 @@ function QuestionsLoading() {
 }
 
 interface Props {
-  searchParams: { [key: string]: string | undefined }
+  searchParams: Promise<{ [key: string]: string | undefined }>;
 }
 
 export default async function CollectionPage({ searchParams }: Props) {
@@ -40,12 +40,13 @@ export default async function CollectionPage({ searchParams }: Props) {
   if (!userId) {
     redirect("/sign-in")
   }
+  const { q, filter, page } = await searchParams
 
   const result = await getSavedQuestions({
     clerkId: userId,
-    searchQuery: searchParams.q,
-    filter: searchParams.filter,
-    page: searchParams.page ? +searchParams.page : 1,
+    filter: filter,
+    searchQuery: q,
+    page: Number.parseInt(page || "1"),
   })
 
   return (
@@ -94,7 +95,7 @@ export default async function CollectionPage({ searchParams }: Props) {
 
       <div className="mt-10">
         <Suspense fallback={<div className="h-10 w-full animate-pulse bg-light-700 dark:bg-dark-500 rounded-lg" />}>
-          <Pagination pageNumber={searchParams.page ? +searchParams.page : 1} isNext={result.isNext} />
+          <Pagination pageNumber={page ? +page : 1} isNext={result.isNext} />
         </Suspense>
       </div>
     </div>

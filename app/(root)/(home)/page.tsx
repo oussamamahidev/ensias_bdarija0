@@ -27,7 +27,7 @@ export const metadata: Metadata = {
 }
 
 interface HomePageProps {
-  searchParams: { [key: string]: string | undefined }
+  searchParams: Promise<{ [key: string]: string | undefined }>;
 }
 
 export default async function Home({ searchParams }: HomePageProps) {
@@ -35,7 +35,7 @@ export default async function Home({ searchParams }: HomePageProps) {
   const { userId } =await auth()
   let result
 
-  const { q, filter, page } = searchParams
+  const { q, filter, page } = await searchParams
 
   if (filter === "recommended") {
     if (userId) {
