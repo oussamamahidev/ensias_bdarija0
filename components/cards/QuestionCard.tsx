@@ -1,41 +1,46 @@
-"use client"
-
-import Link from "next/link"
-import RenderTag from "../shared/RenderTag"
-import Metric from "../shared/Metric"
-import { getTimestamp, formatAndDivideNumber } from "@/lib/utils"
-import { SignedIn } from "@clerk/nextjs"
-import EditDeleteAction from "../shared/EditDeleteAction"
+import Link from 'next/link';
+import React from 'react'
+import RenderTag from '../shared/RenderTag';
+import Metric from '../shared/Metric';
+import { getTimestamp, formatAndDivideNumber } from '@/lib/utils';
+import { SignedIn } from '@clerk/nextjs';
+import EditDeleteAction from '../shared/EditDeleteAction';
+import { IAnswer } from '@/database/answer.model';
 import { MessageSquare, Eye, ThumbsUp } from "lucide-react"
 import { motion } from "framer-motion"
-
 interface Props {
-  _id: string
-  currentUserId?: string | null
-  title: string
-  tags: {
-    _id: string
-    name: string
-  }[]
-  author: {
-    _id: string
-    name: string
-    clerkId: string
-    picture: string
-  }
-  upvotes: string[] | any[]
-  downvotes?: string[] | any[]
-  views: number
-  answers?: any[]
-  createdAt: string | Date
+    _id: string;
+    clerkId?: string | undefined | null;
+    title: string;
+    tags: {
+        _id: string;
+        name: string;
+    }[];
+    author: {
+        _id: string;
+        name: string;
+        clerkId: string;
+        picture: string;
+    }
+    upvotes: string[];
+    downvotes: string[];
+    views: number;
+    answers?: IAnswer[];
+    createdAt: Date;
 }
 
-const QuestionCard = ({ _id, currentUserId, title, tags, author, upvotes, views, answers, createdAt }: Props) => {
-  const showActionButtons = currentUserId && currentUserId === author.clerkId
-
-  // Convert createdAt to Date if it's a string
-  const createdAtDate = typeof createdAt === "string" ? new Date(createdAt) : createdAt
-
+const QuestionCard = ({
+    _id,
+    clerkId,
+    title,
+    tags,
+    author,
+    upvotes,
+    views,
+    answers,
+    createdAt
+}: Props) => {
+    const showActionButtons = clerkId && clerkId === author.clerkId;
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -47,7 +52,7 @@ const QuestionCard = ({ _id, currentUserId, title, tags, author, upvotes, views,
         <div className="w-full">
           <div className="flex justify-between items-start">
             <span className="text-gray-500 dark:text-gray-400 text-sm flex sm:hidden mb-2">
-              {getTimestamp(createdAtDate)}
+              {getTimestamp(createdAt)}
             </span>
             <SignedIn>
               {showActionButtons && <EditDeleteAction type="Question" itemId={JSON.stringify(_id)} />}
@@ -72,7 +77,7 @@ const QuestionCard = ({ _id, currentUserId, title, tags, author, upvotes, views,
           imgUrl={author?.picture || "/assets/icons/avatar.svg"}
           alt="user"
           value={author?.name}
-          title={` - asked ${getTimestamp(createdAtDate)}`}
+          title={` - asked ${getTimestamp(createdAt)}`}
           href={`/profile/${author?._id}`}
           isAuthor
           textStyles="text-sm font-medium"
@@ -81,13 +86,13 @@ const QuestionCard = ({ _id, currentUserId, title, tags, author, upvotes, views,
         <div className="flex items-center gap-4 max-sm:flex-wrap max-sm:justify-start">
           <div className="flex items-center gap-1 text-sm">
             <ThumbsUp size={16} className="text-primary-500" />
-            <span>{formatAndDivideNumber(Array.isArray(upvotes) ? upvotes.length : 0)}</span>
+            <span>{formatAndDivideNumber(upvotes.length)}</span>
             <span className="text-gray-500 dark:text-gray-400 ml-1">votes</span>
           </div>
 
           <div className="flex items-center gap-1 text-sm">
             <MessageSquare size={16} className="text-blue-500" />
-            <span>{formatAndDivideNumber(Array.isArray(answers) ? answers.length : 0)}</span>
+            <span>{formatAndDivideNumber(answers?.length || 0)}</span>
             <span className="text-gray-500 dark:text-gray-400 ml-1">answers</span>
           </div>
 
@@ -97,7 +102,7 @@ const QuestionCard = ({ _id, currentUserId, title, tags, author, upvotes, views,
             <span className="text-gray-500 dark:text-gray-400 ml-1">views</span>
           </div>
         </div>
-      </div>
+      </div> 
     </motion.div>
   )
 }

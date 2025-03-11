@@ -1,26 +1,24 @@
-import { Suspense } from "react"
-import QuestionCard from "@/components/cards/QuestionCard"
+import QuestionCard from "@/components/cards/QuestionCard";
+import HomeFilters from "@/components/home/HomeFilers";
+import Filter from "@/components/shared/Filter";
+import NoResult from "@/components/shared/NoResult";
+import LocalSearch from "@/components/shared/search/LocalSearch";
+import Pagination from "@/components/shared/search/Pagination";
+import { Button } from "@/components/ui/button";
+import { HomePageFilters } from "@/constants/filters";
+import { getQuestions, getRecommendedQuestions } from "@/lib/actions/question.action";
+import Link from "next/link";
+import { Suspense } from "react";
+import Loading from "./loading";
 
-import Filter from "@/components/shared/Filter"
-import NoResult from "@/components/shared/NoResult"
-import LocalSearch from "@/components/shared/search/LocalSearch"
-import Pagination from "@/components/shared/search/Pagination"
-import { HomePageFilters } from "@/constants/filters"
-import { getQuestions, getRecommendedQuestions } from "@/lib/actions/question.action"
-import Link from "next/link"
-import Loading from "./loading"
-import { PlusCircle, TrendingUp } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { auth } from "@clerk/nextjs/server"
-import HomeHero from "@/components/home/HomeHero"
-import TrendingTopics from "@/components/home/TrendingTopics"
-
-import FeaturedQuestions from "@/components/home/FeaturedQuestions"
-import TopContributors from "@/components/home/TopContributors"
-
-import type { Metadata } from "next"
-import HomeFilters from "@/components/home/HomeFilers"
-import StatsCounter from "@/components/home/StatusCounter"
+import type { Metadata } from "next";
+import { auth } from "@clerk/nextjs/server";
+import TopContributors from "@/components/home/TopContributors";
+import FeaturedQuestions from "@/components/home/FeaturedQuestions";
+import { PlusCircle, TrendingUp } from "lucide-react";
+import TrendingTopics from "@/components/home/TrendingTopics";
+import StatsCounter from "@/components/home/StatusCounter";
+import HomeHero from "@/components/home/HomeHero";
 
 export const metadata: Metadata = {
   title: 'Home | D2sFlow',
@@ -56,9 +54,6 @@ export default async function Home({ searchParams }: HomePageProps) {
       page: parseInt(page || "1"),
     });
   }
-   
-
-  // Mock stats for the counter component
   const stats = {
     questions: 15423,
     answers: 32876,
@@ -68,6 +63,7 @@ export default async function Home({ searchParams }: HomePageProps) {
 
   // Check if we should show featured sections
   const showFeaturedSections = !q && !filter && page === undefined
+
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
@@ -148,19 +144,19 @@ export default async function Home({ searchParams }: HomePageProps) {
 
       {/* Regular Questions Grid */}
       <div className="mt-10 grid grid-cols-1 gap-6">
-      {result.questions.length > 0 ? (
-          result.questions.map((question:any) => (
+        {result.questions.length > 0 ? (
+          result.questions.map((question: any) => (
             <QuestionCard
-              key={question._id}
-              _id={question._id}
-              title={question.title}
-              tags={question.tags}
-              author={question.author}
-              upvotes={question.upvotes}
-              downvotes={question.downvotes}
-              views={question.views}
-              answers={question.answers}
-              createdAt={question.createdAt}
+            key={question._id}
+            _id={question._id}
+            title={question.title}
+            tags={question.tags}
+            author={question.author}
+            upvotes={question.upvotes}
+            downvotes={question.downvotes}
+            views={question.views}
+            answers={question.answers}
+            createdAt={question.createdAt}
             />
           ))
         ) : (

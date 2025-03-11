@@ -9,9 +9,11 @@ import { revalidatePath } from "next/cache";
 import Answer from "@/database/answer.model";
 import Interaction from "@/database/interaction.model";
 import { FilterQuery } from "mongoose";
+import { serialize } from "../utils";
+
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function getQuestions(params: GetQuestionsParams) {
+/*export async function getQuestions(params: GetQuestionsParams) {
     try {
         
         await connectToDatabase();
@@ -55,7 +57,7 @@ export async function getQuestions(params: GetQuestionsParams) {
         console.log("🔴 Error fetching questions:", err);
         return { questions: [] };
 }}
-
+*/
 
 export async function createQuestion(params: CreateQuestionParams) {
     try {
@@ -228,18 +230,71 @@ export async function editQuestion(params: EditQuestionParams) {
   }
 }
 
-export async function getHotQuestions(){
+export async function getHotQuestions() {
+  try {
+    connectToDatabase()
+    const hotQuestions = await Question.find({})
+      .sort({ views: -1, upvotes: -1 }) // descending order
+      .limit(5)
 
-  try{
-    connectToDatabase();
-    const hotQuestions = await Question.find({
-    })
-    .sort({views :-1, upvotes :-1})//descending order
-    .limit(5);
-    return JSON.parse(JSON.stringify(hotQuestions));
-  }catch(err){
-    console.log(err);
-    throw err;
+    // Return serialized data
+    return serialize(hotQuestions)
+  } catch (err) {
+    console.log(err)
+    throw err
+  }
+}
+
+// Update the getQuestions function
+export async function getQuestions(params: GetQuestionsParams) {
+  try {
+    await connectToDatabase()
+    const { searchQuery, filter, page = 1, pageSize = 7 } = params
+
+    // Calculate number of post
+    const skipAmount = (page - 1) * pageSize
+    const query: FilterQuery<typeof Question> = {}
+    // ... rest of your existing code ...
+
+    let sortOptions = {}
+
+    switch (filter) {
+      case "newest":
+        sortOptions = { createdAt: -1 }
+        break
+      case "frequent":
+        sortOptions = { views: -1 }
+        break
+      case "unanswered":
+        query.answers = { $size: 0 }
+        break
+      default:
+        sortOptions = { createdAt: -1 }
+        break
+    }
+
+    if (searchQuery) {
+      query.$or = [
+        { title: { $regex: new RegExp(searchQuery, "i") } },
+        { content: { $regex: new RegExp(searchQuery, "i") } },
+      ]
+    }
+
+    const questions = await Question.find(query)
+      .populate({ path: "tags", model: Tag })
+      .populate({ path: "author", model: User })
+      .skip(skipAmount)
+      .limit(pageSize)
+      .sort(sortOptions)
+
+    const totalQuestions = await Question.countDocuments(query)
+    const isNext = totalQuestions > skipAmount + questions.length
+
+    // Return serialized data
+    return serialize({ questions, isNext })
+  } catch (err) {
+    console.log("🔴 Error fetching questions:", err)
+    return { questions: [] }
   }
 }
 
@@ -294,7 +349,7 @@ export async function getRecommendedQuestions(params: RecommendedParams) {
       .skip(skipAmount)
       .limit(pageSize);
     const isNext = totalQuestions > skipAmount + recommendedQuestions.length;
-    return JSON.parse(JSON.stringify({ questions: recommendedQuestions, isNext }));
+    return { questions: recommendedQuestions, isNext };
   } catch (error) {
     console.error("Error getting recommended questions:", error);
     throw error;
