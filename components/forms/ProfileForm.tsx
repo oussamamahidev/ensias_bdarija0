@@ -20,8 +20,9 @@ import Image from "next/image"
 import Link from "next/link"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent } from "@/components/ui/card"
-import { Switch } from "@/components/ui/switch"
+
 import { Label } from "@/components/ui/label"
+import { Switch } from "../ui/switch"
 
 interface Props {
   clerkId: string
