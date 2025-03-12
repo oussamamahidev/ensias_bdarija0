@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-
 import { Suspense, useEffect, useRef, useState } from "react"
 import { Input } from "@/components/ui/input"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
@@ -69,35 +67,15 @@ const GlobalSearch = () => {
     setIsOpen(false)
   }
 
-  // Handle keyboard navigation
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Escape") {
-      setIsOpen(false)
-      setIsFocused(false)
-    }
-  }
-
   return (
     <Suspense>
       <div className="relative w-full" ref={searchContainerRef}>
-        {isOpen && (
-          <div
-            className="fixed inset-0 bg-black/10 dark:bg-black/20 backdrop-blur-[2px] z-0 animate-fade-in"
-            onClick={() => setIsOpen(false)}
-          />
-        )}
         <div
-          className={`relative flex items-center gap-1 rounded-xl px-4 py-2.5 
-            ${
-              isFocused
-                ? "bg-white dark:bg-dark-400 shadow-light-100 dark:shadow-dark-100 ring-2 ring-primary-500/50 scale-[1.02]"
-                : "bg-light-800 dark:bg-dark-400"
-            } transition-all duration-300 ease-in-out z-10`}
+          className={`relative flex items-center gap-1 rounded-xl px-4 py-2.5 bg-gray-100 dark:bg-gray-800 ${
+            isFocused ? "ring-2 ring-primary-500/50" : ""
+          } transition-all duration-200`}
         >
-          <Search
-            size={18}
-            className={`${isFocused ? "text-primary-500" : "text-light-400 dark:text-gray-400"} min-w-[18px] transition-colors duration-200`}
-          />
+          <Search size={18} className="text-gray-500 dark:text-gray-400 min-w-[18px]" />
 
           <Input
             type="text"
@@ -109,8 +87,7 @@ const GlobalSearch = () => {
               if (e.target.value === "" && isOpen) setIsOpen(false)
             }}
             onFocus={() => setIsFocused(true)}
-            onKeyDown={handleKeyDown}
-            className="border-none bg-transparent shadow-none outline-none text-dark-100 dark:text-light-900 placeholder:text-light-400 dark:placeholder:text-gray-400 text-sm no-focus"
+            className="border-none bg-transparent shadow-none outline-none text-gray-700 dark:text-gray-200 placeholder:text-gray-500 dark:placeholder:text-gray-400 text-sm"
           />
 
           {search && (
@@ -118,15 +95,15 @@ const GlobalSearch = () => {
               variant="ghost"
               size="icon"
               onClick={handleClear}
-              className="h-6 w-6 rounded-full p-0 hover:bg-light-700 dark:hover:bg-dark-300 transition-colors duration-200"
+              className="h-6 w-6 rounded-full p-0 hover:bg-gray-200 dark:hover:bg-gray-700"
             >
-              <X size={14} className="text-light-400 dark:text-gray-400" />
+              <X size={14} className="text-gray-500 dark:text-gray-400" />
             </Button>
           )}
         </div>
 
         {isOpen && search && (
-          <div className="absolute top-full left-0 right-0 mt-2 z-20 animate-slide-up">
+          <div className="absolute top-full left-0 right-0 mt-1 z-10">
             <GlobalResult />
           </div>
         )}
