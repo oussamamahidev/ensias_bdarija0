@@ -6,22 +6,55 @@ import { GetAllTagsParams, GetQuestionsByTagIdParams, GetTopInteractedTagsParams
 import Tag, { ITag } from "@/database/tag.model";
 import { FilterQuery } from "mongoose";
 import Question from "@/database/question.model";
-import { serialize } from "../utils";
+import Interaction from "@/database/interaction.model";
 
 export async function getTopInterectedTags(params : GetTopInteractedTagsParams ){
 
-    try{
-        await connectToDatabase();
-        const { userId}=params;
-
-        const user = await User.findById(userId);
-        if(!user) throw new Error(`User not found`);
-
-        return [{_id: "1", name: 'Tag1'}, {_id: "2", name: 'Tag2'}]
-    }catch(err){
-        console.log(err);
-        throw err;
-}
+  try {
+    connectToDatabase();
+    const { userId, limit = 2 } = params;
+    const user = await User.findById(userId);
+    if (!user) throw new Error("User not found");
+    const userInteractions = await Interaction.find({ user: userId }).populate({
+      path: "tags",
+      model: Tag,
+      select: "_id name",
+    });
+    // Group interactions by tags
+    const tagFreqMap: { [key: string]: number } = {};
+    const tagNameToIdMap: { [key: string]: any } = {};
+    for (const interaction of userInteractions) {
+      if (interaction && interaction.tags) {
+        for (const tag of interaction.tags) {
+          if (!tagNameToIdMap[tag.name]) {
+            tagNameToIdMap[tag.name] = tag._id;
+          }
+          if (!tagFreqMap[tag.name]) {
+            tagFreqMap[tag.name] = 1;
+          } else {
+            tagFreqMap[tag.name]++;
+          }
+        }
+      }
+    }
+    // Convert grouped tags object to an array of objects
+    const topInteractedTags = Object.keys(tagFreqMap).map((tagName) => ({
+      _id: tagNameToIdMap[tagName],
+      name: tagName,
+      count: tagFreqMap[tagName],
+    }));
+    // Sort the tags by count in descending order
+    topInteractedTags.sort((a, b) => b.count - a.count);
+    return topInteractedTags
+      .filter((tag) => ({
+        _id: tag._id,
+        name: tag.name,
+      }))
+      .slice(0, limit);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -93,13 +126,10 @@ export async function getAllTags(params : GetAllTagsParams ){
     throw error;
   }
 }
-
-
-export async function  getQuestionByTagId(params : GetQuestionsByTagIdParams ){
-
+export async function getQuestionsByTagId(params: GetQuestionsByTagIdParams) {
   try {
     connectToDatabase();
-    const { tagId, page = 1, pageSize = 5, searchQuery } = params;
+    const { tagId, page = 1, pageSize = 10, searchQuery } = params;
     const skipAmount = (page - 1) * pageSize;
     const tagFilter: FilterQuery<ITag> = { _id: tagId };
     const tag = await Tag.findOne(tagFilter).populate({
@@ -111,7 +141,7 @@ export async function  getQuestionByTagId(params : GetQuestionsByTagIdParams ){
       options: {
         sort: { createdAt: -1 },
         skip: skipAmount,
-        limit: pageSize + 1,
+        limit: pageSize + 1, // +1 to check if there is next page
       },
       populate: [
         { path: "tags", model: Tag, select: "_id name" },
@@ -125,23 +155,22 @@ export async function  getQuestionByTagId(params : GetQuestionsByTagIdParams ){
     const questions = tag.questions;
     return { tagTitle: tag.name, questions, isNext };
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw error;
   }
 }
+
 export async function getTopPopularTags() {
   try {
-    connectToDatabase()
+    connectToDatabase();
     const popularTags = await Tag.aggregate([
       { $project: { name: 1, numberOfQuestions: { $size: "$questions" } } },
       { $sort: { numberOfQuestions: -1 } },
       { $limit: 5 },
-    ])
-
-    // Return serialized data
-    return serialize(popularTags)
+    ]);
+    return JSON.parse(JSON.stringify(popularTags));
   } catch (error) {
-    console.error(error)
-    throw error
+    console.error(error);
+    throw error;
   }
 }

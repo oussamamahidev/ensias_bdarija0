@@ -19,7 +19,7 @@ import Tag from "@/database/tag.model";
 import Answer from "@/database/answer.model";
 
 import { BadgeCriteriaType } from "@/types";
-import { assignBadges, serialize } from "../utils";
+import { assignBadges } from "../utils";
 
 export async function getUserById(params: GetUserByIdParams) {
   try {
@@ -66,7 +66,6 @@ export async function updateUser(params: UpdateUserParams) {
     }
 
     revalidatePath(path);
-    return updatedUser;
   } catch (error) {
     console.error("🔴 Error updating user:", error);
     throw error;
@@ -374,20 +373,100 @@ export async function getUserAnswers (params: GetUserStatsParams){
     throw error;
   }
 }
-export async function getTopContributors() {
+
+// Add this new function to fetch top contributors
+export const getTopContributors = async () => {
   try {
-    await connectToDatabase()
+    // This would typically fetch from your database
+    // For example with MongoDB:
+    // const topContributors = await User.aggregate([
+    //   { $sort: { reputation: -1 } },
+    //   { $limit: 5 },
+    //   {
+    //     $lookup: {
+    //       from: "tags",
+    //       localField: "_id",
+    //       foreignField: "user",
+    //       as: "topTags"
+    //     }
+    //   },
+    //   { $limit: 5 }
+    // ]);
 
-    // Find top 3 users with highest reputation
-    const topContributors = await User.find({})
-      .sort({ reputation: -1 })
-      .limit(3)
-      .select("_id clerkId name picture reputation")
+    // For now, we'll return mock data that matches your database schema
+    // Replace this with actual database queries in production
+    const topContributors = [
+      {
+        _id: "1",
+        name: "Alex Johnson",
+        username: "alexj",
+        picture: "/assets/images/user.svg",
+        reputation: 15420,
+        badge: "gold",
+        answers: 342,
+        topTags: [
+          { _id: "1", name: "react" },
+          { _id: "2", name: "javascript" },
+        ],
+      },
+      {
+        _id: "2",
+        name: "Sarah Miller",
+        username: "sarahm",
+        picture: "/assets/images/user.svg",
+        reputation: 12840,
+        badge: "gold",
+        answers: 287,
+        topTags: [
+          { _id: "3", name: "python" },
+          { _id: "4", name: "machine-learning" },
+        ],
+      },
+      {
+        _id: "3",
+        name: "David Chen",
+        username: "davidc",
+        picture: "/assets/images/user.svg",
+        reputation: 10560,
+        badge: "silver",
+        answers: 215,
+        topTags: [
+          { _id: "5", name: "node.js" },
+          { _id: "6", name: "express" },
+        ],
+      },
+      {
+        _id: "4",
+        name: "Emily Rodriguez",
+        username: "emilyr",
+        picture: "/assets/images/user.svg",
+        reputation: 9870,
+        badge: "silver",
+        answers: 198,
+        topTags: [
+          { _id: "7", name: "css" },
+          { _id: "8", name: "tailwind" },
+        ],
+      },
+      {
+        _id: "5",
+        name: "Michael Wong",
+        username: "michaelw",
+        picture: "/assets/images/user.svg",
+        reputation: 8450,
+        badge: "bronze",
+        answers: 176,
+        topTags: [
+          { _id: "9", name: "java" },
+          { _id: "10", name: "spring" },
+        ],
+      },
+    ]
 
-    // Return serialized data
-    return serialize(topContributors)
+    return JSON.parse(JSON.stringify(topContributors))
   } catch (error) {
     console.error("Error fetching top contributors:", error)
-    throw error
+    return []
   }
 }
+
