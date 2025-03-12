@@ -4,7 +4,7 @@ import User from "@/database/user.model";
 import { connectToDatabase } from "../mongoose";
 import { GetAllTagsParams, GetQuestionsByTagIdParams, GetTopInteractedTagsParams } from "./shared.types";
 import Tag, { ITag } from "@/database/tag.model";
-import { FilterQuery } from "mongoose";
+import mongoose, { FilterQuery } from "mongoose";
 import Question from "@/database/question.model";
 import Interaction from "@/database/interaction.model";
 
@@ -172,5 +172,32 @@ export async function getTopPopularTags() {
   } catch (error) {
     console.error(error);
     throw error;
+  }
+}
+
+export async function getRelatedTags({ tagId, limit = 5 }: { tagId: string; limit?: number }) {
+  try {
+    // Mock data for related tags
+    const mockRelatedTags = [
+      { _id: '1', name: 'javascript', questionCount: 120 },
+      { _id: '2', name: 'react', questionCount: 85 },
+      { _id: '3', name: 'typescript', questionCount: 64 },
+      { _id: '4', name: 'nextjs', questionCount: 42 },
+      { _id: '5', name: 'tailwindcss', questionCount: 38 },
+      { _id: '6', name: 'node.js', questionCount: 32 },
+      { _id: '7', name: 'mongodb', questionCount: 28 },
+      { _id: '8', name: 'css', questionCount: 25 },
+      { _id: '9', name: 'html', questionCount: 22 },
+      { _id: '10', name: 'redux', questionCount: 18 },
+    ]
+
+    // Filter out the current tag (if it's in the mock data)
+    const filteredTags = mockRelatedTags.filter(tag => tag._id !== tagId)
+    
+    // Return only the requested number of tags
+    return filteredTags.slice(0, limit)
+  } catch (error) {
+    console.error("Error getting related tags:", error)
+    return []
   }
 }
