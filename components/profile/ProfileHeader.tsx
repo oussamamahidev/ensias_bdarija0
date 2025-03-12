@@ -133,7 +133,7 @@ const ProfileHeader = ({ user, clerkId }: ProfileHeaderProps) => {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Link href="/profile/edit">
-                      <Button className="rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-700 shadow-sm flex items-center gap-2 px-4 transition-all duration-300 hover:scale-105">
+                      <Button className="rounded-full text-dark100_light900 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-700 shadow-sm flex items-center gap-2 px-4 transition-all duration-300 hover:scale-105">
                         <Edit3 className="h-4 w-4" />
                         Edit Profile
                       </Button>
