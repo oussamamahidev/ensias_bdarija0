@@ -1,63 +1,68 @@
 "use client"
 
-import { GlobalSearchFilters } from '@/constants/filters';
-import { formUrlQuery } from '@/lib/utils';
-import { useRouter, useSearchParams } from 'next/navigation';
-import React, { Suspense, useState } from 'react'
- 
+import { GlobalSearchFilters } from "@/constants/filters"
+import { formUrlQuery } from "@/lib/utils"
+import { useRouter, useSearchParams } from "next/navigation"
+import { Suspense, useState } from "react"
+
 const GlobalFilters = () => {
-    const router = useRouter();
-  const searchParams = useSearchParams();
+  const router = useRouter()
+  const searchParams = useSearchParams()
 
-  const typeParams = searchParams.get('type');
+  const typeParams = searchParams.get("type")
 
-  const [active, setActive] = useState(typeParams ?? "");
+  const [active, setActive] = useState(typeParams ?? "")
 
-  const handleTypeClick =(item: string) =>{
+  const handleTypeClick = (item: string) => {
     if (active === item) {
-            setActive("");
-            const newUrl = formUrlQuery({
-              params: searchParams.toString(),
-              Key: 'type',
-              Value: null,
-            });
-            router.push(newUrl, { scroll: false });
-          } else {
-            setActive(item);
-            const newUrl = formUrlQuery({
-              params: searchParams.toString(),
-              Key: 'type',
-              Value: item.toLowerCase(),
-            });
-            router.push(newUrl, { scroll: false });
-          }
+      setActive("")
+      const newUrl = formUrlQuery({
+        params: searchParams.toString(),
+        Key: "type",
+        Value: null,
+      })
+      router.push(newUrl, { scroll: false })
+    } else {
+      setActive(item)
+      const newUrl = formUrlQuery({
+        params: searchParams.toString(),
+        Key: "type",
+        Value: item.toLowerCase(),
+      })
+      router.push(newUrl, { scroll: false })
+    }
   }
 
   return (
     <Suspense>
-      <div className="flex items-center gap-5 px-5">
-      <p className="text-dark400_light900 body-medium">Type: </p>
-      <div className="flex gap-3">
-        {GlobalSearchFilters.map((item) => (
-          <button
-            type="button"
-            key={item.value}
-            className={`light-border-2 small-medium rounded-2xl px-5 py-2 capitalize dark:text-light-800 dark:hover:text-primary-500
-              ${
-                active === item.value
-                  ? "bg-primary-500 text-light-900"
-                  : "bg-light-700 text-dark-400 hover:text-primary-500 dark:bg-dark-500"
-              }
-            `}
-            onClick={()=>handleTypeClick(item.value)} 
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 px-5">
+        <p className="text-dark-100 dark:text-light-900 font-medium text-sm">Filter by:</p>
+        <div className="flex flex-wrap gap-2">
+          {GlobalSearchFilters.map((item) => (
+            <button
+              type="button"
+              key={item.value}
+              className={`
+                                relative overflow-hidden rounded-full px-4 py-1.5 text-xs font-medium capitalize transition-all duration-300
+                                ${
+                                  active === item.value
+                                    ? "primary-gradient text-white shadow-light-100 dark:shadow-dark-100"
+                                    : "bg-light-800 text-dark-100 hover:bg-light-700 dark:bg-dark-300 dark:text-light-900 dark:hover:bg-dark-400"
+                                }
+                            `}
+              onClick={() => handleTypeClick(item.value)}
             >
-            {item.name}
-          </button>
-        ))}
+              {active === item.value && (
+                <span className="absolute inset-0 bg-white/20 animate-pulse-slow opacity-0"></span>
+              )}
+              {item.name}
+            </button>
+          ))}
+        </div>
       </div>
-    </div>
     </Suspense>
   )
 }
 
 export default GlobalFilters
+
