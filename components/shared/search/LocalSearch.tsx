@@ -109,9 +109,7 @@ const LocalSearchbar = ({ route, iconPosition, imgSrc, placeholder, otherClasses
           </Button>
         )}
 
-        <Button type="submit" size="sm" className="ml-1 hidden h-9 rounded-xl sm:flex text-dark200_light800" disabled={isSearching}>
-          Search
-        </Button>
+        
       </form>
     </div>
   )

@@ -27,12 +27,12 @@ export const metadata: Metadata = {
 }
 
 interface HomePageProps {
-  searchParams: Promise<{ [key: string]: string | undefined }>;
+  searchParams: Promise<{ [key: string]: string | undefined }>
 }
 
 export default async function Home({ searchParams }: HomePageProps) {
   // Server-side auth
-  const { userId } =await auth()
+  const { userId } = await auth()
   let result
 
   const { q, filter, page } = await searchParams
@@ -57,6 +57,10 @@ export default async function Home({ searchParams }: HomePageProps) {
       page: Number.parseInt(page || "1"),
     })
   }
+
+  // Use JSON.parse(JSON.stringify()) to safely serialize MongoDB data
+  // This is a simple way to convert MongoDB objects to plain JavaScript objects
+  const serializedQuestions = JSON.parse(JSON.stringify(result.questions))
 
   // Mock stats for the counter component
   const stats = {
@@ -148,8 +152,8 @@ export default async function Home({ searchParams }: HomePageProps) {
 
       {/* Regular Questions Grid */}
       <div className="mt-10 grid grid-cols-1 gap-6">
-        {result.questions.length > 0 ? (
-          result.questions.map((question: any) => (
+        {serializedQuestions.length > 0 ? (
+          serializedQuestions.map((question: any) => (
             <QuestionCard
               key={question._id}
               _id={question._id}

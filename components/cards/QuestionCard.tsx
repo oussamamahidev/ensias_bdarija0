@@ -28,11 +28,14 @@ interface Props {
   downvotes: string[]
   views: number
   answers?: IAnswer[]
-  createdAt: Date
+  createdAt: Date | string
 }
 
 const QuestionCard = ({ _id, currentUserId, title, tags, author, upvotes, views, answers, createdAt }: Props) => {
   const showActionButtons = currentUserId && currentUserId === author.clerkId
+
+  // Convert string date to Date object if needed
+  const createdAtDate = typeof createdAt === "string" ? new Date(createdAt) : createdAt
 
   return (
     <motion.div
@@ -45,11 +48,9 @@ const QuestionCard = ({ _id, currentUserId, title, tags, author, upvotes, views,
         <div className="w-full">
           <div className="flex justify-between items-start">
             <span className="text-gray-500 dark:text-gray-400 text-sm flex sm:hidden mb-2">
-              {getTimestamp(createdAt)}
+              {getTimestamp(createdAtDate)}
             </span>
-            <SignedIn>
-              {showActionButtons && <EditDeleteAction type="Question" itemId={JSON.stringify(_id)} />}
-            </SignedIn>
+            <SignedIn>{showActionButtons && <EditDeleteAction type="Question" itemId={_id} />}</SignedIn>
           </div>
           <Link href={`/question/${_id}`} className="block group">
             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 group-hover:text-primary-500 dark:group-hover:text-primary-400 transition-colors duration-200 line-clamp-2 mb-3">
@@ -70,7 +71,7 @@ const QuestionCard = ({ _id, currentUserId, title, tags, author, upvotes, views,
           imgUrl={author?.picture || "/assets/icons/avatar.svg"}
           alt="user"
           value={author?.name}
-          title={` - asked ${getTimestamp(createdAt)}`}
+          title={` - asked ${getTimestamp(createdAtDate)}`}
           href={`/profile/${author?._id}`}
           isAuthor
           textStyles="text-sm font-medium"
@@ -95,7 +96,7 @@ const QuestionCard = ({ _id, currentUserId, title, tags, author, upvotes, views,
             <span className="text-gray-500 dark:text-gray-400 ml-1">views</span>
           </div>
         </div>
-      </div> 
+      </div>
     </motion.div>
   )
 }

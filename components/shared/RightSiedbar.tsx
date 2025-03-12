@@ -15,7 +15,7 @@ import { Skeleton } from "../ui/skeleton"
 const RightSidebar = () => {
   const [hotQuestions, setHotQuestions] = useState<any[]>([])
   const [popularTags, setPopularTags] = useState<any[]>([])
-  const [contributors, setContributors] = useState<any[]>([])
+  const [topContributors, setTopContributors] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [expandedSections, setExpandedSections] = useState({
     questions: true,
@@ -37,16 +37,15 @@ const RightSidebar = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [questionsData, tagsData, contributorsData] = await Promise.all([
-          getHotQuestions(),
-          getTopPopularTags(),
-          getTopContributors(),
-        ])
+        const questionsData = await getHotQuestions()
+        const tagsData = await getTopPopularTags()
+        const contributorsData = await getTopContributors()
 
-        // Serialize the MongoDB documents to plain JavaScript objects
+        // Serialize the MongoDB documents to plain JavaScript objects using JSON.parse(JSON.stringify())
+        // This safely handles ObjectIds and other MongoDB-specific types
         setHotQuestions(JSON.parse(JSON.stringify(questionsData)))
         setPopularTags(JSON.parse(JSON.stringify(tagsData)))
-        setContributors(contributorsData)
+        setTopContributors(JSON.parse(JSON.stringify(contributorsData)))
       } catch (error) {
         console.error("Error fetching sidebar data:", error)
       } finally {
@@ -255,14 +254,14 @@ const RightSidebar = () => {
                           <div className="flex items-center gap-3">
                             <Skeleton className="h-10 w-10 rounded-full" />
                             <div>
-                              <Skeleton className="h-4 w-24 mb-1" />
-                              <Skeleton className="h-3 w-16" />
+                              <Skeleton className="h-4 w-24" />
+                              <Skeleton className="mt-1 h-3 w-16" />
                             </div>
                           </div>
                           <Skeleton className="h-8 w-16 rounded-md" />
                         </div>
                       ))
-                  : contributors.slice(0, 3).map((contributor, index) => (
+                  : topContributors.map((contributor, index) => (
                       <motion.div
                         key={contributor._id}
                         initial={{ opacity: 0, y: 10 }}
@@ -280,7 +279,13 @@ const RightSidebar = () => {
                               <AvatarFallback>{contributor.name.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div
-                              className={`absolute -bottom-1 -right-1 h-4 w-4 rounded-full ${getBadgeColor(contributor.badge)} border-2 border-white dark:border-gray-900`}
+                              className={`absolute -bottom-1 -right-1 h-4 w-4 rounded-full ${
+                                index === 0
+                                  ? "bg-yellow-500" // gold
+                                  : index === 1
+                                    ? "bg-gray-400" // silver
+                                    : "bg-amber-700" // bronze
+                              } border-2 border-white dark:border-gray-900`}
                             ></div>
                           </div>
                           <div>
@@ -288,7 +293,7 @@ const RightSidebar = () => {
                             <p className="small-regular text-dark400_light700">{contributor.reputation} points</p>
                           </div>
                         </div>
-                        <Link href={`/profile/${contributor._id}`}>
+                        <Link href={`/profile/${contributor.clerkId}`}>
                           <Button
                             size="sm"
                             variant="ghost"
@@ -299,13 +304,6 @@ const RightSidebar = () => {
                         </Link>
                       </motion.div>
                     ))}
-                {!loading && contributors.length > 3 && (
-                  <Link href="/community" className="mt-2 text-center">
-                    <Button variant="ghost" size="sm" className="w-full text-primary-500 hover:text-primary-600">
-                      View All Contributors
-                    </Button>
-                  </Link>
-                )}
               </div>
             </motion.div>
           )}
