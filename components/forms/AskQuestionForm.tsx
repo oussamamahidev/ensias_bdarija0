@@ -17,12 +17,11 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Card, CardContent } from "@/components/ui/card"
 import { createQuestion } from "@/lib/actions/question.action"
-import { useToast } from "../ui/use-toast"
-import { Card, CardContent } from "../ui/card"
-
+import { useToast } from "@/components/ui/use-toast"
+import { useTheme } from "@/context/ThemeProvider"
 
 // Popular tags for suggestions
 const POPULAR_TAGS = [
@@ -64,12 +63,21 @@ const AI_SUGGESTIONS = [
 
 interface AskQuestionFormProps {
   mongoUserId: string
-  userReputation: number
-  userImage: string
-  userName: string
+  userReputation?: number
+  userImage?: string
+  userName?: string
+  type?: string
+  questionDetails?: any
 }
 
-const AskQuestionForm = ({ mongoUserId, userReputation, userImage, userName }: AskQuestionFormProps) => {
+const AskQuestionForm = ({
+  mongoUserId,
+  userReputation = 0,
+  userImage = "/assets/images/default-profile.png",
+  userName = "Anonymous",
+  type = "create",
+  questionDetails,
+}: AskQuestionFormProps) => {
   const editorRef = useRef<any>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [tagInput, setTagInput] = useState("")
@@ -80,18 +88,28 @@ const AskQuestionForm = ({ mongoUserId, userReputation, userImage, userName }: A
   const [aiSuggestion, setAiSuggestion] = useState("")
   const [previewMode, setPreviewMode] = useState(false)
   const [isGeneratingTitle, setIsGeneratingTitle] = useState(false)
+  const { mode } = useTheme()
 
   const router = useRouter()
   const pathname = usePathname()
   const { toast } = useToast()
 
+  // Parse question details if editing
+  const parsedQuestionDetails = questionDetails
+    ? typeof questionDetails === "string"
+      ? JSON.parse(questionDetails)
+      : questionDetails
+    : {}
+
+  const groupedTags = parsedQuestionDetails?.tags?.map((tag: any) => (typeof tag === "object" ? tag.name : tag)) || []
+
   // Form definition with validation
   const form = useForm<z.infer<typeof QuestionSchema>>({
     resolver: zodResolver(QuestionSchema),
     defaultValues: {
-      title: "",
-      explanation: "",
-      tags: [],
+      title: parsedQuestionDetails?.title || "",
+      explanation: parsedQuestionDetails?.content || "",
+      tags: groupedTags || [],
     },
   })
 
@@ -134,21 +152,33 @@ const AskQuestionForm = ({ mongoUserId, userReputation, userImage, userName }: A
     try {
       setIsSubmitting(true)
 
-      await createQuestion({
-        title: values.title,
-        content: values.explanation,
-        tags: values.tags,
-        author: JSON.parse(mongoUserId),
-        path: pathname,
-      })
+      if (type === "edit" && parsedQuestionDetails?._id) {
+        // Handle edit question logic here
+        // await editQuestion({
+        //   questionId: parsedQuestionDetails._id,
+        //   title: values.title,
+        //   content: values.explanation,
+        //   path: pathname,
+        // })
+        // router.push(`/question/${parsedQuestionDetails._id}`)
+      } else {
+        await createQuestion({
+          title: values.title,
+          content: values.explanation,
+          tags: values.tags,
+          author:
+            typeof mongoUserId === "string" && mongoUserId.startsWith("{") ? JSON.parse(mongoUserId) : mongoUserId,
+          path: pathname,
+        })
 
-      toast({
-        title: "Question posted successfully! 🎉",
-        description: "Your question is now live. You'll be notified when someone answers.",
-        variant: "default",
-      })
+        toast({
+          title: "Question posted successfully! 🎉",
+          description: "Your question is now live. You'll be notified when someone answers.",
+          variant: "default",
+        })
 
-      router.push("/")
+        router.push("/")
+      }
     } catch (error) {
       console.error(error)
       toast({
@@ -326,7 +356,7 @@ const AskQuestionForm = ({ mongoUserId, userReputation, userImage, userName }: A
                     size="sm"
                     className="flex items-center gap-2 text-xs"
                     onClick={generateTitle}
-                    disabled={isGeneratingTitle}
+                    disabled={isGeneratingTitle || type === "edit"}
                   >
                     {isGeneratingTitle ? (
                       <>
@@ -375,6 +405,7 @@ const AskQuestionForm = ({ mongoUserId, userReputation, userImage, userName }: A
                           size="sm"
                           className="flex items-center gap-2 text-xs"
                           onClick={getAIHelp}
+                          disabled={type === "edit"}
                         >
                           <Lightbulb size={14} className="text-primary-500" />
                           <span>Get AI Help</span>
@@ -407,6 +438,7 @@ const AskQuestionForm = ({ mongoUserId, userReputation, userImage, userName }: A
                         onEditorChange={(content) => {
                           field.onChange(content)
                         }}
+                        initialValue={parsedQuestionDetails?.content || ""}
                         init={{
                           height: 350,
                           menubar: false,
@@ -433,8 +465,8 @@ const AskQuestionForm = ({ mongoUserId, userReputation, userImage, userName }: A
                             "alignright alignjustify | bullist numlist outdent indent | " +
                             "codesample | removeformat",
                           content_style: "body { font-family:Inter,sans-serif; font-size:16px }",
-                          skin: "oxide",
-                          content_css: "default",
+                          skin: mode === "dark" ? "oxide-dark" : "oxide",
+                          content_css: mode === "dark" ? "dark" : "default",
                         }}
                       />
                     </FormControl>
@@ -527,6 +559,7 @@ const AskQuestionForm = ({ mongoUserId, userReputation, userImage, userName }: A
                       onKeyDown={handleTagKeyDown}
                       onFocus={() => setShowTagSuggestions(tagInput.length > 0)}
                       onBlur={() => setTimeout(() => setShowTagSuggestions(false), 200)}
+                      disabled={type === "edit"}
                     />
                   </FormControl>
 
@@ -568,6 +601,7 @@ const AskQuestionForm = ({ mongoUserId, userReputation, userImage, userName }: A
                         type="button"
                         className="ml-2 text-primary-500 hover:text-primary-600 focus:outline-none"
                         onClick={() => removeTag(tag)}
+                        disabled={type === "edit"}
                       >
                         <X size={14} />
                       </button>
@@ -664,12 +698,12 @@ const AskQuestionForm = ({ mongoUserId, userReputation, userImage, userName }: A
               {isSubmitting ? (
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 rounded-full border-2 border-t-transparent border-white animate-spin"></div>
-                  <span>Posting...</span>
+                  <span>{type === "edit" ? "Updating..." : "Posting..."}</span>
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
                   <Check size={16} />
-                  <span>Post Question</span>
+                  <span>{type === "edit" ? "Update Question" : "Post Question"}</span>
                 </div>
               )}
             </Button>
