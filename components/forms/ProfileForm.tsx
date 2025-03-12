@@ -18,9 +18,10 @@ import { motion } from "framer-motion"
 import { User, MapPin, Globe, FileText, Upload, X, Save, ArrowLeft, Camera, Palette } from "lucide-react"
 import Image from "next/image"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Switch } from "@/components/ui/switch"
+
 import { Label } from "@/components/ui/label"
 import { CardContent } from "@/components/ui/card"
+import { Switch } from "@radix-ui/react-switch"
 
 interface Props {
   clerkId: string
