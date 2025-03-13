@@ -6,7 +6,7 @@ import NoResult from "@/components/shared/NoResult"
 import LocalSearch from "@/components/shared/search/LocalSearch"
 import Pagination from "@/components/shared/search/Pagination"
 import { HomePageFilters } from "@/constants/filters"
-import { getQuestions, getRecommendedQuestions } from "@/lib/actions/question.action"
+import { getFeaturedQuestions, getQuestions, getRecommendedQuestions } from "@/lib/actions/question.action"
 import Link from "next/link"
 import Loading from "./loading"
 import { PlusCircle, TrendingUp } from "lucide-react"
@@ -29,6 +29,18 @@ export const metadata: Metadata = {
 interface HomePageProps {
   searchParams: Promise<{ [key: string]: string | undefined }>
 }
+
+async function FeaturedQuestionsContainer() {
+  const featuredQuestions = await getFeaturedQuestions()
+  return <FeaturedQuestions questions={featuredQuestions} />
+}
+
+async function FeaturedQuestionsWrapper() {
+  const featuredQuestions = await getFeaturedQuestions()
+  return <FeaturedQuestions questions={featuredQuestions} />
+}
+
+const showFeaturedSections = true
 
 export default async function Home({ searchParams }: HomePageProps) {
   // Server-side auth
@@ -141,12 +153,12 @@ export default async function Home({ searchParams }: HomePageProps) {
         </div>
       </Suspense>
 
-      {/* Featured Questions */}
       {showFeaturedSections && (
         <Suspense
           fallback={<div className="mt-10 h-60 w-full bg-light-700/50 dark:bg-dark-500/50 animate-pulse rounded-lg" />}
         >
-          <FeaturedQuestions />
+          {/* @ts-ignore */}
+          <FeaturedQuestionsContainer />
         </Suspense>
       )}
 

@@ -8,70 +8,34 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { formatAndDivideNumber, getTimestamp } from "@/lib/utils"
 
-const FeaturedQuestions = () => {
-  // Mock featured questions data
-  const featuredQuestions = [
-    {
-      _id: "1",
-      title: "How to implement authentication with Next.js and Clerk?",
-      content:
-        "I'm building a Next.js application and want to implement authentication using Clerk. What's the best approach?",
-      tags: [
-        { _id: "1", name: "next.js" },
-        { _id: "2", name: "authentication" },
-        { _id: "3", name: "clerk" },
-      ],
-      author: {
-        _id: "101",
-        name: "Sarah Johnson",
-        picture: "/assets/images/user.svg",
-      },
-      upvotes: 42,
-      views: 1250,
-      answers: 8,
-      createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-    },
-    {
-      _id: "2",
-      title: "Best practices for state management in large React applications",
-      content:
-        "I'm working on a large-scale React application and need advice on state management. Should I use Redux, Context API, or something else?",
-      tags: [
-        { _id: "4", name: "react" },
-        { _id: "5", name: "redux" },
-        { _id: "6", name: "state-management" },
-      ],
-      author: {
-        _id: "102",
-        name: "Michael Chen",
-        picture: "/assets/images/user.svg",
-      },
-      upvotes: 38,
-      views: 980,
-      answers: 12,
-      createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
-    },
-    {
-      _id: "3",
-      title: "How to optimize Tailwind CSS for production?",
-      content: "My Tailwind CSS bundle size is quite large. What are the best practices to optimize it for production?",
-      tags: [
-        { _id: "7", name: "tailwind-css" },
-        { _id: "8", name: "optimization" },
-        { _id: "9", name: "css" },
-      ],
-      author: {
-        _id: "103",
-        name: "Emily Rodriguez",
-        picture: "/assets/images/user.svg",
-      },
-      upvotes: 29,
-      views: 845,
-      answers: 6,
-      createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
-    },
-  ]
+interface Tag {
+  _id: string
+  name: string
+}
 
+interface Author {
+  _id: string
+  name: string
+  picture: string
+}
+
+interface Question {
+  _id: string
+  title: string
+  content: string
+  tags: Tag[]
+  author: Author
+  upvotes: string[] | number
+  views: number
+  answers: number
+  createdAt: Date
+}
+
+interface FeaturedQuestionsProps {
+  questions?: Question[]
+}
+
+const FeaturedQuestions = ({ questions = [] }: FeaturedQuestionsProps) => {
   const [mounted, setMounted] = useState(false)
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
@@ -81,6 +45,30 @@ const FeaturedQuestions = () => {
   }, [])
 
   if (!mounted) return null
+
+  // If no questions are provided, show a message
+  if (questions.length === 0) {
+    return (
+      <div ref={ref} className="mt-12">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-6 w-6 text-yellow-500" />
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Featured Questions</h2>
+          </div>
+          <Link
+            href="/?filter=top"
+            className="flex items-center text-primary-500 hover:text-primary-600 text-sm font-medium"
+          >
+            View more
+            <ChevronRight className="h-4 w-4 ml-1" />
+          </Link>
+        </div>
+        <div className="bg-white dark:bg-gray-800/80 rounded-xl p-6 border border-gray-100 dark:border-gray-700 text-center">
+          <p className="text-gray-600 dark:text-gray-400">No featured questions available yet.</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div ref={ref} className="mt-12">
@@ -99,7 +87,7 @@ const FeaturedQuestions = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {featuredQuestions.map((question, index) => (
+        {questions.map((question, index) => (
           <motion.div
             key={question._id}
             initial={{ opacity: 0, y: 20 }}
@@ -131,13 +119,19 @@ const FeaturedQuestions = () => {
                       <AvatarImage src={question.author.picture} alt={question.author.name} />
                       <AvatarFallback>{question.author.name.charAt(0)}</AvatarFallback>
                     </Avatar>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">{getTimestamp(question.createdAt)}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {getTimestamp(new Date(question.createdAt))}
+                    </span>
                   </div>
 
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-1 text-xs">
                       <ThumbsUp size={12} className="text-primary-500" />
-                      <span>{formatAndDivideNumber(question.upvotes)}</span>
+                      <span>
+                        {formatAndDivideNumber(
+                          Array.isArray(question.upvotes) ? question.upvotes.length : question.upvotes,
+                        )}
+                      </span>
                     </div>
 
                     <div className="flex items-center gap-1 text-xs">

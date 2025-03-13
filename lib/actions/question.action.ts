@@ -300,3 +300,22 @@ export async function getRecommendedQuestions(params: RecommendedParams) {
     throw error;
   }
 }
+
+export async function getFeaturedQuestions() {
+  try {
+    await connectToDatabase()
+
+    // Get featured questions - these are questions with high engagement
+    // Sorting by a combination of upvotes, views, and answer count
+    const featuredQuestions = await Question.find({})
+      .sort({ upvotes: -1, views: -1, answers: -1 }) // Sort by most upvotes, views, and answers
+      .limit(3) // Get top 3 questions
+      .populate({ path: "tags", model: Tag, select: "_id name" })
+      .populate({ path: "author", model: User, select: "_id clerkId name picture" })
+
+    return JSON.parse(JSON.stringify(featuredQuestions))
+  } catch (err) {
+    console.log("Error fetching featured questions:", err)
+    return []
+  }
+}
