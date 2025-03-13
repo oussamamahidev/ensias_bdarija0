@@ -9,7 +9,7 @@ import { HomePageFilters } from "@/constants/filters"
 import { getFeaturedQuestions, getQuestions, getRecommendedQuestions } from "@/lib/actions/question.action"
 import Link from "next/link"
 import Loading from "./loading"
-import { PlusCircle, TrendingUp } from "lucide-react"
+import { ChevronRight, PlusCircle, Sparkles, TrendingUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { auth } from "@clerk/nextjs/server"
 import HomeHero from "@/components/home/HomeHero"
@@ -21,6 +21,7 @@ import TopContributors from "@/components/home/TopContributors"
 import type { Metadata } from "next"
 import HomeFilters from "@/components/home/HomeFilers"
 import StatsCounter from "@/components/home/StatusCounter"
+import FeaturedQuestionsCarousel from "@/components/home/FeaturedQuestionsCarousel"
 
 export const metadata: Metadata = {
   title: "Home | D2sFlow",
@@ -30,17 +31,6 @@ interface HomePageProps {
   searchParams: Promise<{ [key: string]: string | undefined }>
 }
 
-async function FeaturedQuestionsContainer() {
-  const featuredQuestions = await getFeaturedQuestions()
-  return <FeaturedQuestions questions={featuredQuestions} />
-}
-
-async function FeaturedQuestionsWrapper() {
-  const featuredQuestions = await getFeaturedQuestions()
-  return <FeaturedQuestions questions={featuredQuestions} />
-}
-
-const showFeaturedSections = true
 
 export default async function Home({ searchParams }: HomePageProps) {
   // Server-side auth
@@ -153,14 +143,23 @@ export default async function Home({ searchParams }: HomePageProps) {
         </div>
       </Suspense>
 
-      {showFeaturedSections && (
-        <Suspense
-          fallback={<div className="mt-10 h-60 w-full bg-light-700/50 dark:bg-dark-500/50 animate-pulse rounded-lg" />}
-        >
-          {/* @ts-ignore */}
-          <FeaturedQuestionsContainer />
-        </Suspense>
-      )}
+      <div className="flex flex-col gap-6">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <Sparkles className="text-primary-500" />
+            <h2 className="text-xl font-bold text-dark200_light900">Featured Questions</h2>
+          </div>
+          <Link
+            href="/questions?filter=featured"
+            className="flex items-center gap-1 text-primary-500 hover:text-primary-600 transition-colors"
+          >
+            View more
+            <ChevronRight className="w-4 h-4" />
+          </Link>
+        </div>
+
+        <FeaturedQuestionsCarousel />
+      </div>
 
       {/* Regular Questions Grid */}
       <div className="mt-10 grid grid-cols-1 gap-6">
