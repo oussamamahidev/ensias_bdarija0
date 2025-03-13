@@ -186,7 +186,7 @@ const FeaturedQuestionsCarousel = () => {
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
-        <div className="absolute -top-9 left-6 z-10 mt-1.5">
+        <div className="absolute -top-1 left-6 z-10 mt-3">
           <div className="flex items-center gap-2 bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-md">
             <Sparkles className="w-3.5 h-3.5" />
             Feature4
