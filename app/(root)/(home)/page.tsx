@@ -1,43 +1,46 @@
-import { Suspense } from "react"
-import QuestionCard from "@/components/cards/QuestionCard"
+import { Suspense } from "react";
+import QuestionCard from "@/components/cards/QuestionCard";
 
-import Filter from "@/components/shared/Filter"
-import NoResult from "@/components/shared/NoResult"
-import LocalSearch from "@/components/shared/search/LocalSearch"
-import Pagination from "@/components/shared/search/Pagination"
-import { HomePageFilters } from "@/constants/filters"
-import { getFeaturedQuestions, getQuestions, getRecommendedQuestions } from "@/lib/actions/question.action"
-import Link from "next/link"
-import Loading from "./loading"
-import { ChevronRight, PlusCircle, Sparkles, TrendingUp } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { auth } from "@clerk/nextjs/server"
-import HomeHero from "@/components/home/HomeHero"
-import TrendingTopics from "@/components/home/TrendingTopics"
+import Filter from "@/components/shared/Filter";
+import NoResult from "@/components/shared/NoResult";
+import LocalSearch from "@/components/shared/search/LocalSearch";
+import Pagination from "@/components/shared/search/Pagination";
+import { HomePageFilters } from "@/constants/filters";
+import {
+  getFeaturedQuestions,
+  getQuestions,
+  getRecommendedQuestions,
+} from "@/lib/actions/question.action";
+import Link from "next/link";
+import Loading from "./loading";
+import { ChevronRight, PlusCircle, Sparkles, TrendingUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { auth } from "@clerk/nextjs/server";
+import HomeHero from "@/components/home/HomeHero";
+import TrendingTopics from "@/components/home/TrendingTopics";
 
-import FeaturedQuestions from "@/components/home/FeaturedQuestions"
-import TopContributors from "@/components/home/TopContributors"
+import FeaturedQuestions from "@/components/home/FeaturedQuestions";
+import TopContributors from "@/components/home/TopContributors";
 
-import type { Metadata } from "next"
-import HomeFilters from "@/components/home/HomeFilers"
-import StatsCounter from "@/components/home/StatusCounter"
-import FeaturedQuestionsCarousel from "@/components/home/FeaturedQuestionsCarousel"
+import type { Metadata } from "next";
+import HomeFilters from "@/components/home/HomeFilers";
+import StatsCounter from "@/components/home/StatusCounter";
+import FeaturedQuestionsCarousel from "@/components/home/FeaturedQuestionsCarousel";
 
 export const metadata: Metadata = {
   title: "Home | D2sFlow",
-}
+};
 
 interface HomePageProps {
-  searchParams: Promise<{ [key: string]: string | undefined }>
+  searchParams: Promise<{ [key: string]: string | undefined }>;
 }
-
 
 export default async function Home({ searchParams }: HomePageProps) {
   // Server-side auth
-  const { userId } = await auth()
-  let result
+  const { userId } = await auth();
+  let result;
 
-  const { q, filter, page } = await searchParams
+  const { q, filter, page } = await searchParams;
 
   if (filter === "recommended") {
     if (userId) {
@@ -45,24 +48,24 @@ export default async function Home({ searchParams }: HomePageProps) {
         userId,
         searchQuery: q,
         page: Number.parseInt(page || "1"),
-      })
+      });
     } else {
       result = {
         questions: [],
         isNext: false,
-      }
+      };
     }
   } else {
     result = await getQuestions({
       searchQuery: q,
       filter: filter,
       page: Number.parseInt(page || "1"),
-    })
+    });
   }
 
   // Use JSON.parse(JSON.stringify()) to safely serialize MongoDB data
   // This is a simple way to convert MongoDB objects to plain JavaScript objects
-  const serializedQuestions = JSON.parse(JSON.stringify(result.questions))
+  const serializedQuestions = JSON.parse(JSON.stringify(result.questions));
 
   // Mock stats for the counter component
   const stats = {
@@ -70,30 +73,36 @@ export default async function Home({ searchParams }: HomePageProps) {
     answers: 32876,
     users: 8954,
     tags: 1243,
-  }
+  };
 
   // Check if we should show featured sections
-  const showFeaturedSections = !q && !filter && page === undefined
+  const showFeaturedSections = !q && !filter && page === undefined;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       {/* Hero Section */}
       <Suspense
-        fallback={<div className="h-[300px] w-full bg-gray-100 dark:bg-gray-800/50 animate-pulse rounded-2xl" />}
+        fallback={
+          <div className="h-[300px] w-full bg-gray-100 dark:bg-gray-800/50 animate-pulse rounded-2xl" />
+        }
       >
         <HomeHero hasUserId={!!userId} />
       </Suspense>
 
       {/* Stats Counter */}
       <Suspense
-        fallback={<div className="h-24 w-full bg-gray-100 dark:bg-gray-800/50 animate-pulse rounded-xl mt-8" />}
+        fallback={
+          <div className="h-24 w-full bg-gray-100 dark:bg-gray-800/50 animate-pulse rounded-xl mt-8" />
+        }
       >
         <StatsCounter stats={stats} />
       </Suspense>
 
       {/* Trending Topics */}
       <Suspense
-        fallback={<div className="h-32 w-full bg-gray-100 dark:bg-gray-800/50 animate-pulse rounded-xl mt-8" />}
+        fallback={
+          <div className="h-32 w-full bg-gray-100 dark:bg-gray-800/50 animate-pulse rounded-xl mt-8" />
+        }
       >
         <TrendingTopics />
       </Suspense>
@@ -114,7 +123,9 @@ export default async function Home({ searchParams }: HomePageProps) {
 
       <div className="mt-8 flex justify-between gap-5 max-sm:flex-col sm:items-center">
         <Suspense
-          fallback={<div className="flex-1 h-[56px] bg-light-700/50 dark:bg-dark-500/50 animate-pulse rounded-lg" />}
+          fallback={
+            <div className="flex-1 h-[56px] bg-light-700/50 dark:bg-dark-500/50 animate-pulse rounded-lg" />
+          }
         >
           <LocalSearch
             route="/"
@@ -125,7 +136,9 @@ export default async function Home({ searchParams }: HomePageProps) {
           />
         </Suspense>
         <Suspense
-          fallback={<div className="h-[56px] w-[170px] bg-light-700/50 dark:bg-dark-500/50 animate-pulse rounded-lg" />}
+          fallback={
+            <div className="h-[56px] w-[170px] bg-light-700/50 dark:bg-dark-500/50 animate-pulse rounded-lg" />
+          }
         >
           <Filter
             filters={HomePageFilters}
@@ -136,18 +149,23 @@ export default async function Home({ searchParams }: HomePageProps) {
       </div>
 
       <Suspense
-        fallback={<div className="mt-8 h-14 w-full bg-light-700/50 dark:bg-dark-500/50 animate-pulse rounded-lg" />}
+        fallback={
+          <div className="mt-8 h-14 w-full bg-light-700/50 dark:bg-dark-500/50 animate-pulse rounded-lg" />
+        }
       >
         <div className="mt-6">
           <HomeFilters />
         </div>
       </Suspense>
 
-      <div className="flex flex-col gap-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-col gap-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
+        {/* Title section with spacing */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="text-orange-500 text-2xl">✨</div>
-            <h2 className="text-xl font-bold text-dark200_light900">Featured Questions</h2>
+            <h2 className="text-xl font-bold text-dark200_light900">
+              Featured Questions
+            </h2>
           </div>
           <Link
             href="/questions?filter=featured"
@@ -158,6 +176,7 @@ export default async function Home({ searchParams }: HomePageProps) {
           </Link>
         </div>
 
+        {/* Featured Questions Carousel */}
         <FeaturedQuestionsCarousel />
       </div>
 
@@ -194,7 +213,9 @@ export default async function Home({ searchParams }: HomePageProps) {
       {/* Top Contributors Section */}
       {showFeaturedSections && (
         <Suspense
-          fallback={<div className="mt-16 h-60 w-full bg-light-700/50 dark:bg-dark-500/50 animate-pulse rounded-lg" />}
+          fallback={
+            <div className="mt-16 h-60 w-full bg-light-700/50 dark:bg-dark-500/50 animate-pulse rounded-lg" />
+          }
         >
           <TopContributors />
         </Suspense>
@@ -202,10 +223,12 @@ export default async function Home({ searchParams }: HomePageProps) {
 
       <div className="mt-10">
         <Suspense fallback={<Loading />}>
-          <Pagination pageNumber={page ? +page : 1} isNext={result.isNext || false} />
+          <Pagination
+            pageNumber={page ? +page : 1}
+            isNext={result.isNext || false}
+          />
         </Suspense>
       </div>
     </div>
-  )
+  );
 }
-

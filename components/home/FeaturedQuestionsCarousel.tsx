@@ -1,10 +1,9 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useCallback } from "react"
-import { Sparkles, ChevronLeft, ChevronRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import QuestionCard from "../cards/QuestionCard"
-
+import { useState, useEffect, useCallback } from "react";
+import { Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import QuestionCard from "../cards/QuestionCard";
 
 // Mock data for featured questions
 const MOCK_FEATURED_QUESTIONS = [
@@ -108,49 +107,53 @@ const MOCK_FEATURED_QUESTIONS = [
     answers: Array(7).fill({}),
     createdAt: new Date("2023-11-25"),
   },
-]
+];
 
 const FeaturedQuestionsCarousel = () => {
-  const [activeIndex, setActiveIndex] = useState(0)
-  const [isPaused, setIsPaused] = useState(false)
-  const [isTransitioning, setIsTransitioning] = useState(false)
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Navigate to the next slide
   const nextSlide = useCallback(() => {
-    if (isTransitioning) return
+    if (isTransitioning) return;
 
-    setIsTransitioning(true)
-    setActiveIndex((prevIndex) => (prevIndex + 1) % MOCK_FEATURED_QUESTIONS.length)
+    setIsTransitioning(true);
+    setActiveIndex(
+      (prevIndex) => (prevIndex + 1) % MOCK_FEATURED_QUESTIONS.length
+    );
 
     // Reset transition state after animation completes
     setTimeout(() => {
-      setIsTransitioning(false)
-    }, 500)
-  }, [isTransitioning])
+      setIsTransitioning(false);
+    }, 500);
+  }, [isTransitioning]);
 
   // Navigate to the previous slide
   const prevSlide = useCallback(() => {
-    if (isTransitioning) return
+    if (isTransitioning) return;
 
-    setIsTransitioning(true)
-    setActiveIndex((prevIndex) => (prevIndex === 0 ? MOCK_FEATURED_QUESTIONS.length - 1 : prevIndex - 1))
+    setIsTransitioning(true);
+    setActiveIndex((prevIndex) =>
+      prevIndex === 0 ? MOCK_FEATURED_QUESTIONS.length - 1 : prevIndex - 1
+    );
 
     // Reset transition state after animation completes
     setTimeout(() => {
-      setIsTransitioning(false)
-    }, 500)
-  }, [isTransitioning])
+      setIsTransitioning(false);
+    }, 500);
+  }, [isTransitioning]);
 
   // Auto-advance slides every 2 seconds
   useEffect(() => {
-    if (isPaused) return
+    if (isPaused) return;
 
     const interval = setInterval(() => {
-      nextSlide()
-    }, 2000)
+      nextSlide();
+    }, 2000);
 
-    return () => clearInterval(interval)
-  }, [isPaused, nextSlide])
+    return () => clearInterval(interval);
+  }, [isPaused, nextSlide]);
 
   return (
     <div className="relative w-full">
@@ -191,7 +194,7 @@ const FeaturedQuestionsCarousel = () => {
             <div key={question._id} className="w-full flex-shrink-0 px-2">
               <div className="relative">
                 {/* Featured badge - Now positioned outside the QuestionCard */}
-                <div className="absolute -top-3 left-6 z-10">
+                <div className="absolute -top-5 left-6 z-10 mt-3">
                   <div className="flex items-center gap-2 bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-md">
                     <Sparkles className="w-3.5 h-3.5" />
                     Featured
@@ -223,9 +226,9 @@ const FeaturedQuestionsCarousel = () => {
             <button
               key={index}
               onClick={() => {
-                setIsTransitioning(true)
-                setActiveIndex(index)
-                setTimeout(() => setIsTransitioning(false), 500)
+                setIsTransitioning(true);
+                setActiveIndex(index);
+                setTimeout(() => setIsTransitioning(false), 500);
               }}
               className={`transition-all duration-300 ${
                 index === activeIndex
@@ -238,8 +241,7 @@ const FeaturedQuestionsCarousel = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default FeaturedQuestionsCarousel
-
+export default FeaturedQuestionsCarousel;
