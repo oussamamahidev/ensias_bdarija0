@@ -143,15 +143,15 @@ export default async function Home({ searchParams }: HomePageProps) {
         </div>
       </Suspense>
 
-      <div className="flex flex-col gap-6">
-        <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Sparkles className="text-primary-500" />
+            <div className="text-orange-500 text-2xl">✨</div>
             <h2 className="text-xl font-bold text-dark200_light900">Featured Questions</h2>
           </div>
           <Link
             href="/questions?filter=featured"
-            className="flex items-center gap-1 text-primary-500 hover:text-primary-600 transition-colors"
+            className="flex items-center gap-1 text-orange-500 hover:text-orange-600 transition-colors text-sm font-medium"
           >
             View more
             <ChevronRight className="w-4 h-4" />

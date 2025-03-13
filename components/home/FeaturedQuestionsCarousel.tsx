@@ -1,10 +1,10 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Badge } from "@/components/ui/badge"
 import { Sparkles, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import QuestionCard from "../cards/QuestionCard"
+
 
 // Mock data for featured questions
 const MOCK_FEATURED_QUESTIONS = [
@@ -153,9 +153,33 @@ const FeaturedQuestionsCarousel = () => {
   }, [isPaused, nextSlide])
 
   return (
-    <div className="relative">
+    <div className="relative w-full">
+      {/* Navigation buttons */}
+      <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 flex justify-between px-4 z-20 pointer-events-none">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 rounded-full bg-white/80 dark:bg-gray-800/80 hover:bg-white/90 dark:hover:bg-gray-800/90 shadow-lg pointer-events-auto transition-all"
+          onClick={prevSlide}
+          aria-label="Previous slide"
+        >
+          <ChevronLeft className="h-4 w-4 text-gray-700 dark:text-gray-300" />
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 rounded-full bg-white/80 dark:bg-gray-800/80 hover:bg-white/90 dark:hover:bg-gray-800/90 shadow-lg pointer-events-auto transition-all"
+          onClick={nextSlide}
+          aria-label="Next slide"
+        >
+          <ChevronRight className="h-4 w-4 text-gray-700 dark:text-gray-300" />
+        </Button>
+      </div>
+
+      {/* Carousel container */}
       <div
-        className="relative overflow-hidden rounded-xl"
+        className="relative overflow-hidden"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
@@ -164,35 +188,37 @@ const FeaturedQuestionsCarousel = () => {
           style={{ transform: `translateX(-${activeIndex * 100}%)` }}
         >
           {MOCK_FEATURED_QUESTIONS.map((question, index) => (
-            <div key={question._id} className="w-full flex-shrink-0 px-1">
+            <div key={question._id} className="w-full flex-shrink-0 px-2">
               <div className="relative">
-                {/* Featured badge */}
-                <div className="absolute top-4 left-4 z-10">
-                  <Badge className="bg-primary-500/10 text-primary-500 rounded-full px-4 py-1.5 flex items-center">
-                    <Sparkles className="w-4 h-4 mr-1" />
+                {/* Featured badge - Now positioned outside the QuestionCard */}
+                <div className="absolute -top-3 left-6 z-10">
+                  <div className="flex items-center gap-2 bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-md">
+                    <Sparkles className="w-3.5 h-3.5" />
                     Featured
-                  </Badge>
+                  </div>
                 </div>
 
-                {/* Use the QuestionCard component */}
-                <QuestionCard
-                  _id={question._id}
-                  title={question.title}
-                  tags={question.tags}
-                  author={question.author}
-                  upvotes={question.upvotes}
-                  downvotes={question.downvotes}
-                  views={question.views}
-                  answers={question.answers}
-                  createdAt={question.createdAt}
-                />
+                {/* Question card with extra padding for the badge */}
+                <div className="pt-4">
+                  <QuestionCard
+                    _id={question._id}
+                    title={question.title}
+                    tags={question.tags}
+                    author={question.author}
+                    upvotes={question.upvotes}
+                    downvotes={question.downvotes}
+                    views={question.views}
+                    answers={question.answers}
+                    createdAt={question.createdAt}
+                  />
+                </div>
               </div>
             </div>
           ))}
         </div>
 
         {/* Navigation dots */}
-        <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-2">
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2 z-10">
           {MOCK_FEATURED_QUESTIONS.map((_, index) => (
             <button
               key={index}
@@ -201,35 +227,16 @@ const FeaturedQuestionsCarousel = () => {
                 setActiveIndex(index)
                 setTimeout(() => setIsTransitioning(false), 500)
               }}
-              className={`w-2 h-2 rounded-full transition-all ${
-                activeIndex === index ? "bg-primary-500 w-4" : "bg-gray-300 dark:bg-gray-600"
-              }`}
+              className={`transition-all duration-300 ${
+                index === activeIndex
+                  ? "w-6 h-2 bg-orange-500"
+                  : "w-2 h-2 bg-gray-300 dark:bg-gray-600 hover:bg-orange-400"
+              } rounded-full`}
               aria-label={`Go to slide ${index + 1}`}
             />
           ))}
         </div>
       </div>
-
-      {/* Navigation buttons */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/80 dark:bg-dark-300/80 rounded-full hover:bg-white dark:hover:bg-dark-200 z-10"
-        onClick={prevSlide}
-        aria-label="Previous slide"
-      >
-        <ChevronLeft className="h-5 w-5 text-dark400_light700" />
-      </Button>
-
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/80 dark:bg-dark-300/80 rounded-full hover:bg-white dark:hover:bg-dark-200 z-10"
-        onClick={nextSlide}
-        aria-label="Next slide"
-      >
-        <ChevronRight className="h-5 w-5 text-dark400_light700" />
-      </Button>
     </div>
   )
 }
