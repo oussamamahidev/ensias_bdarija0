@@ -112,13 +112,13 @@ const HomeHero = ({ hasUserId }: HomeHeroProps) => {
           className="relative w-full md:w-2/5 h-[300px] flex-shrink-0"
         >
           <Image
-            src="/assets/images/hero-illustration.svg"
+            src="/assets/images/hero-illustration.png"
             alt="Developer community illustration"
             fill
             className="object-contain dark:hidden"
           />
           <Image
-            src="/assets/images/hero-illustration-dark.svg"
+            src="/assets/images/hero-illustration.png"
             alt="Developer community illustration"
             fill
             className="object-contain hidden dark:block"
