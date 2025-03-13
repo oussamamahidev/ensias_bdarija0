@@ -186,6 +186,12 @@ const FeaturedQuestionsCarousel = () => {
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
+        <div className="absolute -top-5 left-6 z-10 mt-3">
+          <div className="flex items-center gap-2 bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-md">
+            <Sparkles className="w-3.5 h-3.5" />
+            Featured
+          </div>
+        </div>
         <div
           className="flex transition-transform duration-500 ease-in-out"
           style={{ transform: `translateX(-${activeIndex * 100}%)` }}
@@ -194,12 +200,6 @@ const FeaturedQuestionsCarousel = () => {
             <div key={question._id} className="w-full flex-shrink-0 px-2">
               <div className="relative">
                 {/* Featured badge - Now positioned outside the QuestionCard */}
-                <div className="absolute -top-5 left-6 z-10 mt-3">
-                  <div className="flex items-center gap-2 bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-md">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    Featured
-                  </div>
-                </div>
 
                 {/* Question card with extra padding for the badge */}
                 <div className="pt-4">

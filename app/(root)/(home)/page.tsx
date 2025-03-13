@@ -158,7 +158,7 @@ export default async function Home({ searchParams }: HomePageProps) {
         </div>
       </Suspense>
 
-      <div className="flex flex-col gap-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
+      <div className="flex flex-col gap-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-7">
         {/* Title section with spacing */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
