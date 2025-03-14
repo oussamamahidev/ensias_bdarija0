@@ -178,3 +178,10 @@ export function formatJobApiResponse(job: any): Job {
     return JSON.parse(JSON.stringify(obj))
   }
   
+  export function getUserBadge(reputation: number): string | undefined {
+    if (reputation >= 5000) return "gold"
+    if (reputation >= 1000) return "silver"
+    if (reputation >= 500) return "bronze"
+    return undefined
+  }
+  

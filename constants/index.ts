@@ -1,4 +1,4 @@
-import { IThemes, SidebarLink } from "../types"
+import { IThemes, SidebarLink } from "../types";
 
 export const themes: IThemes[] = [
   { value: "light", label: "Light", icon: "/assets/icons/sun.svg" },
@@ -40,6 +40,11 @@ export const sidebarLinks: SidebarLink[] = [
     imgURL: "/assets/icons/user.svg",
     route: "/profile",
     label: "Profile",
+  },
+  {
+    imgURL: "/assets/icons/code.svg",
+    route: "/projects",
+    label: "Projects",
   },
   {
     imgURL: "/assets/icons/question.svg",

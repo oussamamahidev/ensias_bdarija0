@@ -1,52 +1,77 @@
-import Filter from "@/components/shared/Filter"
-import NoResult from "@/components/shared/NoResult"
-import LocalSearchbar from "@/components/shared/search/LocalSearch"
-import { TagFilters } from "@/constants/filters"
-import { getAllTags } from "@/lib/actions/tag.actions"
-import { Suspense } from "react"
-import { TagIcon, TrendingUp, Zap, Hash, BarChart3, Sparkles } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import PopularTagCloud from "@/components/tags/PopularTagCloud"
-import TagCard from "@/components/tags/TagCard"
-import TagCategorySection from "@/components/tags/TagCategorySection"
+import Filter from "@/components/shared/Filter";
+import NoResult from "@/components/shared/NoResult";
+import LocalSearchbar from "@/components/shared/search/LocalSearch";
+import { TagFilters } from "@/constants/filters";
+import { getAllTags } from "@/lib/actions/tag.actions";
+import { Suspense } from "react";
+import {
+  TagIcon,
+  TrendingUp,
+  Zap,
+  Hash,
+  BarChart3,
+  Sparkles,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import PopularTagCloud from "@/components/tags/PopularTagCloud";
+import TagCard from "@/components/tags/TagCard";
+import TagCategorySection from "@/components/tags/TagCategorySection";
 
 interface Props {
-  searchParams: Promise<{ [key: string]: string | undefined }>
+  searchParams: Promise<{ [key: string]: string | undefined }>;
 }
 
 export default async function TagsPage({ searchParams }: Props) {
-  const { q, filter } = await searchParams
+  const { q, filter } = await searchParams;
   const result = await getAllTags({
     searchQuery: q,
     filter,
-  })
+  });
 
   // Serialize MongoDB documents to plain JavaScript objects
-  const serializedTags = JSON.parse(JSON.stringify(result.tags))
+  const serializedTags = JSON.parse(JSON.stringify(result.tags));
 
   // Mock categories for demonstration
   const categories = [
-    { name: "Frontend", icon: <Zap className="h-4 w-4" />, color: "bg-blue-500" },
-    { name: "Backend", icon: <Hash className="h-4 w-4" />, color: "bg-green-500" },
-    { name: "Database", icon: <BarChart3 className="h-4 w-4" />, color: "bg-purple-500" },
-    { name: "DevOps", icon: <TrendingUp className="h-4 w-4" />, color: "bg-orange-500" },
-  ]
+    {
+      name: "Frontend",
+      icon: <Zap className="h-4 w-4" />,
+      color: "bg-blue-500",
+    },
+    {
+      name: "Backend",
+      icon: <Hash className="h-4 w-4" />,
+      color: "bg-green-500",
+    },
+    {
+      name: "Database",
+      icon: <BarChart3 className="h-4 w-4" />,
+      color: "bg-purple-500",
+    },
+    {
+      name: "DevOps",
+      icon: <TrendingUp className="h-4 w-4" />,
+      color: "bg-orange-500",
+    },
+  ];
 
   // Group tags by first letter for alphabetical display
   const groupedByLetter = serializedTags.reduce((acc: any, tag: any) => {
-    const firstLetter = tag.name.charAt(0).toUpperCase()
+    const firstLetter = tag.name.charAt(0).toUpperCase();
     if (!acc[firstLetter]) {
-      acc[firstLetter] = []
+      acc[firstLetter] = [];
     }
-    acc[firstLetter].push(tag)
-    return acc
-  }, {})
+    acc[firstLetter].push(tag);
+    return acc;
+  }, {});
 
   // Sort letters alphabetically
-  const sortedLetters = Object.keys(groupedByLetter).sort()
+  const sortedLetters = Object.keys(groupedByLetter).sort();
 
   // Get trending tags (top 5 by question count)
-  const trendingTags = [...serializedTags].sort((a, b) => b.questions.length - a.questions.length).slice(0, 5)
+  const trendingTags = [...serializedTags]
+    .sort((a, b) => b.questions.length - a.questions.length)
+    .slice(0, 5);
 
   return (
     <>
@@ -61,8 +86,8 @@ export default async function TagsPage({ searchParams }: Props) {
                 <h1 className="text-3xl md:text-4xl font-bold">Explore Tags</h1>
               </div>
               <p className="text-lg text-white/90 max-w-xl mb-6">
-                Discover topics that interest you. Tags help categorize questions and make it easier to find relevant
-                content.
+                Discover topics that interest you. Tags help categorize
+                questions and make it easier to find relevant content.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Button className="bg-white text-primary-500 hover:bg-white/90 rounded-full px-6">
@@ -95,7 +120,9 @@ export default async function TagsPage({ searchParams }: Props) {
             <div className="p-2 bg-primary-500/10 rounded-lg">
               <TrendingUp className="h-5 w-5 text-primary-500" />
             </div>
-            <h2 className="text-2xl font-bold text-dark100_light900">Trending Tags</h2>
+            <h2 className="text-2xl font-bold text-dark100_light900">
+              Trending Tags
+            </h2>
           </div>
 
           <Button variant="ghost" size="sm" className="text-primary-500">
@@ -119,11 +146,17 @@ export default async function TagsPage({ searchParams }: Props) {
       <div className="card-wrapper rounded-xl p-8 border border-gray-100 dark:border-gray-700 animate-fade-in">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-dark100_light900">All Tags</h2>
-          <span className="text-sm text-gray-500 dark:text-gray-400">{serializedTags.length} tags available</span>
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            {serializedTags.length} tags available
+          </span>
         </div>
 
         <div className="mt-6 flex justify-between gap-5 max-sm:flex-col sm:items-center">
-          <Suspense fallback={<div className="h-14 w-full rounded-lg bg-light-700 dark:bg-dark-500 animate-pulse" />}>
+          <Suspense
+            fallback={
+              <div className="h-14 w-full rounded-lg bg-light-700 dark:bg-dark-500 animate-pulse" />
+            }
+          >
             <LocalSearchbar
               route="/tags"
               iconPosition="left"
@@ -133,14 +166,23 @@ export default async function TagsPage({ searchParams }: Props) {
             />
           </Suspense>
 
-          <Suspense fallback={<div className="h-10 w-full rounded-lg bg-light-700 dark:bg-dark-500 animate-pulse" />}>
-            <Filter filters={TagFilters} otherClasses="min-h-[56px] sm:min-w-[170px]" />
+          <Suspense
+            fallback={
+              <div className="h-10 w-full rounded-lg bg-light-700 dark:bg-dark-500 animate-pulse" />
+            }
+          >
+            <Filter
+              filters={TagFilters}
+              otherClasses="min-h-[56px] sm:min-w-[170px]"
+            />
           </Suspense>
         </div>
 
         {/* Tag Categories */}
         <div className="mt-8 mb-10">
-          <h3 className="text-lg font-semibold text-dark100_light900 mb-4">Browse by Category</h3>
+          <h3 className="text-lg font-semibold text-dark100_light900 mb-4">
+            Browse by Category
+          </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             {categories.map((category, index) => (
               <TagCategorySection
@@ -155,7 +197,9 @@ export default async function TagsPage({ searchParams }: Props) {
         {/* Alphabetical Tag List */}
         {serializedTags.length > 0 ? (
           <div className="mt-10">
-            <h3 className="text-lg font-semibold text-dark100_light900 mb-4">Browse Alphabetically</h3>
+            <h3 className="text-lg font-semibold text-dark100_light900 mb-4">
+              Browse Alphabetically
+            </h3>
 
             <div className="flex flex-wrap gap-2 mb-6">
               {sortedLetters.map((letter) => (
@@ -196,6 +240,5 @@ export default async function TagsPage({ searchParams }: Props) {
         )}
       </div>
     </>
-  )
+  );
 }
-

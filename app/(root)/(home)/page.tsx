@@ -7,25 +7,23 @@ import LocalSearch from "@/components/shared/search/LocalSearch";
 import Pagination from "@/components/shared/search/Pagination";
 import { HomePageFilters } from "@/constants/filters";
 import {
-  getFeaturedQuestions,
   getQuestions,
   getRecommendedQuestions,
 } from "@/lib/actions/question.action";
 import Link from "next/link";
-import Loading from "./loading";
-import { ChevronRight, PlusCircle, Sparkles, TrendingUp } from "lucide-react";
+import { ChevronRight, PlusCircle, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { auth } from "@clerk/nextjs/server";
 import HomeHero from "@/components/home/HomeHero";
 import TrendingTopics from "@/components/home/TrendingTopics";
-
-import FeaturedQuestions from "@/components/home/FeaturedQuestions";
 import TopContributors from "@/components/home/TopContributors";
 
 import type { Metadata } from "next";
 import HomeFilters from "@/components/home/HomeFilers";
 import StatsCounter from "@/components/home/StatusCounter";
 import FeaturedQuestionsCarousel from "@/components/home/FeaturedQuestionsCarousel";
+import { getStats } from "@/lib/actions/stats.action";
+import Loading from "./loading";
 
 export const metadata: Metadata = {
   title: "Home | D2sFlow",
@@ -67,13 +65,8 @@ export default async function Home({ searchParams }: HomePageProps) {
   // This is a simple way to convert MongoDB objects to plain JavaScript objects
   const serializedQuestions = JSON.parse(JSON.stringify(result.questions));
 
-  // Mock stats for the counter component
-  const stats = {
-    questions: 15423,
-    answers: 32876,
-    users: 8954,
-    tags: 1243,
-  };
+  // Fetch real statistics from the database
+  const stats = await getStats();
 
   // Check if we should show featured sections
   const showFeaturedSections = !q && !filter && page === undefined;

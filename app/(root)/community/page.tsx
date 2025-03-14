@@ -3,13 +3,12 @@ import Filter from "@/components/shared/Filter"
 import LocalSearchbar from "@/components/shared/search/LocalSearch"
 import Pagination from "@/components/shared/search/Pagination"
 import { UserFilters } from "@/constants/filters"
-import { getAllUsers } from "@/lib/actions/user.action"
+import { getAllUsers, getCommunityStats } from "@/lib/actions/user.action"
 import Link from "next/link"
 import { Suspense } from "react"
 import { Users, Award, TrendingUp, Sparkles, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import CommunityStats from "@/components/community/CommunityStats"
-
 
 interface Props {
   searchParams: Promise<{ [key: string]: string | undefined }>
@@ -36,13 +35,8 @@ export default async function CommunityPage({ searchParams }: Props) {
   const serializedUsers = JSON.parse(JSON.stringify(result.users))
   const isNext = result.isNext
 
-  // Mock stats for the community
-  const communityStats = {
-    totalUsers: 8954,
-    newThisWeek: 243,
-    topContributors: 127,
-    questionsAnswered: 32876,
-  }
+  // Fetch real community stats
+  const communityStats = await getCommunityStats()
 
   return (
     <>

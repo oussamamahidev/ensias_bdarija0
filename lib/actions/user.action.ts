@@ -394,3 +394,75 @@ export async function getTopContributors() {
 
 
 
+export async function getCommunityStats() {
+  try {
+    await connectToDatabase()
+
+    // Run all queries in parallel for better performance
+    const [totalUsersCount, questionsAnsweredCount, topContributorsCount, newUsersThisWeekCount] = await Promise.all([
+      // Total users
+      User.countDocuments({}),
+
+      // Total answers (questions answered)
+      Answer.countDocuments({}),
+
+      // Count users with reputation > 50 (considered top contributors)
+      User.countDocuments({ reputation: { $gt: 50 } }),
+
+      // Count users who joined in the last 7 days
+      User.countDocuments({
+        joinedAt: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+      }),
+    ])
+
+    return {
+      totalUsers: totalUsersCount,
+      questionsAnswered: questionsAnsweredCount,
+      topContributors: topContributorsCount,
+      newThisWeek: newUsersThisWeekCount,
+    }
+  } catch (error) {
+    console.error("Error fetching community stats:", error)
+
+    // Return fallback data in case of error
+    return {
+      totalUsers: 0,
+      questionsAnswered: 0,
+      topContributors: 0,
+      newThisWeek: 0,
+    }
+  }
+}
+
+export async function getUserStats(userId: string) {
+  try {
+    await connectToDatabase()
+
+    // Run all queries in parallel for better performance
+    const [questionsCount, answersCount, user] = await Promise.all([
+      // Count questions by this user
+      Question.countDocuments({ author: userId }),
+
+      // Count answers by this user
+      Answer.countDocuments({ author: userId }),
+
+      // Get user data for reputation
+      User.findById(userId),
+    ])
+
+    return {
+      posts: questionsCount,
+      answers: answersCount,
+      reputation: user?.reputation || 0,
+    }
+  } catch (error) {
+    console.error("Error fetching user stats:", error)
+
+    // Return fallback data in case of error
+    return {
+      posts: 0,
+      answers: 0,
+      reputation: 0,
+    }
+  }
+}

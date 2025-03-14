@@ -308,30 +308,32 @@ export async function getRecommendedQuestions(params: RecommendedParams) {
 
 export async function getFeaturedQuestions() {
   try {
-    connectToDatabase();
+    await connectToDatabase()
 
-    // Fetch questions with high engagement (more upvotes, views, or answers)
+    // Find questions with the most upvotes and views
     const featuredQuestions = await Question.find({})
       .populate({
         path: "tags",
         model: Tag,
-        select: "_id name",
       })
       .populate({
         path: "author",
         model: User,
-        select: "_id name picture",
       })
-      .sort({
-        upvotes: -1,
-        views: -1,
-        answers: -1,
-      })
-      .limit(2); // Adjust the number of featured questions as needed
+      .sort({ upvotes: -1, views: -1 })
+      .limit(5)
 
-    return JSON.parse(JSON.stringify(featuredQuestions));
+    // If we found questions, return them
+    if (featuredQuestions.length > 0) {
+      return JSON.parse(JSON.stringify(featuredQuestions))
+    }
+
+    // If no questions were found, create a fallback question
+    // This is just for development/testing - in production you might want to handle this differently
+    console.log("No featured questions found, returning empty array")
+    return []
   } catch (error) {
-    console.error("Error fetching featured questions:", error);
-    throw error;
+    console.error("Error fetching featured questions:", error)
+    return []
   }
 }

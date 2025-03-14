@@ -1,70 +1,92 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import Image from "next/image"
-import Link from "next/link"
-import { Badge } from "@/components/ui/badge"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Award, Zap, MessageSquare, ThumbsUp } from "lucide-react"
-import { getTopInterectedTags } from "@/lib/actions/tag.actions"
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import Image from "next/image";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Award, Zap, MessageSquare, ThumbsUp } from "lucide-react";
+import { getTopInterectedTags } from "@/lib/actions/tag.actions";
+import { getUserStats } from "@/lib/actions/user.action";
+import { getUserBadge } from "@/lib/utils";
 
 interface Props {
   user: {
-    _id: string
-    clerkId: string
-    picture: string
-    name: string
-    username: string
-    reputation?: number
-    badge?: string
-  }
+    _id: string;
+    clerkId: string;
+    picture: string;
+    name: string;
+    username: string;
+    reputation?: number;
+    badge?: string;
+  };
+}
+
+interface UserStats {
+  posts: number;
+  answers: number;
+  reputation: number;
 }
 
 const UserCard = ({ user }: Props) => {
-  const [interactedTags, setInteractedTags] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [isHovered, setIsHovered] = useState(false)
+  const [interactedTags, setInteractedTags] = useState<any[]>([]);
+  const [stats, setStats] = useState<UserStats>({
+    posts: 0,
+    answers: 0,
+    reputation: user.reputation || 0,
+  });
+  const [userBadge, setUserBadge] = useState<string | undefined>(user.badge);
+  const [loading, setLoading] = useState(true);
+  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
-    const fetchTags = async () => {
+    const fetchData = async () => {
       try {
-        const tags = await getTopInterectedTags({
-          userId: user._id,
-        })
-        setInteractedTags(tags)
-      } catch (error) {
-        console.error("Error fetching tags:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
+        // Fetch tags and stats in parallel
+        const [tags, userStats] = await Promise.all([
+          getTopInterectedTags({ userId: user._id }),
+          getUserStats(user._id),
+        ]);
 
-    fetchTags()
-  }, [user._id])
+        setInteractedTags(tags);
+        setStats(userStats);
+
+        // Determine badge based on reputation if not already set
+        if (!user.badge && userStats.reputation > 0) {
+          const badge = getUserBadge(userStats.reputation);
+          setUserBadge(badge);
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [user._id, user.badge]);
 
   // Get badge color based on badge type
   const getBadgeColor = (badge?: string) => {
-    if (!badge) return ""
+    if (!badge) return "";
 
     switch (badge.toLowerCase()) {
       case "gold":
-        return "bg-yellow-500"
+        return "bg-yellow-500";
       case "silver":
-        return "bg-gray-400"
+        return "bg-gray-400";
       case "bronze":
-        return "bg-amber-700"
+        return "bg-amber-700";
       default:
-        return "bg-primary-500"
+        return "bg-primary-500";
     }
-  }
-
-  // Mock stats - in a real app, these would come from the user object
-  const stats = {
-    posts: user.reputation ? Math.floor(user.reputation / 100) : 12,
-    answers: user.reputation ? Math.floor(user.reputation / 50) : 48,
-    reputation: user.reputation || 1200,
-  }
+  };
 
   return (
     <motion.div
@@ -93,7 +115,10 @@ const UserCard = ({ user }: Props) => {
               <div className="relative group/avatar">
                 <motion.div
                   className="absolute inset-0 rounded-full bg-gradient-to-r from-primary-500/30 to-orange-300/30 blur-sm opacity-0"
-                  animate={{ opacity: isHovered ? 0.7 : 0, scale: isHovered ? 1.1 : 1 }}
+                  animate={{
+                    opacity: isHovered ? 0.7 : 0,
+                    scale: isHovered ? 1.1 : 1,
+                  }}
                   transition={{ duration: 0.3 }}
                 />
                 <Image
@@ -105,16 +130,22 @@ const UserCard = ({ user }: Props) => {
                 />
               </div>
 
-              {user.badge && (
+              {userBadge && (
                 <div
-                  className={`absolute -bottom-1 -right-1 ${getBadgeColor(user.badge)} w-5 h-5 rounded-full border-2 border-white dark:border-gray-800 z-20`}
+                  className={`absolute -bottom-1 -right-1 ${getBadgeColor(
+                    userBadge
+                  )} w-5 h-5 rounded-full border-2 border-white dark:border-gray-800 z-20`}
                 ></div>
               )}
             </div>
 
             <div className="mt-4 text-center">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-1">{user.name}</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">@{user.username}</p>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-1">
+                {user.name}
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                @{user.username}
+              </p>
             </div>
           </div>
 
@@ -122,7 +153,10 @@ const UserCard = ({ user }: Props) => {
             {loading ? (
               <div className="flex flex-wrap justify-center gap-2">
                 {[1, 2].map((i) => (
-                  <div key={i} className="h-6 w-16 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
+                  <div
+                    key={i}
+                    className="h-6 w-16 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"
+                  ></div>
                 ))}
               </div>
             ) : interactedTags && interactedTags.length > 0 ? (
@@ -150,9 +184,13 @@ const UserCard = ({ user }: Props) => {
                       <div className="flex flex-col items-center">
                         <div className="flex items-center gap-1">
                           <MessageSquare className="h-3.5 w-3.5 text-blue-500" />
-                          <span className="font-semibold text-gray-900 dark:text-white">{stats.posts}</span>
+                          <span className="font-semibold text-gray-900 dark:text-white">
+                            {loading ? "-" : stats.posts}
+                          </span>
                         </div>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">Posts</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          Posts
+                        </span>
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -167,9 +205,13 @@ const UserCard = ({ user }: Props) => {
                       <div className="flex flex-col items-center">
                         <div className="flex items-center gap-1">
                           <ThumbsUp className="h-3.5 w-3.5 text-green-500" />
-                          <span className="font-semibold text-gray-900 dark:text-white">{stats.answers}</span>
+                          <span className="font-semibold text-gray-900 dark:text-white">
+                            {loading ? "-" : stats.answers}
+                          </span>
                         </div>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">Answers</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          Answers
+                        </span>
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -184,9 +226,13 @@ const UserCard = ({ user }: Props) => {
                       <div className="flex flex-col items-center">
                         <div className="flex items-center gap-1">
                           <Award className="h-3.5 w-3.5 text-primary-500" />
-                          <span className="font-semibold text-gray-900 dark:text-white">{stats.reputation}</span>
+                          <span className="font-semibold text-gray-900 dark:text-white">
+                            {loading ? "-" : stats.reputation}
+                          </span>
                         </div>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">Rep</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          Rep
+                        </span>
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -199,7 +245,7 @@ const UserCard = ({ user }: Props) => {
           </div>
 
           {/* Pro badge for some users */}
-          {user.reputation && user.reputation > 1000 && (
+          {stats.reputation > 1000 && (
             <div className="absolute top-3 right-3">
               <Badge className="bg-primary-500/10 text-primary-500 hover:bg-primary-500/20 px-2 py-1 flex items-center gap-1">
                 <Zap className="h-3 w-3" />
@@ -210,8 +256,7 @@ const UserCard = ({ user }: Props) => {
         </div>
       </Link>
     </motion.div>
-  )
-}
+  );
+};
 
-export default UserCard
-
+export default UserCard;
