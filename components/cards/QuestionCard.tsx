@@ -1,41 +1,52 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import RenderTag from "../shared/RenderTag"
-import Metric from "../shared/Metric"
-import { getTimestamp, formatAndDivideNumber } from "@/lib/utils"
-import { SignedIn } from "@clerk/nextjs"
-import EditDeleteAction from "../shared/EditDeleteAction"
-import type { IAnswer } from "@/database/answer.model"
-import { MessageSquare, Eye, ThumbsUp } from "lucide-react"
-import { motion } from "framer-motion"
+import Link from "next/link";
+import RenderTag from "../shared/RenderTag";
+import Metric from "../shared/Metric";
+import { getTimestamp, formatAndDivideNumber } from "@/lib/utils";
+import { SignedIn } from "@clerk/nextjs";
+import EditDeleteAction from "../shared/EditDeleteAction";
+import type { IAnswer } from "@/database/answer.model";
+import { MessageSquare, Eye, ThumbsUp } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface Props {
-  _id: string
-  currentUserId?: string | null
-  title: string
+  _id: string;
+  currentUserId?: string | null;
+  title: string;
   tags: {
-    _id: string
-    name: string
-  }[]
+    _id: string;
+    name: string;
+  }[];
   author: {
-    _id: string
-    name: string
-    clerkId: string
-    picture: string
-  }
-  upvotes: string[]
-  downvotes: string[]
-  views: number
-  answers?: IAnswer[]
-  createdAt: Date | string
+    _id: string;
+    name: string;
+    clerkId: string;
+    picture: string;
+  };
+  upvotes: string[];
+  downvotes: string[];
+  views: number;
+  answers?: IAnswer[];
+  createdAt: Date | string;
 }
 
-const QuestionCard = ({ _id, currentUserId, title, tags, author, upvotes, views, answers, createdAt }: Props) => {
-  const showActionButtons = currentUserId && currentUserId === author.clerkId
+const QuestionCard = ({
+  _id,
+  currentUserId,
+  title,
+  tags,
+  author,
+  upvotes,
+  views,
+  answers,
+  createdAt,
+}: Props) => {
+  const showActionButtons = currentUserId && currentUserId === author.clerkId;
 
   // Convert string date to Date object if needed
-  const createdAtDate = typeof createdAt === "string" ? new Date(createdAt) : createdAt
+  const createdAtDate =
+    typeof createdAt === "string" ? new Date(createdAt) : createdAt;
 
   return (
     <motion.div
@@ -50,7 +61,11 @@ const QuestionCard = ({ _id, currentUserId, title, tags, author, upvotes, views,
             <span className="text-gray-500 dark:text-gray-400 text-sm flex sm:hidden mb-2">
               {getTimestamp(createdAtDate)}
             </span>
-            <SignedIn>{showActionButtons && <EditDeleteAction type="Question" itemId={_id} />}</SignedIn>
+            <SignedIn>
+              {showActionButtons && (
+                <EditDeleteAction type="Question" itemId={_id} />
+              )}
+            </SignedIn>
           </div>
           <Link href={`/question/${_id}`} className="block group">
             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 group-hover:text-primary-500 dark:group-hover:text-primary-400 transition-colors duration-200 line-clamp-2 mb-3">
@@ -87,7 +102,9 @@ const QuestionCard = ({ _id, currentUserId, title, tags, author, upvotes, views,
           <div className="flex items-center gap-1 text-sm">
             <MessageSquare size={16} className="text-blue-500" />
             <span>{formatAndDivideNumber(answers?.length || 0)}</span>
-            <span className="text-gray-500 dark:text-gray-400 ml-1">answers</span>
+            <span className="text-gray-500 dark:text-gray-400 ml-1">
+              answers
+            </span>
           </div>
 
           <div className="flex items-center gap-1 text-sm">
@@ -98,8 +115,7 @@ const QuestionCard = ({ _id, currentUserId, title, tags, author, upvotes, views,
         </div>
       </div>
     </motion.div>
-  )
-}
+  );
+};
 
-export default QuestionCard
-
+export default QuestionCard;

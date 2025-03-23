@@ -157,3 +157,14 @@ export interface GetUserStatsParams {
 export interface DeleteUserParams {
   clerkId: string;
 }
+
+// Add these types to your shared.types.ts file
+
+export interface CreateNotificationParams {
+  recipientId: string
+  senderId?: string
+  type: "answer" | "mention" | "upvote" | "badge" | "system"
+  content: string
+  link: string
+}
+
