@@ -24,7 +24,9 @@ export default function NotFound() {
         </div>
 
         <div className="animate-fade-up">
-          <h2 className="text-4xl font-bold">Oops! Page Lost in Space</h2>
+          <h2 className="text-4xl font-bold text-light-900">
+            Oops! Page Lost in Space
+          </h2>
           <p className="text-muted-foreground text-lg mt-2">
             The page you're looking for has drifted into another dimension.
           </p>
@@ -946,7 +948,9 @@ function SpaceShooterGame() {
   return (
     <div className="space-y-4 max-w-lg mx-auto font-inter">
       <div className="space-y-2">
-        <h3 className="text-xl font-bold animate-fade-up">Space Defender</h3>
+        <h3 className="text-xl font-bold animate-fade-up text-light-900">
+          Space Defender
+        </h3>
         <p className="text-muted-foreground animate-fade-up">
           Destroy asteroids to earn points!
         </p>
