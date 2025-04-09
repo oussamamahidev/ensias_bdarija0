@@ -27,7 +27,7 @@ interface Props {
   upvotes: string[];
   downvotes: string[];
   views: number;
-  answers?: IAnswer[];
+  answers: any[];
   createdAt: Date | string;
 }
 
@@ -47,7 +47,7 @@ const QuestionCard = ({
   // Convert string date to Date object if needed
   const createdAtDate =
     typeof createdAt === "string" ? new Date(createdAt) : createdAt;
-
+  const answersCount = Array.isArray(answers) ? answers.length : 0;
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -101,7 +101,7 @@ const QuestionCard = ({
 
           <div className="flex items-center gap-1 text-sm">
             <MessageSquare size={16} className="text-blue-500" />
-            <span>{formatAndDivideNumber(answers?.length || 0)}</span>
+            <span>{formatAndDivideNumber(answersCount)}</span>
             <span className="text-gray-500 dark:text-gray-400 ml-1">
               answers
             </span>

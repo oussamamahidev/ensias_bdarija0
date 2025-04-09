@@ -21,12 +21,14 @@ import { FilterQuery } from "mongoose";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function getQuestions(params: GetQuestionsParams) {
   try {
-    await connectToDatabase();
-    const { searchQuery, filter, page = 1, pageSize = 7 } = params;
+    connectToDatabase();
 
-    //calculate number of post
+    const { searchQuery, filter, page = 1, pageSize = 20 } = params;
+
     const skipAmount = (page - 1) * pageSize;
-    const query: FilterQuery<typeof Question> = {};
+
+    const query: any = {};
+
     if (searchQuery) {
       query.$or = [
         { title: { $regex: new RegExp(searchQuery, "i") } },
@@ -35,6 +37,7 @@ export async function getQuestions(params: GetQuestionsParams) {
     }
 
     let sortOptions = {};
+
     switch (filter) {
       case "newest":
         sortOptions = { createdAt: -1 };
@@ -43,23 +46,27 @@ export async function getQuestions(params: GetQuestionsParams) {
         sortOptions = { views: -1 };
         break;
       case "unanswered":
-        query.answer = { $size: 0 };
+        query.answers = { $size: 0 }; // Changed from "answer" to "answers"
         break;
       default:
         break;
     }
+
+    const totalQuestions = await Question.countDocuments(query);
+
     const questions = await Question.find(query)
       .populate({ path: "tags", model: Tag })
       .populate({ path: "author", model: User })
       .skip(skipAmount)
       .limit(pageSize)
       .sort(sortOptions);
-    const totalQuestions = await Question.countDocuments(query);
+
     const isNext = totalQuestions > skipAmount + questions.length;
+
     return { questions, isNext };
-  } catch (err) {
-    console.log("🔴 Error fetching questions:", err);
-    return { questions: [] };
+  } catch (error) {
+    console.error(error);
+    throw error;
   }
 }
 
@@ -308,7 +315,7 @@ export async function getRecommendedQuestions(params: RecommendedParams) {
 
 export async function getFeaturedQuestions() {
   try {
-    await connectToDatabase()
+    await connectToDatabase();
 
     // Find questions with the most upvotes and views
     const featuredQuestions = await Question.find({})
@@ -321,19 +328,19 @@ export async function getFeaturedQuestions() {
         model: User,
       })
       .sort({ upvotes: -1, views: -1 })
-      .limit(5)
+      .limit(5);
 
     // If we found questions, return them
     if (featuredQuestions.length > 0) {
-      return JSON.parse(JSON.stringify(featuredQuestions))
+      return JSON.parse(JSON.stringify(featuredQuestions));
     }
 
     // If no questions were found, create a fallback question
     // This is just for development/testing - in production you might want to handle this differently
-    console.log("No featured questions found, returning empty array")
-    return []
+    console.log("No featured questions found, returning empty array");
+    return [];
   } catch (error) {
-    console.error("Error fetching featured questions:", error)
-    return []
+    console.error("Error fetching featured questions:", error);
+    return [];
   }
 }

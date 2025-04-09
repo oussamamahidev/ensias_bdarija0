@@ -26,6 +26,7 @@ export default async function TagsPage({ searchParams }: Props) {
   const result = await getAllTags({
     searchQuery: q,
     filter,
+    pageSize: 1000, // Set a very large number to effectively show all tags
   });
 
   // Serialize MongoDB documents to plain JavaScript objects
