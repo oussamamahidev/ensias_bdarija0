@@ -168,3 +168,31 @@ export interface CreateNotificationParams {
   link: string
 }
 
+// Add these types to your existing types.ts file
+
+export type MentorshipStatus = "pending" | "accepted" | "rejected" | "completed" | "cancelled";
+export type SessionStatus = "scheduled" | "in-progress" | "completed" | "cancelled" | "no-show";
+export type PaymentStatus = "pending" | "completed" | "refunded";
+
+export interface MentorAvailability {
+  monday: { start?: string; end?: string }[];
+  tuesday: { start?: string; end?: string }[];
+  wednesday: { start?: string; end?: string }[];
+  thursday: { start?: string; end?: string }[];
+  friday: { start?: string; end?: string }[];
+  saturday: { start?: string; end?: string }[];
+  sunday: { start?: string; end?: string }[];
+}
+
+export interface PreferredTimeSlot {
+  date: Date;
+  startTime: string;
+  endTime: string;
+}
+
+export interface MentorshipPayment {
+  amount: number;
+  status: PaymentStatus;
+  transactionId?: string;
+}
+

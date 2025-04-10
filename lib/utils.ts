@@ -2,6 +2,7 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import qs from "query-string";
 import { BADGE_CRITERIA } from "@/constants";
+import { format } from "date-fns";
 import { BadgeCounts, Job } from "@/types";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -194,4 +195,8 @@ export function getUserBadge(reputation: number): string | undefined {
   if (reputation >= 1000) return "silver";
   if (reputation >= 500) return "bronze";
   return undefined;
+}
+
+export function formatDate(date: Date): string {
+  return format(new Date(date), "MMM d, yyyy");
 }
