@@ -1,4 +1,3 @@
-// app/api/webhook/route.ts
 import { Webhook } from "svix";
 import { headers } from "next/headers";
 import { WebhookEvent } from "@clerk/nextjs/server";
@@ -9,9 +8,6 @@ import {
   updateUser,
 } from "@/lib/actions/user.action";
 import { NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongoose";
-import Mentor from "@/database/mentor.model";
-import User from "@/database/user.model";
 
 export async function POST(req: Request) {
   // You can find this in the Clerk Dashboard -> Webhooks -> choose the webhook
@@ -22,7 +18,7 @@ export async function POST(req: Request) {
       "Please add WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local"
     );
   }
-
+  console.log(WEBHOOK_SECRET);
   // Get the headers
   const headerPayload = headers();
   const svix_id = (await headerPayload).get("svix-id");
@@ -35,11 +31,11 @@ export async function POST(req: Request) {
       status: 400,
     });
   }
-
+  console.log(svix_id);
   // Get the body
   const payload = await req.json();
   const body = JSON.stringify(payload);
-
+  console.log(body);
   // Create a new SVIX instance with your secret.
   const wh = new Webhook(WEBHOOK_SECRET);
 
@@ -58,13 +54,14 @@ export async function POST(req: Request) {
       status: 400,
     });
   }
+  console.log("hna data dyal user clerk", evt.data);
 
   const eventType = evt.type;
-
+  console.log(eventType);
   if (eventType === "user.created") {
     const { id, email_addresses, image_url, username, first_name, last_name } =
       evt.data;
-
+    console.log("hna dkhlna lfonction create", evt.data);
     // Create a new user in your database
     const mongoUser = await createUser({
       clerkId: id,
@@ -75,22 +72,15 @@ export async function POST(req: Request) {
       email: email_addresses[0].email_address,
       picture: image_url,
     });
+    console.log("create user", mongoUser);
 
     return NextResponse.json({ message: "OK", user: mongoUser });
   }
 
   if (eventType === "user.updated") {
-    const {
-      id,
-      email_addresses,
-      image_url,
-      username,
-      first_name,
-      last_name,
-      public_metadata,
-    } = evt.data;
-
-    // Update basic user info
+    const { id, email_addresses, image_url, username, first_name, last_name } =
+      evt.data;
+    // Create a new user in your database
     const mongoUser = await updateUser({
       clerkId: id,
       updateData: {
@@ -103,38 +93,7 @@ export async function POST(req: Request) {
       },
       path: `/profile/${id}`,
     });
-
-    // Handle mentor status updates if public_metadata exists
-    if (public_metadata) {
-      await connectToDatabase();
-
-      // Find the user in MongoDB
-      const user = await User.findOne({ clerkId: id });
-
-      if (user) {
-        // Check mentor status in metadata
-        const isMentor = public_metadata.isMentor === true;
-        const isMentorPending = public_metadata.isMentorPending === true;
-
-        // Find existing mentor record
-        const existingMentor = await Mentor.findOne({ user: user._id });
-
-        if (isMentor && existingMentor) {
-          // Update mentor verification status
-          await Mentor.findByIdAndUpdate(existingMentor._id, {
-            isVerified: true,
-          });
-        } else if (isMentorPending && !existingMentor) {
-          // This is a fallback in case the mentor record wasn't created
-          console.log("Mentor record not found but user has pending status");
-        } else if (!isMentor && !isMentorPending && existingMentor) {
-          // If mentor status was revoked, update the mentor record
-          await Mentor.findByIdAndUpdate(existingMentor._id, {
-            isVerified: false,
-          });
-        }
-      }
-    }
+    console.log("creatupdatee user", mongoUser);
 
     return NextResponse.json({ message: "OK", user: mongoUser });
   }
