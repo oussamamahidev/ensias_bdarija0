@@ -3,7 +3,7 @@
 import Question from "@/database/question.model";
 import { connectToDatabase } from "../mongoose";
 import Tag from "@/database/tag.model";
-import {
+import type {
   CreateQuestionParams,
   DeleteQuestionParams,
   EditQuestionParams,
@@ -16,9 +16,8 @@ import User from "@/database/user.model";
 import { revalidatePath } from "next/cache";
 import Answer from "@/database/answer.model";
 import Interaction from "@/database/interaction.model";
-import { FilterQuery } from "mongoose";
+import type { FilterQuery } from "mongoose";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function getQuestions(params: GetQuestionsParams) {
   try {
     connectToDatabase();
@@ -46,7 +45,7 @@ export async function getQuestions(params: GetQuestionsParams) {
         sortOptions = { views: -1 };
         break;
       case "unanswered":
-        query.answers = { $size: 0 }; // Changed from "answer" to "answers"
+        query.answers = { $size: 0 };
         break;
       default:
         break;
@@ -65,7 +64,7 @@ export async function getQuestions(params: GetQuestionsParams) {
 
     return { questions, isNext };
   } catch (error) {
-    console.error(error);
+    console.error("Error getting questions:", error);
     throw error;
   }
 }
@@ -108,20 +107,40 @@ export async function createQuestion(params: CreateQuestionParams) {
     throw err;
   }
 }
+
 export async function getQuestionById(params: GetQuestionByIdParams) {
   try {
     await connectToDatabase();
     const { questionId } = params;
+
     const question = await Question.findById(questionId)
       .populate({ path: "tags", model: Tag, select: "_id name" })
       .populate({
         path: "author",
         model: User,
         select: "_id clerkId name picture",
+      })
+      // Add this line to populate the answers array
+      .populate({
+        path: "answers",
+        model: "Answer",
+        populate: {
+          path: "author",
+          model: User,
+          select: "_id clerkId name picture",
+        },
       });
+
+    if (!question) {
+      throw new Error("Question not found");
+    }
+
+    // Increment view count
+    await Question.findByIdAndUpdate(questionId, { $inc: { views: 1 } });
+
     return question;
   } catch (err) {
-    console.log(err);
+    console.error("Error getting question by ID:", err);
     throw err;
   }
 }
@@ -148,7 +167,7 @@ export async function upvoteQuestion(params: QuestionVoteParams) {
     if (!question) {
       throw new Error("Question not found");
     }
-    //increment author repatition by -10for upvoting a question
+    //increment author reputation by -10 for upvoting a question
     await User.findByIdAndUpdate(userId, {
       $inc: { reputation: hasAlreadyUpvoted ? -2 : 2 },
     });
@@ -158,7 +177,7 @@ export async function upvoteQuestion(params: QuestionVoteParams) {
     });
     revalidatePath(path);
   } catch (err) {
-    console.log(err);
+    console.error("Error upvoting question:", err);
     throw err;
   }
 }
@@ -170,7 +189,8 @@ export async function downvoteQuestion(params: QuestionVoteParams) {
       params;
     let updateQuery = {};
     if (hasAlreadyDownvoted) {
-      updateQuery = { $pull: { downvote: userId } };
+      // Fixed: Changed 'downvote' to 'downvotes'
+      updateQuery = { $pull: { downvotes: userId } };
     } else if (hasAlreadyUpvoted) {
       updateQuery = {
         $pull: { upvotes: userId },
@@ -195,7 +215,7 @@ export async function downvoteQuestion(params: QuestionVoteParams) {
     });
     revalidatePath(path);
   } catch (err) {
-    console.log(err);
+    console.error("Error downvoting question:", err);
     throw err;
   }
 }
@@ -219,10 +239,11 @@ export async function deleteQuestion(params: DeleteQuestionParams) {
     );
     revalidatePath(path);
   } catch (err) {
-    console.log(err);
+    console.error("Error deleting question:", err);
     throw err;
   }
 }
+
 export async function editQuestion(params: EditQuestionParams) {
   try {
     connectToDatabase();
@@ -236,7 +257,8 @@ export async function editQuestion(params: EditQuestionParams) {
     await question.save();
     revalidatePath(path);
   } catch (error) {
-    console.log(error);
+    console.error("Error editing question:", error);
+    throw error;
   }
 }
 
@@ -248,7 +270,7 @@ export async function getHotQuestions() {
       .limit(5);
     return JSON.parse(JSON.stringify(hotQuestions));
   } catch (err) {
-    console.log(err);
+    console.error("Error getting hot questions:", err);
     throw err;
   }
 }

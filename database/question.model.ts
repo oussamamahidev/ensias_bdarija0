@@ -1,4 +1,4 @@
-import { Schema, models, model, Document } from "mongoose";
+import { Schema, models, model, type Document } from "mongoose";
 
 export interface Iquestion extends Document {
   title: string;
@@ -8,13 +8,14 @@ export interface Iquestion extends Document {
   upvotes: Schema.Types.ObjectId[];
   downvotes: Schema.Types.ObjectId[];
   author: Schema.Types.ObjectId;
-  anwers: Schema.Types.ObjectId[];
+  // Fixed: Changed 'anwers' to 'answers'
+  answers: Schema.Types.ObjectId[];
   createdAt: Date;
 }
 
 const QuestionSchema = new Schema({
-  title: { type: String, require: true },
-  content: { type: String, require: true },
+  title: { type: String, required: true }, // Fixed: Changed 'require' to 'required'
+  content: { type: String, required: true }, // Fixed: Changed 'require' to 'required'
   tags: [{ type: Schema.Types.ObjectId, ref: "Tag" }],
   views: { type: Number, default: 0 },
   upvotes: [{ type: Schema.Types.ObjectId, ref: "User" }],

@@ -1,15 +1,15 @@
-import Filter from "./Filter"
-import { AnswerFilters } from "@/constants/filters"
-import { getAnswers } from "@/lib/actions/answer.action"
-import Link from "next/link"
-import Image from "next/image"
-import { getTimestamp } from "@/lib/utils"
-import ParseHTML from "./ParseHtml"
-import Votes from "./Votes"
-import Pagination from "./search/Pagination"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import Filter from "./Filter";
+import { AnswerFilters } from "@/constants/filters";
+import { getAnswers } from "@/lib/actions/answer.action";
+import Link from "next/link";
+import Image from "next/image";
+import { getTimestamp } from "@/lib/utils";
+import ParseHTML from "./ParseHtml";
+import Votes from "./Votes";
+import Pagination from "./search/Pagination";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   MessageSquare,
   ThumbsUp,
@@ -23,23 +23,36 @@ import {
   Star,
   Lightbulb,
   Bookmark,
-} from "lucide-react"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+} from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface Props {
-  questionId: string
-  userId: string
-  totalANswers: string
-  page?: string
-  filter?: string
+  questionId: string;
+  userId: string;
+  // FIXED: Changed type from string to number
+  totalANswers: number;
+  page?: string;
+  filter?: string;
 }
 
-const AllAnswers = async ({ questionId, totalANswers, userId, filter, page }: Props) => {
+const AllAnswers = async ({
+  questionId,
+  totalANswers,
+  userId,
+  filter,
+  page,
+}: Props) => {
   const result = await getAnswers({
     questionId,
-    page: page ? -page : 1,
+    // FIXED: Removed the negative sign which was causing issues
+    page: page ? +page : 1,
     sortBy: filter,
-  })
+  });
 
   return (
     <div className="mt-11 w-full">
@@ -56,8 +69,8 @@ const AllAnswers = async ({ questionId, totalANswers, userId, filter, page }: Pr
 
       <div className="space-y-8">
         {result.answers.map((answer, index) => {
-          const isTopAnswer = index === 0 && result.answers.length > 1
-          const hasHighVotes = answer.upvotes.length > 5
+          const isTopAnswer = index === 0 && result.answers.length > 1;
+          const hasHighVotes = answer.upvotes.length > 5;
 
           return (
             <Card
@@ -80,12 +93,19 @@ const AllAnswers = async ({ questionId, totalANswers, userId, filter, page }: Pr
                 </div>
               )}
 
-              <CardContent className={`p-6 ${isTopAnswer ? "bg-primary-500/5" : ""}`}>
+              <CardContent
+                className={`p-6 ${isTopAnswer ? "bg-primary-500/5" : ""}`}
+              >
                 <div className="flex items-center justify-between mb-6">
-                  <Link href={`/profile/${answer.author.clerkId}`} className="flex items-center gap-2 group">
+                  <Link
+                    href={`/profile/${answer.author.clerkId}`}
+                    className="flex items-center gap-2 group"
+                  >
                     <div className="relative">
                       <Image
-                        src={answer.author.picture || "/assets/icons/avatar.svg"}
+                        src={
+                          answer.author.picture || "/assets/icons/avatar.svg"
+                        }
                         alt="profile"
                         width={40}
                         height={40}
@@ -103,7 +123,9 @@ const AllAnswers = async ({ questionId, totalANswers, userId, filter, page }: Pr
                         {answer.author.name}
                       </p>
                       <div className="flex items-center gap-2">
-                        <p className="text-xs text-dark400_light500">Answered {getTimestamp(answer.createdAt)}</p>
+                        <p className="text-xs text-dark400_light500">
+                          Answered {getTimestamp(answer.createdAt)}
+                        </p>
                         {answer.author.reputation > 100 && (
                           <Badge className="bg-primary-500/10 text-primary-500 text-xs px-2 py-0.5">
                             <Zap className="h-3 w-3 mr-1" />
@@ -135,7 +157,9 @@ const AllAnswers = async ({ questionId, totalANswers, userId, filter, page }: Pr
                   <div className="flex gap-2">
                     <Badge
                       className={`${
-                        hasHighVotes ? "bg-green-500/10 text-green-500" : "bg-gray-500/10 text-gray-500"
+                        hasHighVotes
+                          ? "bg-green-500/10 text-green-500"
+                          : "bg-gray-500/10 text-gray-500"
                       } px-3 py-1.5 rounded-full`}
                     >
                       <ThumbsUp className="h-3.5 w-3.5 mr-1" />
@@ -246,16 +270,18 @@ const AllAnswers = async ({ questionId, totalANswers, userId, filter, page }: Pr
                 </div>
               </CardContent>
             </Card>
-          )
+          );
         })}
       </div>
 
       <div className="mt-10 w-full">
-        <Pagination pageNumber={page ? +page : 1} isNext={result.isNext || false} />
+        <Pagination
+          pageNumber={page ? +page : 1}
+          isNext={result.isNext || false}
+        />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default AllAnswers
-
+export default AllAnswers;
