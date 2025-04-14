@@ -72,6 +72,7 @@ function TabsLoading() {
 const Page = async ({ params, searchParams }: URLProps) => {
   const { id } = await params;
   const { userId: clerkId } = await auth();
+
   let userInfo;
   let error = null;
 
