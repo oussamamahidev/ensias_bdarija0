@@ -1,26 +1,25 @@
-import { Suspense } from "react"
-import AnswersTab from "@/components/shared/AnswersTab"
-import QuestionTab from "@/components/shared/QuestionTab"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { getUserInfo } from "@/lib/actions/user.action"
-import { auth } from "@clerk/nextjs/server"
+import { Suspense } from "react";
+import AnswersTab from "@/components/shared/AnswersTab";
+import QuestionTab from "@/components/shared/QuestionTab";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getUserInfo } from "@/lib/actions/user.action";
+import { auth } from "@clerk/nextjs/server";
 
-import { Skeleton } from "@/components/ui/skeleton"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle, MessageSquare, ThumbsUp, Activity } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle, MessageSquare, ThumbsUp, Activity } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
-
-import AchievementBadges from "@/components/shared/AchievementBadges"
-import ProfileSkills from "@/components/profile/ProfileSkills"
-import Stats from "@/components/shared/Stats"
-import ProfileHeader from "@/components/profile/ProfileHeader"
-import ProfileInterests from "@/components/profile/ProfileInterests"
-import ProfileActivity from "@/components/profile/ProfileActivity"
+import AchievementBadges from "@/components/shared/AchievementBadges";
+import ProfileSkills from "@/components/profile/ProfileSkills";
+import Stats from "@/components/shared/Stats";
+import ProfileHeader from "@/components/profile/ProfileHeader";
+import ProfileInterests from "@/components/profile/ProfileInterests";
+import ProfileActivity from "@/components/profile/ProfileActivity";
 
 interface URLProps {
-  params: Promise<{ id: string }>
-  searchParams: Promise<{ [key: string]: string | undefined }>
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | undefined }>;
 }
 
 // Loading fallbacks
@@ -44,7 +43,7 @@ function ProfileHeaderLoading() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function StatsLoading() {
@@ -54,7 +53,7 @@ function StatsLoading() {
         <Skeleton key={i} className="h-32 w-full rounded-xl" />
       ))}
     </div>
-  )
+  );
 }
 
 function TabsLoading() {
@@ -67,21 +66,20 @@ function TabsLoading() {
         ))}
       </div>
     </div>
-  )
+  );
 }
 
 const Page = async ({ params, searchParams }: URLProps) => {
-  const { id } = await params
-  const { userId: clerkId } = await auth()
-
-  let userInfo
-  let error = null
+  const { id } = await params;
+  const { userId: clerkId } = await auth();
+  let userInfo;
+  let error = null;
 
   try {
-    userInfo = await getUserInfo({ userId: id })
+    userInfo = await getUserInfo({ userId: id });
   } catch (err) {
-    console.error("Error fetching user info:", err)
-    error = "Failed to load user profile. Please try again later."
+    console.error("Error fetching user info:", err);
+    error = "Failed to load user profile. Please try again later.";
 
     // Provide default values to prevent UI errors
     userInfo = {
@@ -98,11 +96,11 @@ const Page = async ({ params, searchParams }: URLProps) => {
       totalQuestions: 0,
       totalAnswers: 0,
       badgeCounts: { GOLD: 0, SILVER: 0, BRONZE: 0 },
-    }
+    };
   }
 
-  const { tabParam } = await searchParams
-  const activeTab = tabParam || "top-posts"
+  const { tabParam } = await searchParams;
+  const activeTab = tabParam || "top-posts";
 
   // Mock data for skills - in a real app, this would come from your database
   const skills = [
@@ -111,10 +109,16 @@ const Page = async ({ params, searchParams }: URLProps) => {
     { name: "Node.js", level: 80 },
     { name: "TypeScript", level: 75 },
     { name: "Next.js", level: 70 },
-  ]
+  ];
 
   // Mock data for interests
-  const interests = ["Web Development", "UI/UX Design", "Machine Learning", "Open Source", "Cloud Computing"]
+  const interests = [
+    "Web Development",
+    "UI/UX Design",
+    "Machine Learning",
+    "Open Source",
+    "Cloud Computing",
+  ];
 
   return (
     <div className="flex flex-col gap-8 pb-10">
@@ -146,7 +150,9 @@ const Page = async ({ params, searchParams }: URLProps) => {
           <Card className="overflow-hidden">
             <div className="h-2 bg-gradient-to-r from-green-500 to-teal-500" />
             <CardContent className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Skills</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Skills
+              </h3>
               <ProfileSkills skills={skills} />
             </CardContent>
           </Card>
@@ -155,7 +161,9 @@ const Page = async ({ params, searchParams }: URLProps) => {
           <Card className="overflow-hidden">
             <div className="h-2 bg-gradient-to-r from-amber-500 to-yellow-500" />
             <CardContent className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Interests</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Interests
+              </h3>
               <ProfileInterests interests={interests} />
             </CardContent>
           </Card>
@@ -164,7 +172,9 @@ const Page = async ({ params, searchParams }: URLProps) => {
           <Card className="overflow-hidden">
             <div className="h-2 bg-gradient-to-r from-blue-500 to-purple-500" />
             <CardContent className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Achievements</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Achievements
+              </h3>
               <AchievementBadges userId={userInfo.user._id} />
             </CardContent>
           </Card>
@@ -176,29 +186,55 @@ const Page = async ({ params, searchParams }: URLProps) => {
             <div className="w-full">
               <Tabs defaultValue={activeTab} className="w-full">
                 <TabsList className="background-light800_dark400 min-h-[48px] p-1 rounded-xl">
-                  <TabsTrigger value="top-posts" className="tab rounded-lg text-base flex items-center gap-2">
+                  <TabsTrigger
+                    value="top-posts"
+                    className="tab rounded-lg text-base flex items-center gap-2"
+                  >
                     <ThumbsUp className="h-4 w-4" />
                     Top Posts
                   </TabsTrigger>
-                  <TabsTrigger value="answers" className="tab rounded-lg text-base flex items-center gap-2">
+                  <TabsTrigger
+                    value="answers"
+                    className="tab rounded-lg text-base flex items-center gap-2"
+                  >
                     <MessageSquare className="h-4 w-4" />
                     Answers
                   </TabsTrigger>
-                  <TabsTrigger value="activity" className="tab rounded-lg text-base flex items-center gap-2">
+                  <TabsTrigger
+                    value="activity"
+                    className="tab rounded-lg text-base flex items-center gap-2"
+                  >
                     <Activity className="h-4 w-4" />
                     Activity
                   </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="top-posts" className="mt-5 flex w-full flex-col gap-6">
-                  <QuestionTab searchParams={searchParams} userId={userInfo.user._id} clerkId={clerkId} />
+                <TabsContent
+                  value="top-posts"
+                  className="mt-5 flex w-full flex-col gap-6"
+                >
+                  <QuestionTab
+                    searchParams={searchParams}
+                    userId={userInfo.user._id}
+                    clerkId={clerkId}
+                  />
                 </TabsContent>
 
-                <TabsContent value="answers" className="flex w-full flex-col gap-6">
-                  <AnswersTab searchParams={searchParams} userId={userInfo.user._id} clerkId={clerkId} />
+                <TabsContent
+                  value="answers"
+                  className="flex w-full flex-col gap-6"
+                >
+                  <AnswersTab
+                    searchParams={searchParams}
+                    userId={userInfo.user._id}
+                    clerkId={clerkId}
+                  />
                 </TabsContent>
 
-                <TabsContent value="activity" className="flex w-full flex-col gap-6">
+                <TabsContent
+                  value="activity"
+                  className="flex w-full flex-col gap-6"
+                >
                   <ProfileActivity userId={userInfo.user._id} />
                 </TabsContent>
               </Tabs>
@@ -207,8 +243,7 @@ const Page = async ({ params, searchParams }: URLProps) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Page
-
+export default Page;
