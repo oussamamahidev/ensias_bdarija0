@@ -35,11 +35,15 @@ export interface ParamsProps {
 export interface SearchParamsProps {
   searchParams: { [key: string]: string | undefined };
 }
+export interface SearchParamsPropss {
+  searchParams: Promise<{ [key: string]: string | undefined }>;
+}
 
-export interface URLProps {
+export interface URLProps{
   params: { id: string };
   searchParams: { [key: string]: string | undefined };
 }
+
 
 export interface BadgeCounts {
   GOLD: number;
@@ -52,4 +56,22 @@ export type BadgeCriteriaType = keyof typeof BADGE_CRITERIA;
 export interface IFilterOptions {
   name: string;
   value: string;
+}
+
+// Basic params type for all dynamic routes
+export type DynamicParams<T> = Promise<T>;
+
+// Specific params types for each route
+export interface TagPageParams {
+  id: string;
+}
+
+export interface QuestionPageParams {
+  id: string;
+}
+
+// Page props types
+export interface PageProps<T> {
+  params: DynamicParams<T>;
+  searchParams?: { [key: string]: string | undefined };
 }
