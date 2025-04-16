@@ -16,18 +16,13 @@ import { getCodeChallenges } from "@/lib/actions/expert.action";
 import { formatDistanceToNow } from "date-fns";
 
 interface CodeChallengesPageProps {
-  searchParams: {
-    difficulty?: string;
-    tag?: string;
-    q?: string;
-    page?: string;
-  };
+  searchParams: Promise<{ [key: string]: string | undefined }>;
 }
 
 export default async function CodeChallengesPage({
   searchParams,
 }: CodeChallengesPageProps) {
-  const { difficulty, tag, q, page } = searchParams;
+  const { difficulty, tag, q, page } = await searchParams;
   const currentPage = page ? Number.parseInt(page) : 1;
 
   const { challenges, isNext } = await getCodeChallenges({
