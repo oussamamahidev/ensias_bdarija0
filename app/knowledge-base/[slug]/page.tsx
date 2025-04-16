@@ -10,15 +10,13 @@ import { getUserById } from "@/lib/actions/user.action";
 import LikeArticleButton from "@/components/expert/LikeArticleButton";
 
 interface KnowledgeBaseArticlePageProps {
-  params: {
-    slug: string;
-  };
+  params: Promise<{ slug: string }>;
 }
 
 export default async function KnowledgeBaseArticlePage({
   params,
 }: KnowledgeBaseArticlePageProps) {
-  const { slug } = params;
+  const { slug } = await params;
 
   // Get the article
   const article = await getKnowledgeBaseArticleBySlug({ slug });

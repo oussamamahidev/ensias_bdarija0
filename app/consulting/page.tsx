@@ -15,18 +15,13 @@ import Link from "next/link";
 import { getExperts } from "@/lib/actions/expert.action";
 
 interface ConsultingPageProps {
-  searchParams: {
-    expertise?: string;
-    q?: string;
-    page?: string;
-    sortBy?: string;
-  };
+  searchParams: Promise<{ [key: string]: string | undefined }>;
 }
 
 export default async function ConsultingPage({
   searchParams,
 }: ConsultingPageProps) {
-  const { expertise, q, page, sortBy = "rating" } = searchParams;
+  const { expertise, q, page, sortBy = "rating" } = await searchParams;
   const currentPage = page ? Number.parseInt(page) : 1;
 
   const { experts, isNext } = await getExperts({

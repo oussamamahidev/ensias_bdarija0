@@ -16,17 +16,13 @@ import { getKnowledgeBaseArticles } from "@/lib/actions/expert.action";
 import { formatDistanceToNow } from "date-fns";
 
 interface KnowledgeBasePageProps {
-  searchParams: {
-    category?: string;
-    q?: string;
-    page?: string;
-  };
+  searchParams: Promise<{ [key: string]: string | undefined }>;
 }
 
 export default async function KnowledgeBasePage({
   searchParams,
 }: KnowledgeBasePageProps) {
-  const { category, q, page } = searchParams;
+  const { category, q, page } = await searchParams;
   const currentPage = page ? Number.parseInt(page) : 1;
 
   const { articles, isNext } = await getKnowledgeBaseArticles({
