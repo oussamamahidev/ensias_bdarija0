@@ -36,11 +36,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { deleteCodeChallenge } from "@/lib/actions/expert.action";
 
 import CodeChallengeCreator from "./CodeChallengeCreator";
 import { CodeChallenge } from "@/types/code-challenge";
 import { useToast } from "../ui/use-toast";
+import { deleteCodeChallenge } from "@/lib/actions/expert.action";
 
 interface CodeChallengeManagerProps {
   mongoUserId: string;
@@ -244,7 +244,7 @@ export default function CodeChallengeManager({
               </CardHeader>
               <CardContent className="pb-3">
                 <div className="flex flex-wrap gap-2">
-                  {challenge.tags.map((tag:any, index:any) => (
+                  {challenge.tags.map((tag: any, index: any) => (
                     <Badge
                       key={index}
                       variant="secondary"

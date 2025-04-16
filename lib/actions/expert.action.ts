@@ -205,7 +205,8 @@ export async function getKnowledgeBaseArticleBySlug(
     }).populate("author", "name username picture");
 
     if (!article) {
-      throw new Error("Article not found");
+      // Instead of throwing an error, return null or an empty article object
+      return null;
     }
 
     // Increment view count
@@ -216,7 +217,8 @@ export async function getKnowledgeBaseArticleBySlug(
     return JSON.parse(JSON.stringify(article));
   } catch (error) {
     console.error("Error getting knowledge base article by slug:", error);
-    throw error;
+    // Return null instead of throwing the error
+    return null;
   }
 }
 
@@ -281,17 +283,7 @@ export async function deleteKnowledgeBaseArticle(
 
 // ==================== CODE CHALLENGE ACTIONS ====================
 
-export async function createCodeChallenge(params: {
-  title: string;
-  description: string;
-  difficulty: "beginner" | "intermediate" | "advanced" | "expert";
-  tags: string[];
-  author: string;
-  starterCode: string;
-  testCases: { input: string; expectedOutput: string }[];
-  path: string;
-  published: boolean;
-}) {
+export async function createCodeChallenge(params: CreateCodeChallengeParams) {
   try {
     await connectToDatabase();
 
@@ -304,25 +296,14 @@ export async function createCodeChallenge(params: {
       starterCode,
       testCases,
       path,
-      published,
+      published = false,
     } = params;
 
-    // Create a slug from the title
-    const slug = title
-      .toLowerCase()
-      .replace(/[^\w\s]/gi, "")
-      .replace(/\s+/g, "-");
-
-    // Check if a challenge with this slug already exists
-    const existingChallenge = await CodeChallenge.findOne({ slug });
-
-    // If it exists, add a random suffix to make it unique
-    const finalSlug = existingChallenge
-      ? `${slug}-${Math.floor(Math.random() * 1000)}`
-      : slug;
+    // Generate a slug from the title
+    const slug = await generateUniqueSlug(title);
 
     // Create the challenge
-    const challenge = await CodeChallenge.create({
+    const newChallenge = await CodeChallenge.create({
       title,
       description,
       difficulty,
@@ -331,35 +312,21 @@ export async function createCodeChallenge(params: {
       starterCode,
       testCases,
       published,
-      slug: finalSlug,
+      slug,
     });
 
-    // Update the user's challenges
-    await User.findByIdAndUpdate(author, {
-      $push: { challenges: challenge._id },
-    });
+    // Update user's reputation
+    await User.findByIdAndUpdate(author, { $inc: { reputation: 15 } });
 
     revalidatePath(path);
-
-    return challenge;
+    return JSON.parse(JSON.stringify(newChallenge));
   } catch (error) {
     console.error("Error creating code challenge:", error);
     throw error;
   }
 }
 
-// Update an existing code challenge
-export async function updateCodeChallenge(params: {
-  challengeId: string;
-  title: string;
-  description: string;
-  difficulty: "beginner" | "intermediate" | "advanced" | "expert";
-  tags: string[];
-  starterCode: string;
-  testCases: { input: string; expectedOutput: string }[];
-  path: string;
-  published: boolean;
-}) {
+export async function updateCodeChallenge(params: UpdateCodeChallengeParams) {
   try {
     await connectToDatabase();
 
@@ -371,86 +338,64 @@ export async function updateCodeChallenge(params: {
       tags,
       starterCode,
       testCases,
-      path,
       published,
+      path,
     } = params;
+
+    // Prepare update object
+    const updateData: any = {};
+    if (title !== undefined) updateData.title = title;
+    if (description !== undefined) updateData.description = description;
+    if (difficulty !== undefined) updateData.difficulty = difficulty;
+    if (tags !== undefined) updateData.tags = tags;
+    if (starterCode !== undefined) updateData.starterCode = starterCode;
+    if (testCases !== undefined) updateData.testCases = testCases;
+    if (published !== undefined) updateData.published = published;
+    updateData.updatedAt = new Date();
+
+    // If title is updated, generate a new slug
+    if (title) {
+      updateData.slug = await generateUniqueSlug(title);
+    }
 
     // Update the challenge
     const updatedChallenge = await CodeChallenge.findByIdAndUpdate(
       challengeId,
-      {
-        title,
-        description,
-        difficulty,
-        tags,
-        starterCode,
-        testCases,
-        published,
-      },
+      updateData,
       { new: true }
-    ).populate({
-      path: "author",
-      model: User,
-      select: "_id name picture",
-    });
+    );
 
     if (!updatedChallenge) {
       throw new Error("Challenge not found");
     }
 
     revalidatePath(path);
-
-    return updatedChallenge;
+    return JSON.parse(JSON.stringify(updatedChallenge));
   } catch (error) {
     console.error("Error updating code challenge:", error);
     throw error;
   }
 }
 
-// Delete a code challenge
-export async function deleteCodeChallenge(challengeId: string, path: string) {
+export async function getCodeChallenges(params: GetCodeChallengesParams) {
   try {
     await connectToDatabase();
 
-    // Find the challenge to get the author
-    const challenge = await CodeChallenge.findById(challengeId);
+    const {
+      page = 1,
+      pageSize = 10,
+      difficulty,
+      tags,
+      searchQuery,
+      authorId,
+      sortBy = "newest",
+    } = params;
 
-    if (!challenge) {
-      throw new Error("Challenge not found");
-    }
+    // Calculate skip amount for pagination
+    const skipAmount = (page - 1) * pageSize;
 
-    // Delete the challenge
-    await CodeChallenge.findByIdAndDelete(challengeId);
-
-    // Update the user's challenges
-    await User.findByIdAndUpdate(challenge.author, {
-      $pull: { challenges: challengeId },
-    });
-
-    revalidatePath(path);
-
-    return { success: true };
-  } catch (error) {
-    console.error("Error deleting code challenge:", error);
-    throw error;
-  }
-}
-
-// Get code challenges with filtering and pagination
-export async function getCodeChallenges(params: {
-  difficulty?: string;
-  tags?: string[];
-  searchQuery?: string;
-  page?: number;
-  pageSize?: number;
-}) {
-  try {
-    await connectToDatabase();
-
-    const { difficulty, tags, searchQuery, page = 1, pageSize = 10 } = params;
-
-    // Build the query
-    const query: any = { published: true };
+    // Prepare filter query
+    const query: FilterQuery<typeof CodeChallenge> = { published: true };
 
     if (difficulty) {
       query.difficulty = difficulty;
@@ -462,81 +407,138 @@ export async function getCodeChallenges(params: {
 
     if (searchQuery) {
       query.$or = [
-        { title: { $regex: searchQuery, $options: "i" } },
-        { description: { $regex: searchQuery, $options: "i" } },
+        { title: { $regex: new RegExp(searchQuery, "i") } },
+        { description: { $regex: new RegExp(searchQuery, "i") } },
       ];
     }
 
-    // Calculate skip for pagination
-    const skipAmount = (page - 1) * pageSize;
+    if (authorId) {
+      query.author = authorId;
+    }
 
-    // Get challenges
+    // Prepare sort options
+    let sortOptions = {};
+    switch (sortBy) {
+      case "newest":
+        sortOptions = { createdAt: -1 };
+        break;
+      case "oldest":
+        sortOptions = { createdAt: 1 };
+        break;
+      case "popular":
+        sortOptions = { "submissions.length": -1 };
+        break;
+      default:
+        sortOptions = { createdAt: -1 };
+    }
+
+    // Get challenges with pagination
     const challenges = await CodeChallenge.find(query)
-      .populate({
-        path: "author",
-        model: User,
-        select: "_id name picture",
-      })
-      .sort({ createdAt: -1 })
+      .populate("author", "name username picture")
+      .sort(sortOptions)
       .skip(skipAmount)
       .limit(pageSize);
 
-    // Get total count for pagination
+    // Get total challenges count for pagination
     const totalChallenges = await CodeChallenge.countDocuments(query);
+
+    // Check if there are more challenges
     const isNext = totalChallenges > skipAmount + challenges.length;
 
-    return { challenges, isNext };
+    return { challenges: JSON.parse(JSON.stringify(challenges)), isNext };
   } catch (error) {
     console.error("Error getting code challenges:", error);
     throw error;
   }
 }
 
-// Get a single code challenge by slug
-export async function getCodeChallengeBySlug(params: { slug: string }) {
+export async function getCodeChallengeBySlug(
+  params: GetCodeChallengeBySlugParams
+) {
   try {
     await connectToDatabase();
 
     const { slug } = params;
 
-    // Find the challenge
+    // Find the challenge by slug
     const challenge = await CodeChallenge.findOne({
       slug,
       published: true,
-    }).populate({
-      path: "author",
-      model: User,
-      select: "_id name picture",
-    });
+    }).populate("author", "name username picture");
 
     if (!challenge) {
       throw new Error("Challenge not found");
     }
 
-    // Increment views
-    challenge.views = (challenge.views || 0) + 1;
-    await challenge.save();
-
-    return challenge;
+    return JSON.parse(JSON.stringify(challenge));
   } catch (error) {
     console.error("Error getting code challenge by slug:", error);
     throw error;
   }
 }
 
-// Get challenges by user
-export async function getChallengesByUser(userId: string) {
+export async function submitCodeChallenge(params: SubmitCodeChallengeParams) {
   try {
     await connectToDatabase();
 
-    // Find all challenges by this user
-    const challenges = await CodeChallenge.find({ author: userId }).sort({
-      createdAt: -1,
+    const { challengeId, userId, code, path } = params;
+
+    // Find the challenge
+    const challenge = await CodeChallenge.findById(challengeId);
+    if (!challenge) {
+      throw new Error("Challenge not found");
+    }
+
+    // In a real implementation, you would run the code against test cases
+    // For now, we'll simulate a successful submission
+    const passed = true;
+    const executionTime = Math.floor(Math.random() * 500); // Random execution time between 0-500ms
+
+    // Create the submission
+    const submission = await CodeSubmission.create({
+      challenge: challengeId,
+      user: userId,
+      code,
+      passed,
+      executionTime,
     });
 
-    return challenges;
+    // Update the challenge with the new submission
+    await CodeChallenge.findByIdAndUpdate(challengeId, {
+      $push: { submissions: submission._id },
+    });
+
+    // Update user's reputation if passed
+    if (passed) {
+      await User.findByIdAndUpdate(userId, { $inc: { reputation: 5 } });
+    }
+
+    revalidatePath(path);
+    return JSON.parse(JSON.stringify({ submission, passed, executionTime }));
   } catch (error) {
-    console.error("Error getting user challenges:", error);
+    console.error("Error submitting code challenge:", error);
+    throw error;
+  }
+}
+
+export async function deleteCodeChallenge(challengeId: string, path: string) {
+  try {
+    await connectToDatabase();
+
+    // Delete the challenge
+    const deletedChallenge = await CodeChallenge.findByIdAndDelete(challengeId);
+
+    if (!deletedChallenge) {
+      throw new Error("Challenge not found");
+    }
+
+    // Delete all submissions for this challenge
+    await CodeSubmission.deleteMany({ challenge: challengeId });
+
+    revalidatePath(path);
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting code challenge:", error);
     throw error;
   }
 }

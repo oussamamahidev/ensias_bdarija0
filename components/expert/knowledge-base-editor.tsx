@@ -1,8 +1,9 @@
 "use client";
 
 import type React from "react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { Editor } from "@tinymce/tinymce-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -23,7 +24,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Editor } from "@tinymce/tinymce-react";
 import { FileText, Save, Loader2, AlertCircle } from "lucide-react";
 import {
   createKnowledgeBaseArticle,
@@ -31,6 +31,7 @@ import {
 } from "@/lib/actions/expert.action";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/components/ui/use-toast";
+import { useTheme } from "@/context/ThemeProvider";
 
 interface KnowledgeBaseArticle {
   _id: string;
@@ -52,12 +53,12 @@ interface KnowledgeBaseEditorProps {
   onUpdateSuccess?: (article: KnowledgeBaseArticle) => void;
 }
 
-const KnowledgeBaseEditor = ({
+export default function KnowledgeBaseEditor({
   mongoUserId,
   isEditing = false,
   articleToEdit,
   onUpdateSuccess,
-}: KnowledgeBaseEditorProps) => {
+}: KnowledgeBaseEditorProps) {
   const router = useRouter();
   const [title, setTitle] = useState(articleToEdit?.title || "");
   const [category, setCategory] = useState(articleToEdit?.category || "");
@@ -66,21 +67,11 @@ const KnowledgeBaseEditor = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("write");
   const [error, setError] = useState("");
-  const [editorLoaded, setEditorLoaded] = useState(false);
-  const [editorError, setEditorError] = useState<string | null>(null);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editorRef = useRef<any>(null);
-
-  // Check for TinyMCE API key on component mount
-  useEffect(() => {
-    const apiKey = process.env.NEXT_PUBLIC_TINY_EDITOR_API_KEY;
-    if (!apiKey) {
-      setEditorError(
-        "TinyMCE API key is missing. Please add it to your environment variables."
-      );
-    }
-  }, []);
+  const { mode } = useTheme();
+  const [previewMode, setPreviewMode] = useState(false);
 
   const handleSubmit = async () => {
     if (!title || !category || !content) {
@@ -149,11 +140,6 @@ const KnowledgeBaseEditor = ({
     }
   };
 
-  const handleEditorInit = (editor: any) => {
-    editorRef.current = editor;
-    setEditorLoaded(true);
-  };
-
   const handleImageUpload = () => {
     fileInputRef.current?.click();
   };
@@ -192,17 +178,12 @@ const KnowledgeBaseEditor = ({
     }
   };
 
-  const renderMarkdownPreview = () => {
-    // For TinyMCE, we can just return the HTML content directly
-    return content;
-  };
-
   return (
     <div className="w-full max-w-5xl mx-auto">
-      <Card className="border-2 border-primary-500/20">
-        <CardHeader className="bg-primary-500/5">
+      <Card className="border-2 border-primary/20">
+        <CardHeader className="bg-primary/5">
           <CardTitle className="text-2xl flex items-center gap-2">
-            <FileText className="h-6 w-6 text-primary-500" />
+            <FileText className="h-6 w-6 text-primary" />
             {isEditing
               ? "Edit Knowledge Base Article"
               : "Create Knowledge Base Article"}
@@ -219,14 +200,6 @@ const KnowledgeBaseEditor = ({
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Error</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          {editorError && (
-            <Alert variant="destructive" className="mb-6">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Editor Error</AlertTitle>
-              <AlertDescription>{editorError}</AlertDescription>
             </Alert>
           )}
 
@@ -277,7 +250,10 @@ const KnowledgeBaseEditor = ({
 
             <Tabs
               value={activeTab}
-              onValueChange={setActiveTab}
+              onValueChange={(value) => {
+                setActiveTab(value);
+                setPreviewMode(value === "preview");
+              }}
               className="w-full"
             >
               <TabsList className="grid grid-cols-2">
@@ -288,12 +264,16 @@ const KnowledgeBaseEditor = ({
               <TabsContent value="write" className="mt-2">
                 <Editor
                   apiKey={process.env.NEXT_PUBLIC_TINY_EDITOR_API_KEY}
-                  onInit={(_, editor) => handleEditorInit(editor)}
-                  value={content}
-                  onEditorChange={(newContent) => setContent(newContent)}
+                  onInit={(_, editor) => {
+                    editorRef.current = editor;
+                  }}
+                  onEditorChange={(newContent) => {
+                    setContent(newContent);
+                  }}
+                  initialValue={articleToEdit?.content || ""}
                   init={{
                     height: 500,
-                    menubar: true,
+                    menubar: false,
                     plugins: [
                       "advlist",
                       "autolink",
@@ -305,34 +285,41 @@ const KnowledgeBaseEditor = ({
                       "anchor",
                       "searchreplace",
                       "visualblocks",
-                      "code",
+                      "codesample",
                       "fullscreen",
                       "insertdatetime",
                       "media",
                       "table",
-                      "code",
-                      "help",
-                      "wordcount",
                     ],
                     toolbar:
-                      "undo redo | blocks | " +
+                      "undo redo | formatselect | " +
                       "bold italic forecolor | alignleft aligncenter " +
                       "alignright alignjustify | bullist numlist outdent indent | " +
-                      "removeformat | help",
+                      "codesample | image link | removeformat",
                     content_style:
                       "body { font-family:Inter,sans-serif; font-size:16px }",
-                    images_upload_handler: (blobInfo, progress) =>
-                      new Promise((resolve, reject) => {
-                        // In a real app, you would upload to your server or a service like Cloudinary
-                        const reader = new FileReader();
-                        reader.onload = () => {
-                          resolve(reader.result as string);
+                    skin: mode === "dark" ? "oxide-dark" : "oxide",
+                    content_css: mode === "dark" ? "dark" : "default",
+                    file_picker_types: "image",
+                    file_picker_callback: (cb, value, meta) => {
+                      // Trigger file input click
+                      fileInputRef.current?.click();
+
+                      // Listen for file input change
+                      if (fileInputRef.current) {
+                        fileInputRef.current.onchange = () => {
+                          const file = fileInputRef.current?.files?.[0];
+                          if (!file) return;
+
+                          const reader = new FileReader();
+                          reader.onload = (e) => {
+                            const imageUrl = e.target?.result as string;
+                            cb(imageUrl, { title: file.name });
+                          };
+                          reader.readAsDataURL(file);
                         };
-                        reader.onerror = () => {
-                          reject("Failed to read file");
-                        };
-                        reader.readAsDataURL(blobInfo.blob());
-                      }),
+                      }
+                    },
                   }}
                 />
                 <input
@@ -345,18 +332,12 @@ const KnowledgeBaseEditor = ({
               </TabsContent>
 
               <TabsContent value="preview" className="mt-2">
-                <div className="min-h-[500px] p-4 border rounded-md overflow-auto">
-                  {content ? (
+                <div className="min-h-[500px] w-full border rounded-xl p-4 overflow-y-auto bg-background">
+                  {previewMode && (
                     <div
                       className="prose dark:prose-invert max-w-none"
-                      dangerouslySetInnerHTML={{
-                        __html: renderMarkdownPreview(),
-                      }}
+                      dangerouslySetInnerHTML={{ __html: content }}
                     />
-                  ) : (
-                    <div className="text-muted-foreground italic flex items-center justify-center h-full">
-                      Preview will appear here...
-                    </div>
                   )}
                 </div>
               </TabsContent>
@@ -399,6 +380,4 @@ const KnowledgeBaseEditor = ({
       </Card>
     </div>
   );
-};
-
-export default KnowledgeBaseEditor;
+}
