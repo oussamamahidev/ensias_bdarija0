@@ -200,3 +200,17 @@ export function getUserBadge(reputation: number): string | undefined {
 export function formatDate(date: Date): string {
   return format(new Date(date), "MMM d, yyyy");
 }
+
+export async function generateSlug(title: string): Promise<string> {
+  // Convert title to slug format
+  const slug = title
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "") // Remove special characters
+    .replace(/\s+/g, "-") // Replace spaces with hyphens
+    .replace(/-+/g, "-") // Replace multiple hyphens with single hyphen
+    .trim();
+
+  // Add a timestamp to ensure uniqueness
+  const timestamp = Date.now().toString().slice(-4);
+  return `${slug}-${timestamp}`;
+}
