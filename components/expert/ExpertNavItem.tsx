@@ -66,31 +66,22 @@ const ExpertNavItem = () => {
         <DropdownMenuLabel>Expert Tools</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href="/expert-dashboard" className="cursor-pointer">
+          <Link href="/expert" className="cursor-pointer">
             Dashboard
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link
-            href="/expert-dashboard?tab=knowledge-base"
-            className="cursor-pointer"
-          >
+          <Link href="/expert?tab=knowledge-base" className="cursor-pointer">
             Knowledge Base
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link
-            href="/expert-dashboard?tab=challenges"
-            className="cursor-pointer"
-          >
+          <Link href="/expert?tab=challenges" className="cursor-pointer">
             Code Challenges
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link
-            href="/expert-dashboard?tab=consulting"
-            className="cursor-pointer"
-          >
+          <Link href="/expert?tab=consulting" className="cursor-pointer">
             Consulting Calendar
           </Link>
         </DropdownMenuItem>

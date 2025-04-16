@@ -7,6 +7,7 @@ import type {
   CreateUserParams,
   DeleteUserParams,
   GetAllUsersParams,
+  UpdateUserParams,
   GetUserByIdParams,
   ToggleSaveQuestionParams,
   GetSavedQuestionsParams,
@@ -47,74 +48,27 @@ export async function createUser(userParam: CreateUserParams) {
     throw error;
   }
 }
-interface UpdateUserParams {
-  clerkId: string;
-  updateData: {
-    name: string;
-    username: string;
-    portfolioWebsite?: string;
-    location?: string;
-    bio?: string;
-    picture?: string;
-  };
-  path: string;
-}
 
-// Modify the updateUser function to handle optional fields
 export async function updateUser(params: UpdateUserParams) {
   try {
-    console.log("Updating user with data:", params.updateData);
-    await connectToDatabase(); // Make sure this is awaited
+    console.log("Updating user");
+    await connectToDatabase(); // FIX: Await database connection
 
     const { clerkId, updateData, path } = params;
-
-    // Ensure picture field is always present in updateData if it's required in your model
-    if (!updateData.picture) {
-      const existingUser = await User.findOne({ clerkId });
-      if (existingUser && existingUser.picture) {
-        updateData.picture = existingUser.picture;
-      }
-    }
-
     const updatedUser = await User.findOneAndUpdate({ clerkId }, updateData, {
       new: true,
     });
 
     if (!updatedUser) {
-      console.error("User not found with clerkId:", clerkId);
       throw new Error("User not found");
     }
 
-    console.log("User updated successfully:", updatedUser.username);
     revalidatePath(path);
-    return updatedUser;
   } catch (error) {
     console.error("🔴 Error updating user:", error);
     throw error;
   }
 }
-
-// export async function updateUser(params: UpdateUserParams) {
-//   try {
-//     console.log("Updating user");
-//     await connectToDatabase(); // FIX: Await database connection
-
-//     const { clerkId, updateData, path } = params;
-//     const updatedUser = await User.findOneAndUpdate({ clerkId }, updateData, {
-//       new: true,
-//     });
-
-//     if (!updatedUser) {
-//       throw new Error("User not found");
-//     }
-
-//     revalidatePath(path);
-//     return updatedUser;
-//   } catch (error) {
-//     console.error("🔴 Error updating user:", error);
-//     throw error;
-//   }
-// }
 
 export async function deleteUser(userParam: DeleteUserParams) {
   try {

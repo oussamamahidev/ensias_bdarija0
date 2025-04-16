@@ -14,9 +14,17 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { CalendarDays, Clock, DollarSign, Save } from "lucide-react";
+import { CalendarDays, Clock, DollarSign, Loader2, Save } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
+import { updateExpertAvailability } from "@/lib/actions/expert.action";
 import { useToast } from "../ui/use-toast";
+
+interface ConsultingCalendarProps {
+  mongoUserId: string;
+}
 
 const timeSlots = [
   "09:00 AM",
@@ -30,7 +38,7 @@ const timeSlots = [
   "05:00 PM",
 ];
 
-const ConsultingCalendar = () => {
+const ConsultingCalendar = ({ mongoUserId }: ConsultingCalendarProps) => {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
   const [rate, setRate] = useState("");
@@ -41,6 +49,7 @@ const ConsultingCalendar = () => {
   ]);
   const [description, setDescription] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState("");
   const { toast } = useToast();
 
   const toggleTimeSlot = (slot: string) => {
@@ -53,25 +62,41 @@ const ConsultingCalendar = () => {
 
   const handleSave = async () => {
     if (!date || selectedSlots.length === 0 || !rate) {
-      toast({
-        title: "Missing information",
-        description:
-          "Please select a date, at least one time slot, and set your hourly rate.",
-        variant: "destructive",
-      });
+      setError(
+        "Please select a date, at least one time slot, and set your hourly rate."
+      );
+      return;
+    }
+
+    if (!mongoUserId) {
+      setError(
+        "User authentication error. Please try logging out and back in."
+      );
       return;
     }
 
     setIsSaving(true);
+    setError("");
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      await updateExpertAvailability({
+        expertId: mongoUserId,
+        date: date,
+        timeSlots: selectedSlots,
+        rate: Number(rate),
+        path: "/expert",
+      });
+
       toast({
         title: "Availability updated!",
         description: "Your consulting calendar has been updated successfully.",
       });
+    } catch (error) {
+      console.error("Error updating availability:", error);
+      setError("Failed to update availability. Please try again.");
+    } finally {
       setIsSaving(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -87,6 +112,14 @@ const ConsultingCalendar = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
+          {error && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-6">
               <div>
@@ -184,8 +217,17 @@ const ConsultingCalendar = () => {
             </p>
           </div>
           <Button onClick={handleSave} disabled={isSaving} className="gap-2">
-            <Save className="h-4 w-4" />
-            {isSaving ? "Saving..." : "Update Availability"}
+            {isSaving ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4" />
+                Update Availability
+              </>
+            )}
           </Button>
         </CardFooter>
       </Card>

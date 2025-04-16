@@ -41,11 +41,11 @@ export const sidebarLinks: SidebarLink[] = [
     route: "/profile",
     label: "Profile",
   },
-  /* {
+  {
     imgURL: "/assets/icons/code.svg",
-    route: "/projects",
-    label: "Projects",
-  },*/
+    route: "/knowledge-base",
+    label: "Blogs",
+  },
   {
     imgURL: "/assets/icons/question.svg",
     route: "/ask-question",

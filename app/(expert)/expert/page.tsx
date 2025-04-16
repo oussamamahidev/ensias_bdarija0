@@ -4,8 +4,30 @@ import { CalendarDays, Code, FileText, Lightbulb, Users } from "lucide-react";
 import KnowledgeBaseEditor from "@/components/expert/KnowledgeBaseEditor";
 import CodeChallengeCreator from "@/components/expert/CodeChallengeCreator";
 import ConsultingCalendar from "@/components/expert/ConsultingCalendar";
+import { auth } from "@clerk/nextjs/server";
+import { getUserById } from "@/lib/actions/user.action";
+import { redirect } from "next/navigation";
 
-export default function ExpertDashboardPage() {
+export default async function ExpertDashboardPage() {
+  // Get the user's Clerk ID
+  const { userId: clerkId } = await auth();
+
+  // If not logged in, redirect to sign in
+  if (!clerkId) {
+    redirect("/sign-in");
+  }
+
+  // Get the MongoDB user document
+  const mongoUser = await getUserById({ userId: clerkId });
+
+  // If user not found, redirect to home
+  if (!mongoUser) {
+    redirect("/");
+  }
+
+  // Get the MongoDB ObjectId as a string
+  const mongoUserId = mongoUser._id.toString();
+
   return (
     <div className="container mx-auto py-8 space-y-8">
       <div className="flex flex-col gap-2">
@@ -104,15 +126,15 @@ export default function ExpertDashboardPage() {
         </TabsList>
 
         <TabsContent value="knowledge-base">
-          <KnowledgeBaseEditor />
+          <KnowledgeBaseEditor mongoUserId={mongoUserId} />
         </TabsContent>
 
         <TabsContent value="challenges">
-          <CodeChallengeCreator />
+          <CodeChallengeCreator mongoUserId={mongoUserId} />
         </TabsContent>
 
         <TabsContent value="consulting">
-          <ConsultingCalendar />
+          <ConsultingCalendar mongoUserId={mongoUserId} />
         </TabsContent>
       </Tabs>
     </div>

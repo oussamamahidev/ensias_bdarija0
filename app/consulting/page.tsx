@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Card,
   CardContent,
@@ -14,16 +12,16 @@ import { CalendarDays, DollarSign, Search, Star, User } from "lucide-react";
 import Link from "next/link";
 import { getExperts } from "@/lib/actions/expert.action";
 
-interface ConsultingPageProps {
-  searchParams: Promise<{ [key: string]: string | undefined }>;
-}
-
+// Convert to a Server Component
 export default async function ConsultingPage({
   searchParams,
-}: ConsultingPageProps) {
+}: {
+  searchParams: Promise<{ [key: string]: string | undefined }>;
+}) {
   const { expertise, q, page, sortBy = "rating" } = await searchParams;
   const currentPage = page ? Number.parseInt(page) : 1;
 
+  // This is now properly called in a Server Component
   const { experts, isNext } = await getExperts({
     expertise: expertise ? [expertise] : undefined,
     searchQuery: q,
@@ -73,21 +71,19 @@ export default async function ConsultingPage({
           </form>
         </div>
         <div className="flex gap-2">
-          <select
-            className="bg-background border rounded-md px-3 py-2 text-sm"
-            defaultValue={sortBy}
-            onChange={(e) => {
-              const url = new URL(window.location.href);
-              url.searchParams.set("sortBy", e.target.value);
-              window.location.href = url.toString();
-            }}
-          >
-            {sortOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          <form>
+            <select
+              name="sortBy"
+              className="bg-background border rounded-md px-3 py-2 text-sm"
+              defaultValue={sortBy}
+            >
+              {sortOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </form>
         </div>
       </div>
 
