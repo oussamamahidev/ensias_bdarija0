@@ -52,26 +52,28 @@ interface UpdateUserParams {
   updateData: {
     name: string;
     username: string;
-    bio: string;
-    picture: string;
+    portfolioWebsite?: string;
+    location?: string;
+    bio?: string;
+    picture?: string;
   };
   path: string;
 }
 
-// Modify the updateUser function to handle base64 image data
+// Modify the updateUser function to handle optional fields
 export async function updateUser(params: UpdateUserParams) {
   try {
-    console.log("Updating user");
-    await connectToDatabase(); // FIX: Await database connection
+    console.log("Updating user with data:", params.updateData);
+    await connectToDatabase(); // Make sure this is awaited
 
     const { clerkId, updateData, path } = params;
 
-    // Check if the updateData contains a base64 image
-    if (updateData.picture && updateData.picture.startsWith("data:image")) {
-      // In a production app, you would upload this to a storage service
-      // For now, we'll just use the base64 data directly
-      console.log("Processing profile image");
-      // You could add image processing here if needed
+    // Ensure picture field is always present in updateData if it's required in your model
+    if (!updateData.picture) {
+      const existingUser = await User.findOne({ clerkId });
+      if (existingUser && existingUser.picture) {
+        updateData.picture = existingUser.picture;
+      }
     }
 
     const updatedUser = await User.findOneAndUpdate({ clerkId }, updateData, {
@@ -79,9 +81,11 @@ export async function updateUser(params: UpdateUserParams) {
     });
 
     if (!updatedUser) {
+      console.error("User not found with clerkId:", clerkId);
       throw new Error("User not found");
     }
 
+    console.log("User updated successfully:", updatedUser.username);
     revalidatePath(path);
     return updatedUser;
   } catch (error) {

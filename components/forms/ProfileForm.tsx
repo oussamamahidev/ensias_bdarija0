@@ -19,9 +19,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { useCallback, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { updateUser } from "@/lib/actions/user.actions";
 import { useUser } from "@clerk/nextjs";
 import Image from "next/image";
+import { updateUser } from "@/lib/actions/user.action";
 
 const ProfileSchema = z.object({
   name: z.string().min(2, {
@@ -50,6 +50,9 @@ const ProfileForm = () => {
   const [coverImage, setCoverImage] = useState<string | null>(null);
 
   const clerkId = user?.id || "";
+  const parseUser = {
+    picture: user?.imageUrl || "",
+  };
 
   const form = useForm<z.infer<typeof ProfileSchema>>({
     resolver: zodResolver(ProfileSchema),
@@ -73,11 +76,11 @@ const ProfileForm = () => {
           updateData: {
             name: values.name,
             username: values.username,
-            portfolioWebsite: values.portfolioWebsite,
-            location: values.location,
-            bio: values.bio,
+            portfolioWebsite: values.portfolioWebsite || undefined,
+            location: values.location || undefined,
+            bio: values.bio || undefined,
             // Add the profile image if it exists
-            ...(profileImage && { picture: profileImage }),
+            picture: profileImage || parseUser.picture, // Use existing picture if no new one is uploaded
           },
           path: pathname,
         });
@@ -85,7 +88,6 @@ const ProfileForm = () => {
         toast({
           title: "Profile updated successfully",
           description: "Your profile information has been saved.",
-          variant: "default",
         });
 
         router.back();
@@ -101,7 +103,7 @@ const ProfileForm = () => {
         setIsSubmitting(false);
       }
     },
-    [clerkId, pathname, router, toast, profileImage]
+    [clerkId, pathname, router, toast, profileImage, parseUser.picture]
   );
 
   const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
