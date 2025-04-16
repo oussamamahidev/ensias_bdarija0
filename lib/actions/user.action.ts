@@ -7,7 +7,6 @@ import type {
   CreateUserParams,
   DeleteUserParams,
   GetAllUsersParams,
-  UpdateUserParams,
   GetUserByIdParams,
   ToggleSaveQuestionParams,
   GetSavedQuestionsParams,
@@ -48,13 +47,33 @@ export async function createUser(userParam: CreateUserParams) {
     throw error;
   }
 }
+interface UpdateUserParams {
+  clerkId: string;
+  updateData: {
+    name: string;
+    username: string;
+    bio: string;
+    picture: string;
+  };
+  path: string;
+}
 
+// Modify the updateUser function to handle base64 image data
 export async function updateUser(params: UpdateUserParams) {
   try {
     console.log("Updating user");
     await connectToDatabase(); // FIX: Await database connection
 
     const { clerkId, updateData, path } = params;
+
+    // Check if the updateData contains a base64 image
+    if (updateData.picture && updateData.picture.startsWith("data:image")) {
+      // In a production app, you would upload this to a storage service
+      // For now, we'll just use the base64 data directly
+      console.log("Processing profile image");
+      // You could add image processing here if needed
+    }
+
     const updatedUser = await User.findOneAndUpdate({ clerkId }, updateData, {
       new: true,
     });
@@ -70,6 +89,28 @@ export async function updateUser(params: UpdateUserParams) {
     throw error;
   }
 }
+
+// export async function updateUser(params: UpdateUserParams) {
+//   try {
+//     console.log("Updating user");
+//     await connectToDatabase(); // FIX: Await database connection
+
+//     const { clerkId, updateData, path } = params;
+//     const updatedUser = await User.findOneAndUpdate({ clerkId }, updateData, {
+//       new: true,
+//     });
+
+//     if (!updatedUser) {
+//       throw new Error("User not found");
+//     }
+
+//     revalidatePath(path);
+//     return updatedUser;
+//   } catch (error) {
+//     console.error("🔴 Error updating user:", error);
+//     throw error;
+//   }
+// }
 
 export async function deleteUser(userParam: DeleteUserParams) {
   try {
