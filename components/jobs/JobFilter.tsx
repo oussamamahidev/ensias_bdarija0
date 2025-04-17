@@ -1,23 +1,30 @@
-"use client"
+"use client";
 
-import { FILTER_SEARCH_PARAMS_KEY } from "@/constants"
-import { formUrlQuery } from "@/lib/utils"
-import { useRouter, useSearchParams } from "next/navigation"
-import { useCallback } from "react"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { MapPin } from "lucide-react"
+import { FILTER_SEARCH_PARAMS_KEY } from "@/constants";
+import { formUrlQuery } from "@/lib/utils";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import Image from "next/image";
 
 interface Props {
-  filters: string[]
-  otherClasses?: string
-  containerClasses?: string
+  filters: string[];
+  otherClasses?: string;
+  containerClasses?: string;
 }
 
 const JobsFilter = ({ filters, otherClasses, containerClasses }: Props) => {
-  const searchParams = useSearchParams()
-  const router = useRouter()
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
-  const paramFilter = searchParams.get(FILTER_SEARCH_PARAMS_KEY)
+  const paramFilter = searchParams.get(FILTER_SEARCH_PARAMS_KEY);
 
   const handleUpdateParams = useCallback(
     (value: string) => {
@@ -25,24 +32,32 @@ const JobsFilter = ({ filters, otherClasses, containerClasses }: Props) => {
         params: searchParams.toString(),
         Key: FILTER_SEARCH_PARAMS_KEY,
         Value: value,
-      })
-      router.push(newUrl, { scroll: false })
+      });
+      router.push(newUrl, { scroll: false });
     },
-    [router, searchParams],
-  )
+    [router, searchParams]
+  );
 
   return (
     <div className={`relative ${containerClasses}`}>
-      <Select onValueChange={handleUpdateParams} defaultValue={paramFilter || undefined}>
+      <Select
+        onValueChange={handleUpdateParams}
+        defaultValue={paramFilter || undefined}
+      >
         <SelectTrigger
-          className={`${otherClasses} body-regular light-border background-light800_dark300 text-dark500_light700 flex items-center gap-3 border px-4 py-2.5 rounded-lg`}
+          className={`${otherClasses} body-regular light-border background-light800_dark300 text-dark500_light700 flex items-center gap-3 border px-4 py-2.5`}
         >
-          <MapPin className="h-5 w-5 text-primary-500" />
+          <Image
+            src="/assets/icons/carbon-location.svg"
+            alt="location"
+            width={18}
+            height={18}
+          />
           <div className="line-clamp-1 flex-1 text-left">
             <SelectValue placeholder="Select Location" />
           </div>
         </SelectTrigger>
-        <SelectContent className="text-dark500_light700 small-regular border-none bg-light-900 dark:bg-dark-300 rounded-lg shadow-md">
+        <SelectContent className="text-dark500_light700 small-regular border-none bg-light-900 dark:bg-dark-300">
           <SelectGroup>
             {filters.length === 0 ? (
               <SelectItem value="No results found">No results found</SelectItem>
@@ -61,8 +76,7 @@ const JobsFilter = ({ filters, otherClasses, containerClasses }: Props) => {
         </SelectContent>
       </Select>
     </div>
-  )
-}
+  );
+};
 
-export default JobsFilter
-
+export default JobsFilter;
