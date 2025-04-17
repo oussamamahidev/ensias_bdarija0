@@ -25,7 +25,7 @@ export default clerkMiddleware(async (auth, req) => {
   // Fetch the user's role from the session claims
   const userRole = (await auth()).sessionClaims?.metadata?.role;
 
-  console.log("this my role you fucking cont", userRole);
+  console.log("this my role ", userRole);
   // Protect all routes starting with `/admin`
   if (isAdminRoute(req) && !(userRole === "expert")) {
     const url = new URL("/ForFun", req.url);
