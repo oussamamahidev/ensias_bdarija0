@@ -100,13 +100,13 @@ export default function Home() {
             delay={0.5}
           />
           <FeatureCard
-            icon={<Award size={24} />}
-            title="Reputation & Badges"
-            description="Earn badges and build your reputation by contributing to the community."
-            link="/badges"
-            linkText="View Badges"
-            color="yellow"
-            delay={0.6}
+            icon={<HelpCircle size={24} />}
+            title="All Questions"
+            description="Browse all community questions, help others, and learn from shared knowledge."
+            link="/questions"
+            linkText="View Questions"
+            color="blue"
+            delay={0.5}
           />
         </div>
       </section>

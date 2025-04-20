@@ -22,12 +22,12 @@ const Navbar = () => {
               src="/assets/images/site-logo.svg"
               width={20}
               height={20}
-              alt="D2sFlow"
+              alt="Ensias bDarija"
               className="relative z-10"
             />
           </div>
           <p className="font-spaceGrotesk font-bold text-xl text-gray-900 dark:text-white group-hover:text-primary-500 dark:group-hover:text-primary-400 transition-colors">
-            D2s<span className="text-primary-500">Overflow</span>
+            Ensias<span className="text-primary-500">bDarija</span>
           </p>
         </Link>
 

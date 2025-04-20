@@ -26,7 +26,7 @@ import { getStats } from "@/lib/actions/stats.action";
 import Loading from "./loading";
 
 export const metadata: Metadata = {
-  title: "Home | D2sFlow",
+  title: "Home | Ensias bDarija",
 };
 
 interface HomePageProps {

@@ -20,14 +20,14 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "D2sFlow Application",
+  title: "Ensias bDarija Application",
   description:
     "Une plateforme communautaire où les développeurs peuvent poser des questions, partager leurs connaissances et collaborer sur des problèmes techniques. Grâce à un système de votes et de tags, les utilisateurs trouvent rapidement les meilleures réponses et solutions.",
   icons: {
     icon: "/public/assets/images/site-logo.svg",
   },
   openGraph: {
-    title: "D2sFlow Application",
+    title: "Ensias bDarija Application",
     description:
       "Une plateforme communautaire où les développeurs peuvent poser des questions et collaborer sur des problèmes techniques.",
     url: "https://ton-site.com",
@@ -37,13 +37,13 @@ export const metadata: Metadata = {
         url: "/public/assets/images/metadata.png", // Remplace avec le chemin de ton image
         width: 1200,
         height: 630,
-        alt: "D2sFlow - Plateforme communautaire pour développeurs",
+        alt: "Ensias bDarija - Plateforme communautaire pour développeurs",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "D2sFlow Application",
+    title: "Ensias bDarija Application",
     description:
       "Une plateforme communautaire où les développeurs peuvent poser des questions et collaborer sur des problèmes techniques.",
     images: ["/public/assets/images/metadata.png"],
