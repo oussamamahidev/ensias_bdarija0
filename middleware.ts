@@ -7,6 +7,7 @@ const isPublicRoute = createRouteMatcher([
   "/sign-in(.*)", // Sign-in page
   "/sign-up(.*)", // Sign-up page
   "/api/weebhook",
+  "/dashbord",
 ]);
 
 // export default clerkMiddleware(async (auth, request) => {
