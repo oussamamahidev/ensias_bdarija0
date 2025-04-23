@@ -1,27 +1,26 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import Link from "next/link"
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Search, ArrowRight, Sparkles, Check } from "lucide-react"
-import { useUser } from "@clerk/nextjs"
-import ThemeToggle from "./ThemeToggle"
-
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Search, ArrowRight, Sparkles, Check } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
+import ThemeToggle from "./ThemeToggle";
 
 export default function HeroSection() {
-  const { isSignedIn } = useUser()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [animationComplete, setAnimationComplete] = useState(false)
+  const { isSignedIn } = useUser();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [animationComplete, setAnimationComplete] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setAnimationComplete(true)
-    }, 2000)
+      setAnimationComplete(true);
+    }, 2000);
 
-    return () => clearTimeout(timer)
-  }, [])
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <section className="relative w-full overflow-hidden bg-gradient-to-b from-orange-50 to-white dark:from-gray-900 dark:to-gray-800 pt-20 pb-24">
@@ -92,7 +91,9 @@ export default function HeroSection() {
             >
               <div className="flex items-center gap-2 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 px-4 py-2 rounded-full">
                 <Sparkles size={16} />
-                <span className="text-sm font-medium">Developer Q&A Platform</span>
+                <span className="text-sm font-medium">
+                  Developer Q&A Platform
+                </span>
               </div>
             </motion.div>
 
@@ -103,7 +104,9 @@ export default function HeroSection() {
               transition={{ duration: 0.5, delay: 0.4 }}
             >
               Where Developers <br className="hidden sm:block" />
-              <span className="primary-text-gradient">Learn, Share & Build</span>
+              <span className="primary-text-gradient">
+                Learn, Share & Build
+              </span>
             </motion.h1>
 
             <motion.p
@@ -112,8 +115,9 @@ export default function HeroSection() {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.6 }}
             >
-              D2sOverflow is a community for programmers to learn, share their knowledge, and build their careers. Join
-              thousands of developers and take your coding skills to the next level.
+              D2sOverflow is a community for programmers to learn, share their
+              knowledge, and build their careers. Join thousands of developers
+              and take your coding skills to the next level.
             </motion.p>
 
             <motion.div
@@ -122,7 +126,10 @@ export default function HeroSection() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.8 }}
             >
-              <Link href={isSignedIn ? "/ask-question" : "/sign-up"} className="w-full sm:w-auto">
+              <Link
+                href={isSignedIn ? "/ask-question" : "/sign-up"}
+                className="w-full sm:w-auto"
+              >
                 <Button className="primary-gradient text-white px-6 sm:px-8 py-5 sm:py-6 rounded-xl hover:shadow-lg transition-all w-full sm:w-auto">
                   {isSignedIn ? "Ask a Question" : "Join the Community"}
                   <ArrowRight size={16} className="ml-2" />
@@ -192,8 +199,8 @@ export default function HeroSection() {
               }}
             >
               <Image
-                src="/assets/images/hero-image.svg"
-                alt="D2sOverflow Hero"
+                src="/assets/images/ensias.png"
+                alt="EnsiasBdarija"
                 width={600}
                 height={500}
                 className="w-full h-auto"
@@ -229,9 +236,14 @@ export default function HeroSection() {
             >
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                  <Check size={16} className="text-green-600 dark:text-green-400" />
+                  <Check
+                    size={16}
+                    className="text-green-600 dark:text-green-400"
+                  />
                 </div>
-                <span className="text-sm font-medium text-dark200_light900">Problem Solved!</span>
+                <span className="text-sm font-medium text-dark200_light900">
+                  Problem Solved!
+                </span>
               </div>
             </motion.div>
           </motion.div>
@@ -254,12 +266,14 @@ export default function HeroSection() {
               key={stat.label}
               className="text-center p-4 bg-white/50 dark:bg-gray-800/50 rounded-lg backdrop-blur-sm"
             >
-              <h3 className="text-xl sm:text-2xl md:text-3xl font-bold primary-text-gradient">{stat.value}</h3>
+              <h3 className="text-xl sm:text-2xl md:text-3xl font-bold primary-text-gradient">
+                {stat.value}
+              </h3>
               <p className="text-dark400_light700">{stat.label}</p>
             </div>
           ))}
         </motion.div>
       </div>
     </section>
-  )
+  );
 }

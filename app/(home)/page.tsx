@@ -10,6 +10,7 @@ import {
   Users,
   BookOpen,
   HelpCircle,
+  UserCircle,
 } from "lucide-react";
 import HeroSection from "@/components/dashbord/HeroSection";
 import FeatureCard from "@/components/dashbord/FeatureCard";
@@ -100,13 +101,13 @@ export default function Home() {
             delay={0.5}
           />
           <FeatureCard
-            icon={<HelpCircle size={24} />}
-            title="All Questions"
-            description="Browse all community questions, help others, and learn from shared knowledge."
-            link="/questions"
-            linkText="View Questions"
-            color="blue"
-            delay={0.5}
+            icon={<UserCircle size={24} />}
+            title="Your Profile"
+            description="View and edit your personal information, track your activity, and manage your preferences."
+            link="/profile"
+            linkText="Go to Profile"
+            color="green"
+            delay={0.6}
           />
         </div>
       </section>
