@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import Image from "next/image";
-import { SignedIn } from "@clerk/nextjs";
+import { SignedIn, useUser } from "@clerk/nextjs";
 import { UserButton } from "@clerk/nextjs";
 import Theme from "./Theme";
 import MobileNav from "./MobileNav";
@@ -13,6 +13,9 @@ import Notifications from "./Notification";
 import ExpertNavItem from "@/components/expert/ExpertNavItem";
 
 const Navbar = () => {
+  const { user } = useUser();
+
+  const role = user?.publicMetadata?.role || user?.unsafeMetadata?.role;
   return (
     <nav className="fixed z-50 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 shadow-sm">
       <div className="container mx-auto flex items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
@@ -47,7 +50,7 @@ const Navbar = () => {
           <SignedIn>
             {/* Expert Nav Item will only show if user is an expert */}
             {/* Add this to your navbar links */}
-            <ExpertNavItem />
+            {role === "expert" && <ExpertNavItem />}
             <UserButton
               afterSignOutUrl="/"
               appearance={{
