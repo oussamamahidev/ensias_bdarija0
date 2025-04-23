@@ -28,31 +28,6 @@ const ExpertNavItem = () => {
   const [expertStatus, setExpertStatus] = useState<ExpertStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const checkExpertStatus = async () => {
-      if (!isSignedIn) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const response = await fetch("/api/expert/check-status");
-        const data = await response.json();
-        setExpertStatus(data);
-      } catch (error) {
-        console.error("Error checking expert status:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkExpertStatus();
-  }, [isSignedIn]);
-
-  if (isLoading || !isSignedIn || !expertStatus?.isExpert) {
-    return null;
-  }
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

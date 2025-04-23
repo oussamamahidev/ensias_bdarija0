@@ -13,12 +13,12 @@ export const themes: IThemes[] = [
 export const sidebarLinks: SidebarLink[] = [
   {
     imgURL: "/assets/icons/home.svg",
-    route: "/dashbord",
+    route: "/",
     label: "Home",
   },
   {
-    imgURL: "/assets/icons/home.svg",
-    route: "/",
+    imgURL: "/assets/icons/questions.svg",
+    route: "/questions",
     label: "Questions",
   },
   {
