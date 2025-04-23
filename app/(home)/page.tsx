@@ -101,13 +101,13 @@ export default function Home() {
             delay={0.5}
           />
           <FeatureCard
-            icon={<UserCircle size={24} />}
-            title="Your Profile"
-            description="View and edit your personal information, track your activity, and manage your preferences."
-            link="/profile"
-            linkText="Go to Profile"
-            color="green"
-            delay={0.6}
+            icon={<Award size={24} />}
+            title="Coding Challenges"
+            description="Sharpen your skills with real-world coding challenges and improve your problem-solving abilities."
+            link="/code-challenges"
+            linkText="Start Solving"
+            color="yellow"
+            delay={0.7}
           />
         </div>
       </section>
