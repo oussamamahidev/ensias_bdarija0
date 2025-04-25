@@ -9,7 +9,6 @@ import {
   KnowledgeBaseArticle,
   CodeChallenge,
   CodeSubmission,
-  ConsultingSession,
   ExpertAvailability,
   ExpertProfile,
 } from "@/database/expert.model";
@@ -33,6 +32,7 @@ import type {
   GetExpertProfileParams,
   GetExpertsParams,
 } from "./shared.types";
+import { Event } from "@/database/expert.model";
 
 // ==================== KNOWLEDGE BASE ACTIONS ====================
 
@@ -627,153 +627,153 @@ export async function getExpertAvailability(
   }
 }
 
-export async function bookConsultingSession(
-  params: BookConsultingSessionParams
-) {
-  try {
-    await connectToDatabase();
+// export async function bookConsultingSession(
+//   params: BookConsultingSessionParams
+// ) {
+//   try {
+//     await connectToDatabase();
 
-    const { expertId, clientId, date, timeSlot, duration, topic, notes, path } =
-      params;
+//     const { expertId, clientId, date, timeSlot, duration, topic, notes, path } =
+//       params;
 
-    // Check if the expert is available at the requested time
-    const expertAvailability = await ExpertAvailability.findOne({
-      expert: expertId,
-      date: {
-        $gte: new Date(date.setHours(0, 0, 0, 0)),
-        $lt: new Date(date.setHours(23, 59, 59, 999)),
-      },
-      timeSlots: { $in: [timeSlot] },
-    });
+//     // Check if the expert is available at the requested time
+//     const expertAvailability = await ExpertAvailability.findOne({
+//       expert: expertId,
+//       date: {
+//         $gte: new Date(date.setHours(0, 0, 0, 0)),
+//         $lt: new Date(date.setHours(23, 59, 59, 999)),
+//       },
+//       timeSlots: { $in: [timeSlot] },
+//     });
 
-    if (!expertAvailability) {
-      throw new Error("Expert is not available at the requested time");
-    }
+//     if (!expertAvailability) {
+//       throw new Error("Expert is not available at the requested time");
+//     }
 
-    // Create the consulting session
-    const session = await ConsultingSession.create({
-      expert: expertId,
-      client: clientId,
-      date,
-      timeSlot,
-      duration,
-      rate: expertAvailability.rate,
-      topic,
-      notes: notes || "",
-    });
+//     // Create the consulting session
+//     const session = await ConsultingSession.create({
+//       expert: expertId,
+//       client: clientId,
+//       date,
+//       timeSlot,
+//       duration,
+//       rate: expertAvailability.rate,
+//       topic,
+//       notes: notes || "",
+//     });
 
-    // Remove the booked time slot from availability
-    await ExpertAvailability.findByIdAndUpdate(expertAvailability._id, {
-      $pull: { timeSlots: timeSlot },
-    });
+//     // Remove the booked time slot from availability
+//     await ExpertAvailability.findByIdAndUpdate(expertAvailability._id, {
+//       $pull: { timeSlots: timeSlot },
+//     });
 
-    revalidatePath(path);
-    return JSON.parse(JSON.stringify(session));
-  } catch (error) {
-    console.error("Error booking consulting session:", error);
-    throw error;
-  }
-}
+//     revalidatePath(path);
+//     return JSON.parse(JSON.stringify(session));
+//   } catch (error) {
+//     console.error("Error booking consulting session:", error);
+//     throw error;
+//   }
+// }
 
-export async function getConsultingSessions(
-  params: GetConsultingSessionsParams
-) {
-  try {
-    await connectToDatabase();
+// export async function getConsultingSessions(
+//   params: GetConsultingSessionsParams
+// ) {
+//   try {
+//     await connectToDatabase();
 
-    const { userId, role, status, page = 1, pageSize = 10 } = params;
+//     const { userId, role, status, page = 1, pageSize = 10 } = params;
 
-    // Calculate skip amount for pagination
-    const skipAmount = (page - 1) * pageSize;
+//     // Calculate skip amount for pagination
+//     const skipAmount = (page - 1) * pageSize;
 
-    // Prepare filter query
-    const query: FilterQuery<typeof ConsultingSession> = {};
+//     // Prepare filter query
+//     const query: FilterQuery<typeof ConsultingSession> = {};
 
-    if (role === "expert") {
-      query.expert = userId;
-    } else {
-      query.client = userId;
-    }
+//     if (role === "expert") {
+//       query.expert = userId;
+//     } else {
+//       query.client = userId;
+//     }
 
-    if (status) {
-      query.status = status;
-    }
+//     if (status) {
+//       query.status = status;
+//     }
 
-    // Get sessions with pagination
-    const sessions = await ConsultingSession.find(query)
-      .populate("expert", "name username picture")
-      .populate("client", "name username picture")
-      .sort({ date: 1 })
-      .skip(skipAmount)
-      .limit(pageSize);
+//     // Get sessions with pagination
+//     const sessions = await ConsultingSession.find(query)
+//       .populate("expert", "name username picture")
+//       .populate("client", "name username picture")
+//       .sort({ date: 1 })
+//       .skip(skipAmount)
+//       .limit(pageSize);
 
-    // Get total sessions count for pagination
-    const totalSessions = await ConsultingSession.countDocuments(query);
+//     // Get total sessions count for pagination
+//     const totalSessions = await ConsultingSession.countDocuments(query);
 
-    // Check if there are more sessions
-    const isNext = totalSessions > skipAmount + sessions.length;
+//     // Check if there are more sessions
+//     const isNext = totalSessions > skipAmount + sessions.length;
 
-    return { sessions: JSON.parse(JSON.stringify(sessions)), isNext };
-  } catch (error) {
-    console.error("Error getting consulting sessions:", error);
-    throw error;
-  }
-}
+//     return { sessions: JSON.parse(JSON.stringify(sessions)), isNext };
+//   } catch (error) {
+//     console.error("Error getting consulting sessions:", error);
+//     throw error;
+//   }
+// }
 
-export async function updateConsultingSession(
-  params: UpdateConsultingSessionParams
-) {
-  try {
-    await connectToDatabase();
+// export async function updateConsultingSession(
+//   params: UpdateConsultingSessionParams
+// ) {
+//   try {
+//     await connectToDatabase();
 
-    const { sessionId, status, notes, path } = params;
+//     const { sessionId, status, notes, path } = params;
 
-    // Prepare update object
-    const updateData: any = {};
-    if (status !== undefined) updateData.status = status;
-    if (notes !== undefined) updateData.notes = notes;
-    updateData.updatedAt = new Date();
+//     // Prepare update object
+//     const updateData: any = {};
+//     if (status !== undefined) updateData.status = status;
+//     if (notes !== undefined) updateData.notes = notes;
+//     updateData.updatedAt = new Date();
 
-    // Update the session
-    const updatedSession = await ConsultingSession.findByIdAndUpdate(
-      sessionId,
-      updateData,
-      { new: true }
-    );
+//     // Update the session
+//     const updatedSession = await ConsultingSession.findByIdAndUpdate(
+//       sessionId,
+//       updateData,
+//       { new: true }
+//     );
 
-    if (!updatedSession) {
-      throw new Error("Session not found");
-    }
+//     if (!updatedSession) {
+//       throw new Error("Session not found");
+//     }
 
-    // If session is cancelled, add the time slot back to availability
-    if (status === "cancelled") {
-      const session = await ConsultingSession.findById(sessionId);
-      if (session) {
-        // Find or create availability for that date
-        const existingAvailability = await ExpertAvailability.findOne({
-          expert: session.expert,
-          date: {
-            $gte: new Date(session.date.setHours(0, 0, 0, 0)),
-            $lt: new Date(session.date.setHours(23, 59, 59, 999)),
-          },
-        });
+//     // If session is cancelled, add the time slot back to availability
+//     if (status === "cancelled") {
+//       const session = await ConsultingSession.findById(sessionId);
+//       if (session) {
+//         // Find or create availability for that date
+//         const existingAvailability = await ExpertAvailability.findOne({
+//           expert: session.expert,
+//           date: {
+//             $gte: new Date(session.date.setHours(0, 0, 0, 0)),
+//             $lt: new Date(session.date.setHours(23, 59, 59, 999)),
+//           },
+//         });
 
-        if (existingAvailability) {
-          // Add the time slot back
-          await ExpertAvailability.findByIdAndUpdate(existingAvailability._id, {
-            $addToSet: { timeSlots: session.timeSlot },
-          });
-        }
-      }
-    }
+//         if (existingAvailability) {
+//           // Add the time slot back
+//           await ExpertAvailability.findByIdAndUpdate(existingAvailability._id, {
+//             $addToSet: { timeSlots: session.timeSlot },
+//           });
+//         }
+//       }
+//     }
 
-    revalidatePath(path);
-    return JSON.parse(JSON.stringify(updatedSession));
-  } catch (error) {
-    console.error("Error updating consulting session:", error);
-    throw error;
-  }
-}
+//     revalidatePath(path);
+//     return JSON.parse(JSON.stringify(updatedSession));
+//   } catch (error) {
+//     console.error("Error updating consulting session:", error);
+//     throw error;
+//   }
+// }
 
 // ==================== EXPERT PROFILE ACTIONS ====================
 
@@ -927,6 +927,549 @@ export async function getExperts(params: GetExpertsParams) {
     return { experts: JSON.parse(JSON.stringify(filteredExperts)), isNext };
   } catch (error) {
     console.error("Error getting experts:", error);
+    throw error;
+  }
+}
+export type CreateEventParams = {
+  title: string;
+  description: string;
+  startDate: Date;
+  endDate: Date;
+  location: string;
+  country: string;
+  technologies: string[];
+  website?: string;
+  organizer: string;
+  submitter: string;
+  isVirtual: boolean;
+  eventType:
+    | "conference"
+    | "webinar"
+    | "hackathon"
+    | "meetup"
+    | "workshop"
+    | "other";
+  path: string;
+};
+
+export type UpdateEventParams = {
+  eventId: string;
+  title?: string;
+  description?: string;
+  startDate?: Date;
+  endDate?: Date;
+  location?: string;
+  country?: string;
+  technologies?: string[];
+  website?: string;
+  organizer?: string;
+  status?: "pending" | "approved" | "rejected";
+  isFeatured?: boolean;
+  isVirtual?: boolean;
+  eventType?:
+    | "conference"
+    | "webinar"
+    | "hackathon"
+    | "meetup"
+    | "workshop"
+    | "other";
+  path: string;
+};
+
+export type GetEventsParams = {
+  page?: number;
+  pageSize?: number;
+  searchQuery?: string;
+  country?: string;
+  technologies?: string[];
+  startDate?: Date;
+  endDate?: Date;
+  status?: "pending" | "approved" | "rejected";
+  eventType?:
+    | "conference"
+    | "webinar"
+    | "hackathon"
+    | "meetup"
+    | "workshop"
+    | "other";
+  sortBy?: "newest" | "oldest" | "startDate" | "popularity" | "rating";
+  submitterId?: string;
+};
+
+export type GetEventByIdParams = {
+  eventId: string;
+};
+
+export type AddCommentParams = {
+  eventId: string;
+  userId: string;
+  content: string;
+  path: string;
+};
+
+export type AddRatingParams = {
+  eventId: string;
+  userId: string;
+  score: number;
+  path: string;
+};
+
+export type BookmarkEventParams = {
+  eventId: string;
+  userId: string;
+  path: string;
+};
+
+// Create a new event
+export async function createEvent(params: CreateEventParams) {
+  try {
+    await connectToDatabase();
+
+    const {
+      title,
+      description,
+      startDate,
+      endDate,
+      location,
+      country,
+      technologies,
+      website,
+      organizer,
+      submitter,
+      isVirtual,
+      eventType,
+      path,
+    } = params;
+
+    // Create the event
+    const newEvent = await Event.create({
+      title,
+      description,
+      startDate,
+      endDate,
+      location,
+      country,
+      technologies,
+      website: website || "",
+      organizer,
+      submitter,
+      isVirtual,
+      eventType,
+    });
+
+    // Update user's reputation
+    await User.findByIdAndUpdate(submitter, { $inc: { reputation: 5 } });
+
+    revalidatePath(path);
+    return JSON.parse(JSON.stringify(newEvent));
+  } catch (error) {
+    console.error("Error creating event:", error);
+    throw error;
+  }
+}
+
+// Update an event
+export async function updateEvent(params: UpdateEventParams) {
+  try {
+    await connectToDatabase();
+
+    const {
+      eventId,
+      title,
+      description,
+      startDate,
+      endDate,
+      location,
+      country,
+      technologies,
+      website,
+      organizer,
+      status,
+      isFeatured,
+      isVirtual,
+      eventType,
+      path,
+    } = params;
+
+    // Prepare update object
+    const updateData: any = {};
+    if (title !== undefined) updateData.title = title;
+    if (description !== undefined) updateData.description = description;
+    if (startDate !== undefined) updateData.startDate = startDate;
+    if (endDate !== undefined) updateData.endDate = endDate;
+    if (location !== undefined) updateData.location = location;
+    if (country !== undefined) updateData.country = country;
+    if (technologies !== undefined) updateData.technologies = technologies;
+    if (website !== undefined) updateData.website = website;
+    if (organizer !== undefined) updateData.organizer = organizer;
+    if (status !== undefined) updateData.status = status;
+    if (isFeatured !== undefined) updateData.isFeatured = isFeatured;
+    if (isVirtual !== undefined) updateData.isVirtual = isVirtual;
+    if (eventType !== undefined) updateData.eventType = eventType;
+    updateData.updatedAt = new Date();
+
+    // Update the event
+    const updatedEvent = await Event.findByIdAndUpdate(eventId, updateData, {
+      new: true,
+    });
+
+    if (!updatedEvent) {
+      throw new Error("Event not found");
+    }
+
+    revalidatePath(path);
+    return JSON.parse(JSON.stringify(updatedEvent));
+  } catch (error) {
+    console.error("Error updating event:", error);
+    throw error;
+  }
+}
+
+// Get events with filtering and pagination
+export async function getEvents(params: GetEventsParams) {
+  try {
+    await connectToDatabase();
+
+    const {
+      page = 1,
+      pageSize = 10,
+      searchQuery,
+      country,
+      technologies,
+      startDate,
+      endDate,
+      status = "approved", // Default to approved events
+      eventType,
+      sortBy = "startDate",
+      submitterId,
+    } = params;
+
+    // Calculate skip amount for pagination
+    const skipAmount = (page - 1) * pageSize;
+
+    // Prepare filter query
+    const query: FilterQuery<typeof Event> = { status };
+
+    if (searchQuery) {
+      query.$or = [
+        { title: { $regex: new RegExp(searchQuery, "i") } },
+        { description: { $regex: new RegExp(searchQuery, "i") } },
+        { organizer: { $regex: new RegExp(searchQuery, "i") } },
+      ];
+    }
+
+    if (country) {
+      query.country = country;
+    }
+
+    if (technologies && technologies.length > 0) {
+      query.technologies = { $in: technologies };
+    }
+
+    if (startDate) {
+      query.startDate = { $gte: startDate };
+    }
+
+    if (endDate) {
+      query.endDate = { $lte: endDate };
+    }
+
+    if (eventType) {
+      query.eventType = eventType;
+    }
+
+    if (submitterId) {
+      query.submitter = submitterId;
+    }
+
+    // Prepare sort options
+    let sortOptions = {};
+    switch (sortBy) {
+      case "newest":
+        sortOptions = { createdAt: -1 };
+        break;
+      case "oldest":
+        sortOptions = { createdAt: 1 };
+        break;
+      case "startDate":
+        sortOptions = { startDate: 1 };
+        break;
+      case "popularity":
+        sortOptions = { "bookmarks.length": -1 };
+        break;
+      case "rating":
+        sortOptions = { "ratings.score": -1 };
+        break;
+      default:
+        sortOptions = { startDate: 1 };
+    }
+
+    // Get events with pagination
+    const events = await Event.find(query)
+      .populate("submitter", "name username picture")
+      .sort(sortOptions)
+      .skip(skipAmount)
+      .limit(pageSize);
+
+    // Get total events count for pagination
+    const totalEvents = await Event.countDocuments(query);
+
+    // Check if there are more events
+    const isNext = totalEvents > skipAmount + events.length;
+
+    return { events: JSON.parse(JSON.stringify(events)), isNext };
+  } catch (error) {
+    console.error("Error getting events:", error);
+    throw error;
+  }
+}
+
+// Get event by ID
+export async function getEventById(params: GetEventByIdParams) {
+  try {
+    await connectToDatabase();
+
+    const { eventId } = params;
+
+    // Find the event by ID
+    const event = await Event.findById(eventId)
+      .populate("submitter", "name username picture")
+      .populate("comments.user", "name username picture")
+      .populate("ratings.user", "name username picture")
+      .populate("bookmarks", "name username picture");
+
+    if (!event) {
+      throw new Error("Event not found");
+    }
+
+    return JSON.parse(JSON.stringify(event));
+  } catch (error) {
+    console.error("Error getting event by ID:", error);
+    throw error;
+  }
+}
+
+// Add a comment to an event
+export async function addComment(params: AddCommentParams) {
+  try {
+    await connectToDatabase();
+
+    const { eventId, userId, content, path } = params;
+
+    // Add the comment
+    const updatedEvent = await Event.findByIdAndUpdate(
+      eventId,
+      {
+        $push: {
+          comments: {
+            user: userId,
+            content,
+            createdAt: new Date(),
+          },
+        },
+      },
+      { new: true }
+    ).populate("comments.user", "name username picture");
+
+    if (!updatedEvent) {
+      throw new Error("Event not found");
+    }
+
+    revalidatePath(path);
+    return JSON.parse(JSON.stringify(updatedEvent.comments));
+  } catch (error) {
+    console.error("Error adding comment:", error);
+    throw error;
+  }
+}
+
+// Add a rating to an event
+export async function addRating(params: AddRatingParams) {
+  try {
+    await connectToDatabase();
+
+    const { eventId, userId, score, path } = params;
+
+    // Check if user has already rated the event
+    const event = await Event.findById(eventId);
+    if (!event) {
+      throw new Error("Event not found");
+    }
+
+    const existingRatingIndex = event.ratings.findIndex(
+      (rating: any) => rating.user.toString() === userId
+    );
+
+    if (existingRatingIndex !== -1) {
+      // Update existing rating
+      event.ratings[existingRatingIndex].score = score;
+      event.ratings[existingRatingIndex].createdAt = new Date();
+    } else {
+      // Add new rating
+      event.ratings.push({
+        user: userId,
+        score,
+        createdAt: new Date(),
+      });
+    }
+
+    await event.save();
+
+    revalidatePath(path);
+    return JSON.parse(JSON.stringify(event.ratings));
+  } catch (error) {
+    console.error("Error adding rating:", error);
+    throw error;
+  }
+}
+
+// Bookmark an event
+export async function bookmarkEvent(params: BookmarkEventParams) {
+  try {
+    await connectToDatabase();
+
+    const { eventId, userId, path } = params;
+
+    // Check if user has already bookmarked the event
+    const event = await Event.findById(eventId);
+    if (!event) {
+      throw new Error("Event not found");
+    }
+
+    const hasBookmarked = event.bookmarks.includes(userId);
+
+    // Toggle bookmark
+    if (hasBookmarked) {
+      await Event.findByIdAndUpdate(eventId, {
+        $pull: { bookmarks: userId },
+      });
+    } else {
+      await Event.findByIdAndUpdate(eventId, {
+        $addToSet: { bookmarks: userId },
+      });
+    }
+
+    revalidatePath(path);
+    return { success: true, bookmarked: !hasBookmarked };
+  } catch (error) {
+    console.error("Error bookmarking event:", error);
+    throw error;
+  }
+}
+
+// Get pending events for expert approval
+export async function getPendingEvents(params: GetEventsParams) {
+  try {
+    await connectToDatabase();
+
+    const { page = 1, pageSize = 10 } = params;
+
+    // Calculate skip amount for pagination
+    const skipAmount = (page - 1) * pageSize;
+
+    // Get pending events with pagination
+    const events = await Event.find({ status: "pending" })
+      .populate("submitter", "name username picture")
+      .sort({ createdAt: -1 })
+      .skip(skipAmount)
+      .limit(pageSize);
+
+    // Get total pending events count for pagination
+    const totalEvents = await Event.countDocuments({ status: "pending" });
+
+    // Check if there are more events
+    const isNext = totalEvents > skipAmount + events.length;
+
+    return { events: JSON.parse(JSON.stringify(events)), isNext };
+  } catch (error) {
+    console.error("Error getting pending events:", error);
+    throw error;
+  }
+}
+
+// Approve or reject an event
+export async function updateEventStatus(
+  eventId: string,
+  status: "approved" | "rejected",
+  path: string
+) {
+  try {
+    await connectToDatabase();
+
+    // Update the event status
+    const updatedEvent = await Event.findByIdAndUpdate(
+      eventId,
+      { status, updatedAt: new Date() },
+      { new: true }
+    );
+
+    if (!updatedEvent) {
+      throw new Error("Event not found");
+    }
+
+    // If approved, update submitter's reputation
+    if (status === "approved") {
+      await User.findByIdAndUpdate(updatedEvent.submitter, {
+        $inc: { reputation: 10 },
+      });
+    }
+
+    revalidatePath(path);
+    return JSON.parse(JSON.stringify(updatedEvent));
+  } catch (error) {
+    console.error("Error updating event status:", error);
+    throw error;
+  }
+}
+
+// Delete an event
+export async function deleteEvent(eventId: string, path: string) {
+  try {
+    await connectToDatabase();
+
+    // Delete the event
+    const deletedEvent = await Event.findByIdAndDelete(eventId);
+
+    if (!deletedEvent) {
+      throw new Error("Event not found");
+    }
+
+    revalidatePath(path);
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting event:", error);
+    throw error;
+  }
+}
+
+// Get countries with events
+export async function getEventCountries() {
+  try {
+    await connectToDatabase();
+
+    // Get distinct countries from approved events
+    const countries = await Event.distinct("country", { status: "approved" });
+
+    return countries;
+  } catch (error) {
+    console.error("Error getting event countries:", error);
+    throw error;
+  }
+}
+
+// Get technologies from events
+export async function getEventTechnologies() {
+  try {
+    await connectToDatabase();
+
+    // Get distinct technologies from approved events
+    const technologies = await Event.distinct("technologies", {
+      status: "approved",
+    });
+
+    return technologies;
+  } catch (error) {
+    console.error("Error getting event technologies:", error);
     throw error;
   }
 }

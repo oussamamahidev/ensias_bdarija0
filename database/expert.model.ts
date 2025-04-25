@@ -93,35 +93,81 @@ const CodeSubmissionSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-// Consulting Session Schema
-export interface IConsultingSession extends Document {
-  expert: Schema.Types.ObjectId;
-  client: Schema.Types.ObjectId;
-  date: Date;
-  timeSlot: string;
-  duration: number; // in minutes
-  rate: number; // hourly rate in USD
-  status: "scheduled" | "completed" | "cancelled";
-  topic: string;
-  notes: string;
+// Event Attachment Schema (replacing ConsultingSession)
+export interface IEvent extends Document {
+  title: string;
+  description: string;
+  startDate: Date;
+  endDate: Date;
+  location: string;
+  country: string;
+  technologies: string[];
+  website: string;
+  organizer: string;
+  submitter: Schema.Types.ObjectId;
+  status: "pending" | "approved" | "rejected";
+  isFeatured: boolean;
+  isVirtual: boolean;
+  eventType:
+    | "conference"
+    | "webinar"
+    | "hackathon"
+    | "meetup"
+    | "workshop"
+    | "other";
+  comments: {
+    user: Schema.Types.ObjectId;
+    content: string;
+    createdAt: Date;
+  }[];
+  ratings: {
+    user: Schema.Types.ObjectId;
+    score: number;
+    createdAt: Date;
+  }[];
+  bookmarks: Schema.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
 
-const ConsultingSessionSchema = new Schema({
-  expert: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  client: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  date: { type: Date, required: true },
-  timeSlot: { type: String, required: true },
-  duration: { type: Number, default: 60 }, // default to 60 minutes
-  rate: { type: Number, required: true },
+const EventSchema = new Schema({
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+  startDate: { type: Date, required: true },
+  endDate: { type: Date, required: true },
+  location: { type: String, required: true },
+  country: { type: String, required: true },
+  technologies: [{ type: String }],
+  website: { type: String },
+  organizer: { type: String, required: true },
+  submitter: { type: Schema.Types.ObjectId, ref: "User", required: true },
   status: {
     type: String,
-    enum: ["scheduled", "completed", "cancelled"],
-    default: "scheduled",
+    enum: ["pending", "approved", "rejected"],
+    default: "pending",
   },
-  topic: { type: String, required: true },
-  notes: { type: String },
+  isFeatured: { type: Boolean, default: false },
+  isVirtual: { type: Boolean, default: false },
+  eventType: {
+    type: String,
+    enum: ["conference", "webinar", "hackathon", "meetup", "workshop", "other"],
+    required: true,
+  },
+  comments: [
+    {
+      user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+      content: { type: String, required: true },
+      createdAt: { type: Date, default: Date.now },
+    },
+  ],
+  ratings: [
+    {
+      user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+      score: { type: Number, required: true, min: 1, max: 5 },
+      createdAt: { type: Date, default: Date.now },
+    },
+  ],
+  bookmarks: [{ type: Schema.Types.ObjectId, ref: "User" }],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
@@ -183,9 +229,7 @@ const CodeChallenge =
   models.CodeChallenge || model("CodeChallenge", CodeChallengeSchema);
 const CodeSubmission =
   models.CodeSubmission || model("CodeSubmission", CodeSubmissionSchema);
-const ConsultingSession =
-  models.ConsultingSession ||
-  model("ConsultingSession", ConsultingSessionSchema);
+const Event = models.Event || model("Event", EventSchema);
 const ExpertAvailability =
   models.ExpertAvailability ||
   model("ExpertAvailability", ExpertAvailabilitySchema);
@@ -196,7 +240,7 @@ export {
   KnowledgeBaseArticle,
   CodeChallenge,
   CodeSubmission,
-  ConsultingSession,
+  Event,
   ExpertAvailability,
   ExpertProfile,
 };
