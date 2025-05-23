@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import {
   MessageSquare,
   Tag,
-  Award,
   Users,
   BookOpen,
   HelpCircle,

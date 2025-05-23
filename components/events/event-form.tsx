@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
@@ -34,6 +33,8 @@ import {
   Diamond,
   MagnetIcon as Magic,
   Wand2,
+  PartyPopper,
+  CalendarDays,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -207,6 +208,7 @@ export default function EventForm({ userId }: EventFormProps) {
   const [previewMode, setPreviewMode] = useState(false);
   const [autoSave, setAutoSave] = useState(true);
   const [formProgress, setFormProgress] = useState(0);
+  const [calendarHover, setCalendarHover] = useState(false);
   const confettiRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -258,7 +260,16 @@ export default function EventForm({ userId }: EventFormProps) {
         const draftData = JSON.parse(draft);
         Object.keys(draftData).forEach((key) => {
           if (draftData[key] !== undefined) {
-            form.setValue(key as keyof FormValues, draftData[key]);
+            if (key === "startDate" || key === "endDate") {
+              if (draftData[key]) {
+                form.setValue(
+                  key as keyof FormValues,
+                  new Date(draftData[key])
+                );
+              }
+            } else {
+              form.setValue(key as keyof FormValues, draftData[key]);
+            }
           }
         });
       } catch (error) {
@@ -284,7 +295,7 @@ export default function EventForm({ userId }: EventFormProps) {
       return value && value !== "";
     });
     setFormProgress((filledFields.length / requiredFields.length) * 100);
-  }, [form]);
+  }, [form.watch()]);
 
   // Sync arrays with form
   useEffect(() => {
@@ -376,7 +387,7 @@ export default function EventForm({ userId }: EventFormProps) {
   const getStepIcon = (step: number) => {
     const icons = [
       <Sparkles key="0" className="h-5 w-5" />,
-      <Calendar key="1" className="h-5 w-5" />,
+      <CalendarDays key="1" className="h-5 w-5" />,
       <Users key="2" className="h-5 w-5" />,
       <Rocket key="3" className="h-5 w-5" />,
       <Trophy key="4" className="h-5 w-5" />,
@@ -438,20 +449,20 @@ export default function EventForm({ userId }: EventFormProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-orange-900 via-amber-800 to-orange-800 relative overflow-hidden">
       {/* Animated Background */}
       <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-0 left-0 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-float"></div>
+        <div className="absolute top-0 left-0 w-72 h-72 bg-orange-500 rounded-full mix-blend-multiply filter blur-xl animate-float"></div>
         <div
           className="absolute top-0 right-0 w-72 h-72 bg-yellow-500 rounded-full mix-blend-multiply filter blur-xl animate-float"
           style={{ animationDelay: "2s" }}
         ></div>
         <div
-          className="absolute bottom-0 left-0 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl animate-float"
+          className="absolute bottom-0 left-0 w-72 h-72 bg-red-500 rounded-full mix-blend-multiply filter blur-xl animate-float"
           style={{ animationDelay: "4s" }}
         ></div>
         <div
-          className="absolute bottom-0 right-0 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl animate-float"
+          className="absolute bottom-0 right-0 w-72 h-72 bg-amber-500 rounded-full mix-blend-multiply filter blur-xl animate-float"
           style={{ animationDelay: "6s" }}
         ></div>
       </div>
@@ -465,7 +476,7 @@ export default function EventForm({ userId }: EventFormProps) {
           {[...Array(50)].map((_, i) => (
             <div
               key={i}
-              className="absolute w-2 h-2 bg-rainbow-gradient animate-confetti"
+              className="absolute w-2 h-2 bg-gradient-to-r from-orange-500 via-yellow-500 to-red-500 animate-confetti"
               style={{
                 left: `${Math.random() * 100}%`,
                 animationDelay: `${Math.random() * 3}s`,
@@ -480,11 +491,11 @@ export default function EventForm({ userId }: EventFormProps) {
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8 animate-fade-in">
-            <h1 className="text-5xl font-bold bg-clip-text text-transparent bg-rainbow-gradient animate-rainbow mb-4">
+            <h1 className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-500 via-yellow-500 to-red-500 animate-rainbow mb-4">
               Create Epic Event
             </h1>
             <p className="text-xl text-white/80 mb-6">
-              Lets build something extraordinary together! ✨
+              Let s build something extraordinary together! ✨
             </p>
 
             {/* Progress Bar */}
@@ -499,7 +510,7 @@ export default function EventForm({ userId }: EventFormProps) {
               </div>
               <div className="w-full bg-white/20 rounded-full h-3 backdrop-blur-sm">
                 <div
-                  className="bg-gradient-to-r from-pink-500 to-purple-500 h-3 rounded-full transition-all duration-500 ease-out animate-pulse-glow"
+                  className="bg-gradient-to-r from-orange-500 to-red-500 h-3 rounded-full transition-all duration-500 ease-out animate-pulse-glow"
                   style={{ width: `${formProgress}%` }}
                 />
               </div>
@@ -518,7 +529,7 @@ export default function EventForm({ userId }: EventFormProps) {
           </div>
 
           {/* Step Navigation */}
-          <div className="flex justify-center mb-8">
+          <div className="flex justify-center mb-8 overflow-x-auto pb-2">
             <div className="flex items-center space-x-4 bg-white/10 backdrop-blur-md rounded-full px-6 py-3 border border-white/20">
               {[0, 1, 2, 3, 4].map((step) => (
                 <div
@@ -526,7 +537,7 @@ export default function EventForm({ userId }: EventFormProps) {
                   className={cn(
                     "flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300",
                     step === formStep
-                      ? "bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-neon animate-pulse-glow"
+                      ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-neon animate-pulse-glow"
                       : step < formStep
                       ? "bg-green-500 text-white"
                       : "bg-white/20 text-white/60"
@@ -576,7 +587,7 @@ export default function EventForm({ userId }: EventFormProps) {
                               <Input
                                 placeholder="Enter an amazing title that will grab attention..."
                                 {...field}
-                                className="h-14 bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:border-pink-400 focus:ring-pink-400 backdrop-blur-sm text-lg"
+                                className="h-14 bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:border-orange-400 focus:ring-orange-400 backdrop-blur-sm text-lg"
                               />
                             </FormControl>
                             <FormDescription className="text-white/60">
@@ -595,7 +606,7 @@ export default function EventForm({ userId }: EventFormProps) {
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel className="text-white font-medium flex items-center gap-2">
-                                <Zap className="h-4 w-4 text-blue-400" />
+                                <Zap className="h-4 w-4 text-orange-400" />
                                 Event Type *
                               </FormLabel>
                               <Select
@@ -603,7 +614,7 @@ export default function EventForm({ userId }: EventFormProps) {
                                 defaultValue={field.value}
                               >
                                 <FormControl>
-                                  <SelectTrigger className="h-14 bg-white/10 border-white/30 text-white focus:border-pink-400 focus:ring-pink-400 backdrop-blur-sm">
+                                  <SelectTrigger className="h-14 bg-white/10 border-white/30 text-white focus:border-orange-400 focus:ring-orange-400 backdrop-blur-sm">
                                     <SelectValue placeholder="Choose your event type" />
                                   </SelectTrigger>
                                 </FormControl>
@@ -647,7 +658,7 @@ export default function EventForm({ userId }: EventFormProps) {
                                 defaultValue={field.value}
                               >
                                 <FormControl>
-                                  <SelectTrigger className="h-14 bg-white/10 border-white/30 text-white focus:border-pink-400 focus:ring-pink-400 backdrop-blur-sm">
+                                  <SelectTrigger className="h-14 bg-white/10 border-white/30 text-white focus:border-orange-400 focus:ring-orange-400 backdrop-blur-sm">
                                     <SelectValue placeholder="Select category" />
                                   </SelectTrigger>
                                 </FormControl>
@@ -692,13 +703,13 @@ export default function EventForm({ userId }: EventFormProps) {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-white font-medium flex items-center gap-2">
-                              <Wand2 className="h-4 w-4 text-purple-400" />
+                              <Wand2 className="h-4 w-4 text-orange-400" />
                               Description *
                             </FormLabel>
                             <FormControl>
                               <Textarea
                                 placeholder="Tell us about your amazing event! What will attendees learn? Who should join? What makes it special?"
-                                className="min-h-[120px] bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:border-pink-400 focus:ring-pink-400 backdrop-blur-sm resize-none"
+                                className="min-h-[120px] bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:border-orange-400 focus:ring-orange-400 backdrop-blur-sm resize-none"
                                 {...field}
                               />
                             </FormControl>
@@ -715,7 +726,7 @@ export default function EventForm({ userId }: EventFormProps) {
                         <Button
                           type="button"
                           onClick={nextFormStep}
-                          className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white px-8 py-4 h-auto text-lg font-semibold shadow-neon transition-all duration-300 hover:scale-105"
+                          className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-4 h-auto text-lg font-semibold shadow-neon transition-all duration-300 hover:scale-105"
                         >
                           Continue the Journey
                           <Rocket className="ml-2 h-5 w-5" />
@@ -734,7 +745,7 @@ export default function EventForm({ userId }: EventFormProps) {
                           render={({ field }) => (
                             <FormItem className="flex flex-col">
                               <FormLabel className="text-white font-medium flex items-center gap-2">
-                                <Calendar className="h-4 w-4 text-green-400" />
+                                <CalendarDays className="h-4 w-4 text-orange-400" />
                                 Start Date *
                               </FormLabel>
                               <Popover>
@@ -742,32 +753,110 @@ export default function EventForm({ userId }: EventFormProps) {
                                   <FormControl>
                                     <Button
                                       variant="outline"
+                                      onMouseEnter={() =>
+                                        setCalendarHover(true)
+                                      }
+                                      onMouseLeave={() =>
+                                        setCalendarHover(false)
+                                      }
                                       className={cn(
-                                        "h-14 pl-3 text-left font-normal bg-white/10 border-white/30 text-white hover:bg-white/20 backdrop-blur-sm",
-                                        !field.value && "text-white/50"
+                                        "w-full h-14 pl-4 text-left font-normal bg-white/10 border-white/30 text-white hover:bg-white/20 backdrop-blur-sm transition-all duration-300",
+                                        !field.value && "text-white/50",
+                                        calendarHover &&
+                                          "scale-[1.02] shadow-lg border-orange-400"
                                       )}
                                     >
-                                      {field.value ? (
-                                        format(field.value, "PPP")
-                                      ) : (
-                                        <span>Pick your start date</span>
-                                      )}
-                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                      <div className="flex items-center justify-between w-full">
+                                        <div className="flex items-center gap-2">
+                                          <div
+                                            className={cn(
+                                              "w-8 h-8 rounded-full flex items-center justify-center",
+                                              "bg-gradient-to-r from-orange-500 to-red-500 transition-all duration-300",
+                                              calendarHover &&
+                                                "animate-calendar-bounce"
+                                            )}
+                                          >
+                                            <CalendarIcon className="h-4 w-4 text-white" />
+                                          </div>
+                                          {field.value ? (
+                                            <span className="font-medium">
+                                              {format(
+                                                field.value,
+                                                "EEEE, MMMM d, yyyy"
+                                              )}
+                                            </span>
+                                          ) : (
+                                            <span>Pick your start date</span>
+                                          )}
+                                        </div>
+                                        <div className="w-2 h-2 rounded-full bg-orange-400 animate-pulse" />
+                                      </div>
                                     </Button>
                                   </FormControl>
                                 </PopoverTrigger>
                                 <PopoverContent
-                                  className="w-auto p-0 bg-gray-900 border-gray-700"
-                                  align="start"
+                                  className="w-auto p-0 bg-gray-900/95 backdrop-blur-md border-orange-500/30 shadow-2xl rounded-xl overflow-hidden"
+                                  align="center"
                                 >
+                                  <div className="p-4 border-b border-orange-500/20 bg-gradient-to-r from-orange-500 to-red-500">
+                                    <div className="flex items-center gap-2">
+                                      <PartyPopper className="h-5 w-5 text-white animate-calendar-bounce" />
+                                      <h3 className="text-white font-bold text-lg">
+                                        When does your event start?
+                                      </h3>
+                                    </div>
+                                    <p className="text-white/80 text-sm mt-1">
+                                      Choose a date to kick off your amazing
+                                      event!
+                                    </p>
+                                  </div>
                                   <Calendar
                                     mode="single"
                                     selected={field.value}
                                     onSelect={field.onChange}
                                     disabled={(date) => date < new Date()}
                                     initialFocus
-                                    className="text-white"
+                                    className="text-white bg-transparent p-3"
+                                    classNames={{
+                                      months:
+                                        "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                                      month: "space-y-4",
+                                      caption:
+                                        "flex justify-center pt-1 relative items-center text-orange-400 font-bold",
+                                      caption_label: "text-lg font-bold",
+                                      nav: "space-x-1 flex items-center",
+                                      nav_button: cn(
+                                        "h-8 w-8 bg-orange-500/20 hover:bg-orange-500/40 text-orange-400 hover:text-white rounded-full transition-all duration-300 hover:scale-110"
+                                      ),
+                                      nav_button_previous: "absolute left-1",
+                                      nav_button_next: "absolute right-1",
+                                      table: "w-full border-collapse space-y-1",
+                                      head_row: "flex",
+                                      head_cell:
+                                        "text-orange-300 rounded-md w-9 font-bold text-sm",
+                                      row: "flex w-full mt-2",
+                                      cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-orange-500/20 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20 rounded-lg",
+                                      day: cn(
+                                        "h-9 w-9 p-0 font-normal text-white hover:bg-orange-500/30 hover:text-white rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-lg"
+                                      ),
+                                      day_selected:
+                                        "bg-gradient-to-r from-orange-500 to-red-500 text-white hover:bg-gradient-to-r hover:from-orange-600 hover:to-red-600 focus:bg-gradient-to-r focus:from-orange-500 focus:to-red-500 shadow-lg scale-110 animate-date-glow",
+                                      day_today:
+                                        "bg-orange-500/20 text-orange-300 font-bold ring-2 ring-orange-400/50",
+                                      day_outside: "text-gray-500 opacity-50",
+                                      day_disabled: "text-gray-600 opacity-30",
+                                      day_range_middle:
+                                        "aria-selected:bg-orange-500/20 aria-selected:text-white",
+                                      day_hidden: "invisible",
+                                    }}
                                   />
+                                  <div className="p-3 border-t border-orange-500/20 bg-gradient-to-r from-gray-900 to-gray-800">
+                                    <div className="flex items-center justify-center gap-2 text-orange-300 text-sm">
+                                      <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse" />
+                                      <span>Select a date to continue</span>
+                                      <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
+                                    </div>
+                                  </div>
                                 </PopoverContent>
                               </Popover>
                               <FormMessage />
@@ -781,7 +870,7 @@ export default function EventForm({ userId }: EventFormProps) {
                           render={({ field }) => (
                             <FormItem className="flex flex-col">
                               <FormLabel className="text-white font-medium flex items-center gap-2">
-                                <Calendar className="h-4 w-4 text-red-400" />
+                                <CalendarDays className="h-4 w-4 text-red-400" />
                                 End Date *
                               </FormLabel>
                               <Popover>
@@ -789,24 +878,62 @@ export default function EventForm({ userId }: EventFormProps) {
                                   <FormControl>
                                     <Button
                                       variant="outline"
+                                      onMouseEnter={() =>
+                                        setCalendarHover(true)
+                                      }
+                                      onMouseLeave={() =>
+                                        setCalendarHover(false)
+                                      }
                                       className={cn(
-                                        "h-14 pl-3 text-left font-normal bg-white/10 border-white/30 text-white hover:bg-white/20 backdrop-blur-sm",
-                                        !field.value && "text-white/50"
+                                        "w-full h-14 pl-4 text-left font-normal bg-white/10 border-white/30 text-white hover:bg-white/20 backdrop-blur-sm transition-all duration-300",
+                                        !field.value && "text-white/50",
+                                        calendarHover &&
+                                          "scale-[1.02] shadow-lg border-red-400"
                                       )}
                                     >
-                                      {field.value ? (
-                                        format(field.value, "PPP")
-                                      ) : (
-                                        <span>Pick your end date</span>
-                                      )}
-                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                      <div className="flex items-center justify-between w-full">
+                                        <div className="flex items-center gap-2">
+                                          <div
+                                            className={cn(
+                                              "w-8 h-8 rounded-full flex items-center justify-center",
+                                              "bg-gradient-to-r from-red-500 to-orange-500 transition-all duration-300",
+                                              calendarHover &&
+                                                "animate-calendar-bounce"
+                                            )}
+                                          >
+                                            <CalendarIcon className="h-4 w-4 text-white" />
+                                          </div>
+                                          {field.value ? (
+                                            <span className="font-medium">
+                                              {format(
+                                                field.value,
+                                                "EEEE, MMMM d, yyyy"
+                                              )}
+                                            </span>
+                                          ) : (
+                                            <span>Pick your end date</span>
+                                          )}
+                                        </div>
+                                        <div className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
+                                      </div>
                                     </Button>
                                   </FormControl>
                                 </PopoverTrigger>
                                 <PopoverContent
-                                  className="w-auto p-0 bg-gray-900 border-gray-700"
-                                  align="start"
+                                  className="w-auto p-0 bg-gray-900/95 backdrop-blur-md border-red-500/30 shadow-2xl rounded-xl overflow-hidden"
+                                  align="center"
                                 >
+                                  <div className="p-4 border-b border-red-500/20 bg-gradient-to-r from-red-500 to-orange-500">
+                                    <div className="flex items-center gap-2">
+                                      <Trophy className="h-5 w-5 text-white animate-calendar-bounce" />
+                                      <h3 className="text-white font-bold text-lg">
+                                        When does your event end?
+                                      </h3>
+                                    </div>
+                                    <p className="text-white/80 text-sm mt-1">
+                                      Select when your awesome event concludes!
+                                    </p>
+                                  </div>
                                   <Calendar
                                     mode="single"
                                     selected={field.value}
@@ -817,8 +944,49 @@ export default function EventForm({ userId }: EventFormProps) {
                                         date < form.getValues("startDate"))
                                     }
                                     initialFocus
-                                    className="text-white"
+                                    className="text-white bg-transparent p-3"
+                                    classNames={{
+                                      months:
+                                        "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                                      month: "space-y-4",
+                                      caption:
+                                        "flex justify-center pt-1 relative items-center text-red-400 font-bold",
+                                      caption_label: "text-lg font-bold",
+                                      nav: "space-x-1 flex items-center",
+                                      nav_button: cn(
+                                        "h-8 w-8 bg-red-500/20 hover:bg-red-500/40 text-red-400 hover:text-white rounded-full transition-all duration-300 hover:scale-110"
+                                      ),
+                                      nav_button_previous: "absolute left-1",
+                                      nav_button_next: "absolute right-1",
+                                      table: "w-full border-collapse space-y-1",
+                                      head_row: "flex",
+                                      head_cell:
+                                        "text-red-300 rounded-md w-9 font-bold text-sm",
+                                      row: "flex w-full mt-2",
+                                      cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-red-500/20 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20 rounded-lg",
+                                      day: cn(
+                                        "h-9 w-9 p-0 font-normal text-white hover:bg-red-500/30 hover:text-white rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-lg"
+                                      ),
+                                      day_selected:
+                                        "bg-gradient-to-r from-red-500 to-orange-500 text-white hover:bg-gradient-to-r hover:from-red-600 hover:to-orange-600 focus:bg-gradient-to-r focus:from-red-500 focus:to-orange-500 shadow-lg scale-110 animate-date-glow",
+                                      day_today:
+                                        "bg-red-500/20 text-red-300 font-bold ring-2 ring-red-400/50",
+                                      day_outside: "text-gray-500 opacity-50",
+                                      day_disabled: "text-gray-600 opacity-30",
+                                      day_range_middle:
+                                        "aria-selected:bg-red-500/20 aria-selected:text-white",
+                                      day_hidden: "invisible",
+                                    }}
                                   />
+                                  <div className="p-3 border-t border-red-500/20 bg-gradient-to-r from-gray-900 to-gray-800">
+                                    <div className="flex items-center justify-center gap-2 text-red-300 text-sm">
+                                      <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
+                                      <span>
+                                        Select a date after your start date
+                                      </span>
+                                      <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse" />
+                                    </div>
+                                  </div>
                                 </PopoverContent>
                               </Popover>
                               <FormMessage />
@@ -827,6 +995,34 @@ export default function EventForm({ userId }: EventFormProps) {
                         />
                       </div>
 
+                      {/* Date Range Preview */}
+                      {form.watch("startDate") && form.watch("endDate") && (
+                        <div className="bg-white/10 backdrop-blur-md rounded-lg p-4 border border-white/20 animate-calendar-slide">
+                          <div className="flex items-center gap-2 text-white mb-2">
+                            <CalendarDays className="h-5 w-5 text-orange-400" />
+                            <h3 className="font-medium">Your Event Duration</h3>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2 text-white/80">
+                            <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white">
+                              {format(form.watch("startDate"), "MMM d, yyyy")}
+                            </Badge>
+                            <span>to</span>
+                            <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-white">
+                              {format(form.watch("endDate"), "MMM d, yyyy")}
+                            </Badge>
+                            <span className="ml-2">
+                              (
+                              {Math.ceil(
+                                (form.watch("endDate").getTime() -
+                                  form.watch("startDate").getTime()) /
+                                  (1000 * 60 * 60 * 24)
+                              )}{" "}
+                              days)
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
                       <FormField
                         control={form.control}
                         name="isVirtual"
@@ -834,7 +1030,7 @@ export default function EventForm({ userId }: EventFormProps) {
                           <FormItem className="flex flex-row items-center justify-between rounded-lg border border-white/30 p-6 bg-white/5 backdrop-blur-sm">
                             <div className="space-y-0.5">
                               <FormLabel className="text-white font-medium flex items-center gap-2">
-                                <Globe className="h-5 w-5 text-blue-400" />
+                                <Globe className="h-5 w-5 text-orange-400" />
                                 Virtual Event
                               </FormLabel>
                               <FormDescription className="text-white/60">
@@ -845,7 +1041,7 @@ export default function EventForm({ userId }: EventFormProps) {
                               <Switch
                                 checked={field.value}
                                 onCheckedChange={field.onChange}
-                                className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-pink-500 data-[state=checked]:to-purple-500"
+                                className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-orange-500 data-[state=checked]:to-red-500"
                               />
                             </FormControl>
                           </FormItem>
@@ -872,7 +1068,7 @@ export default function EventForm({ userId }: EventFormProps) {
                                       : "City, Venue, Address..."
                                   }
                                   {...field}
-                                  className="h-14 bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:border-pink-400 focus:ring-pink-400 backdrop-blur-sm"
+                                  className="h-14 bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:border-orange-400 focus:ring-orange-400 backdrop-blur-sm"
                                 />
                               </FormControl>
                               <FormMessage />
@@ -886,7 +1082,7 @@ export default function EventForm({ userId }: EventFormProps) {
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel className="text-white font-medium flex items-center gap-2">
-                                <Globe className="h-4 w-4 text-cyan-400" />
+                                <Globe className="h-4 w-4 text-orange-400" />
                                 {form.watch("isVirtual")
                                   ? "Host Country *"
                                   : "Country *"}
@@ -895,7 +1091,7 @@ export default function EventForm({ userId }: EventFormProps) {
                                 <Input
                                   placeholder="Country"
                                   {...field}
-                                  className="h-14 bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:border-pink-400 focus:ring-pink-400 backdrop-blur-sm"
+                                  className="h-14 bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:border-orange-400 focus:ring-orange-400 backdrop-blur-sm"
                                 />
                               </FormControl>
                               <FormMessage />
@@ -917,7 +1113,7 @@ export default function EventForm({ userId }: EventFormProps) {
                         <Button
                           type="button"
                           onClick={nextFormStep}
-                          className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white px-8 py-4 h-auto font-semibold shadow-neon transition-all duration-300 hover:scale-105"
+                          className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-4 h-auto font-semibold shadow-neon transition-all duration-300 hover:scale-105"
                         >
                           Keep Going
                           <Zap className="ml-2 h-5 w-5" />
@@ -943,7 +1139,7 @@ export default function EventForm({ userId }: EventFormProps) {
                                 <Input
                                   placeholder="Your organization or name"
                                   {...field}
-                                  className="h-14 bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:border-pink-400 focus:ring-pink-400 backdrop-blur-sm"
+                                  className="h-14 bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:border-orange-400 focus:ring-orange-400 backdrop-blur-sm"
                                 />
                               </FormControl>
                               <FormMessage />
@@ -957,14 +1153,14 @@ export default function EventForm({ userId }: EventFormProps) {
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel className="text-white font-medium flex items-center gap-2">
-                                <Users className="h-4 w-4 text-blue-400" />
+                                <Users className="h-4 w-4 text-orange-400" />
                                 Expected Attendees
                               </FormLabel>
                               <FormControl>
                                 <div className="space-y-3">
                                   <Slider
                                     value={[field.value]}
-                                    onValueChange={(value: any) =>
+                                    onValueChange={(value) =>
                                       field.onChange(value[0])
                                     }
                                     max={10000}
@@ -1011,7 +1207,7 @@ export default function EventForm({ userId }: EventFormProps) {
                                   className={cn(
                                     "h-16 flex flex-col items-center justify-center gap-1 transition-all duration-300",
                                     field.value === level
-                                      ? "bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-neon"
+                                      ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-neon"
                                       : "bg-white/10 border-white/30 text-white hover:bg-white/20 backdrop-blur-sm"
                                   )}
                                 >
@@ -1076,7 +1272,7 @@ export default function EventForm({ userId }: EventFormProps) {
                                     onChange={(e) =>
                                       field.onChange(Number(e.target.value))
                                     }
-                                    className="h-14 bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:border-pink-400 focus:ring-pink-400 backdrop-blur-sm"
+                                    className="h-14 bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:border-orange-400 focus:ring-orange-400 backdrop-blur-sm"
                                   />
                                 </FormControl>
                                 <FormMessage />
@@ -1092,7 +1288,7 @@ export default function EventForm({ userId }: EventFormProps) {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-white font-medium flex items-center gap-2">
-                              <Zap className="h-4 w-4 text-purple-400" />
+                              <Zap className="h-4 w-4 text-orange-400" />
                               Technologies & Topics
                             </FormLabel>
                             <div className="space-y-4">
@@ -1113,7 +1309,7 @@ export default function EventForm({ userId }: EventFormProps) {
                                       );
                                     }
                                   }}
-                                  className="h-14 bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:border-pink-400 focus:ring-pink-400 backdrop-blur-sm"
+                                  className="h-14 bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:border-orange-400 focus:ring-orange-400 backdrop-blur-sm"
                                 />
                                 <Button
                                   type="button"
@@ -1127,7 +1323,7 @@ export default function EventForm({ userId }: EventFormProps) {
                                     )
                                   }
                                   disabled={!techInput.trim()}
-                                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white h-14 px-6"
+                                  className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white h-14 px-6"
                                 >
                                   <Plus className="h-5 w-5" />
                                 </Button>
@@ -1162,7 +1358,7 @@ export default function EventForm({ userId }: EventFormProps) {
                                     <Badge
                                       key={index}
                                       variant="secondary"
-                                      className="bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2 px-4 text-sm font-medium"
+                                      className="bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 px-4 text-sm font-medium"
                                     >
                                       {tech}
                                       <button
@@ -1205,7 +1401,7 @@ export default function EventForm({ userId }: EventFormProps) {
                         <Button
                           type="button"
                           onClick={nextFormStep}
-                          className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white px-8 py-4 h-auto font-semibold shadow-neon transition-all duration-300 hover:scale-105"
+                          className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-4 h-auto font-semibold shadow-neon transition-all duration-300 hover:scale-105"
                         >
                           Almost There
                           <Star className="ml-2 h-5 w-5" />
@@ -1223,14 +1419,14 @@ export default function EventForm({ userId }: EventFormProps) {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-white font-medium flex items-center gap-2">
-                              <Globe className="h-4 w-4 text-blue-400" />
+                              <Globe className="h-4 w-4 text-orange-400" />
                               Website (Optional)
                             </FormLabel>
                             <FormControl>
                               <Input
                                 placeholder="https://your-awesome-event.com"
                                 {...field}
-                                className="h-14 bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:border-pink-400 focus:ring-pink-400 backdrop-blur-sm"
+                                className="h-14 bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:border-orange-400 focus:ring-orange-400 backdrop-blur-sm"
                               />
                             </FormControl>
                             <FormMessage />
@@ -1267,7 +1463,7 @@ export default function EventForm({ userId }: EventFormProps) {
                                       );
                                     }
                                   }}
-                                  className="h-14 bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:border-pink-400 focus:ring-pink-400 backdrop-blur-sm"
+                                  className="h-14 bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:border-orange-400 focus:ring-orange-400 backdrop-blur-sm"
                                 />
                                 <Button
                                   type="button"
@@ -1334,7 +1530,8 @@ export default function EventForm({ userId }: EventFormProps) {
                       <FormField
                         control={form.control}
                         name="benefits"
-                        render={({ field :any }) => (
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        render={({ field: any }) => (
                           <FormItem>
                             <FormLabel className="text-white font-medium flex items-center gap-2">
                               <Gift className="h-4 w-4 text-green-400" />
@@ -1360,7 +1557,7 @@ export default function EventForm({ userId }: EventFormProps) {
                                       );
                                     }
                                   }}
-                                  className="h-14 bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:border-pink-400 focus:ring-pink-400 backdrop-blur-sm"
+                                  className="h-14 bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:border-orange-400 focus:ring-orange-400 backdrop-blur-sm"
                                 />
                                 <Button
                                   type="button"
@@ -1374,7 +1571,7 @@ export default function EventForm({ userId }: EventFormProps) {
                                     )
                                   }
                                   disabled={!benefitInput.trim()}
-                                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white h-14 px-6"
+                                  className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white h-14 px-6"
                                 >
                                   <Plus className="h-5 w-5" />
                                 </Button>
@@ -1462,7 +1659,7 @@ export default function EventForm({ userId }: EventFormProps) {
                                 <Switch
                                   checked={field.value}
                                   onCheckedChange={field.onChange}
-                                  className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-red-500 data-[state=checked]:to-pink-500"
+                                  className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-red-500 data-[state=checked]:to-orange-500"
                                 />
                               </FormControl>
                             </FormItem>
@@ -1475,7 +1672,7 @@ export default function EventForm({ userId }: EventFormProps) {
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel className="text-white font-medium flex items-center gap-2">
-                                <Globe className="h-4 w-4 text-cyan-400" />
+                                <Globe className="h-4 w-4 text-orange-400" />
                                 Language
                               </FormLabel>
                               <Select
@@ -1483,7 +1680,7 @@ export default function EventForm({ userId }: EventFormProps) {
                                 defaultValue={field.value}
                               >
                                 <FormControl>
-                                  <SelectTrigger className="h-14 bg-white/10 border-white/30 text-white focus:border-pink-400 focus:ring-pink-400 backdrop-blur-sm">
+                                  <SelectTrigger className="h-14 bg-white/10 border-white/30 text-white focus:border-orange-400 focus:ring-orange-400 backdrop-blur-sm">
                                     <SelectValue placeholder="Select language" />
                                   </SelectTrigger>
                                 </FormControl>
@@ -1533,7 +1730,7 @@ export default function EventForm({ userId }: EventFormProps) {
                         <Button
                           type="button"
                           onClick={nextFormStep}
-                          className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white px-8 py-4 h-auto font-semibold shadow-neon transition-all duration-300 hover:scale-105"
+                          className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-4 h-auto font-semibold shadow-neon transition-all duration-300 hover:scale-105"
                         >
                           Final Step
                           <Crown className="ml-2 h-5 w-5" />
@@ -1546,7 +1743,7 @@ export default function EventForm({ userId }: EventFormProps) {
                   {formStep === 4 && (
                     <div className="space-y-6 animate-slide-in-right">
                       <div className="text-center mb-8">
-                        <div className="w-20 h-20 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse-glow">
+                        <div className="w-20 h-20 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse-glow">
                           <Trophy className="h-10 w-10 text-white" />
                         </div>
                         <h3 className="text-2xl font-bold text-white mb-2">
@@ -1562,7 +1759,7 @@ export default function EventForm({ userId }: EventFormProps) {
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
-                              <Badge className="bg-gradient-to-r from-pink-500 to-purple-500 text-white">
+                              <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white">
                                 {form.watch("eventType")}
                               </Badge>
                               <Badge
@@ -1596,7 +1793,7 @@ export default function EventForm({ userId }: EventFormProps) {
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                           <div className="text-center p-3 bg-white/5 rounded-lg">
-                            <Calendar className="h-5 w-5 text-blue-400 mx-auto mb-1" />
+                            <Calendar className="h-5 w-5 text-orange-400 mx-auto mb-1" />
                             <div className="text-white/60">Date</div>
                             <div className="text-white font-medium">
                               {form.watch("startDate")
@@ -1614,7 +1811,7 @@ export default function EventForm({ userId }: EventFormProps) {
                             </div>
                           </div>
                           <div className="text-center p-3 bg-white/5 rounded-lg">
-                            <Users className="h-5 w-5 text-green-400 mx-auto mb-1" />
+                            <Users className="h-5 w-5 text-orange-400 mx-auto mb-1" />
                             <div className="text-white/60">Capacity</div>
                             <div className="text-white font-medium">
                               {form.watch("capacity")?.toLocaleString() ||
@@ -1622,7 +1819,7 @@ export default function EventForm({ userId }: EventFormProps) {
                             </div>
                           </div>
                           <div className="text-center p-3 bg-white/5 rounded-lg">
-                            <DollarSign className="h-5 w-5 text-yellow-400 mx-auto mb-1" />
+                            <DollarSign className="h-5 w-5 text-orange-400 mx-auto mb-1" />
                             <div className="text-white/60">Price</div>
                             <div className="text-white font-medium">
                               {form.watch("isPaid")
@@ -1693,7 +1890,7 @@ export default function EventForm({ userId }: EventFormProps) {
                         <Button
                           type="submit"
                           disabled={isSubmitting}
-                          className="bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 hover:from-pink-600 hover:via-purple-600 hover:to-indigo-600 text-white px-12 py-4 h-auto text-lg font-bold shadow-neon transition-all duration-300 hover:scale-105 animate-pulse-glow"
+                          className="bg-gradient-to-r from-orange-500 via-amber-500 to-red-500 hover:from-orange-600 hover:via-amber-600 hover:to-red-600 text-white px-12 py-4 h-auto text-lg font-bold shadow-neon transition-all duration-300 hover:scale-105 animate-pulse-glow"
                         >
                           {isSubmitting ? (
                             <>

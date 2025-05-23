@@ -72,6 +72,19 @@ const config = {
           purple: "#8000ff",
           cyan: "#00ffff",
         },
+        orange: {
+          50: "#fff7ed",
+          100: "#ffedd5",
+          200: "#fed7aa",
+          300: "#fdba74",
+          400: "#fb923c",
+          500: "#f97316",
+          600: "#ea580c",
+          700: "#c2410c",
+          800: "#9a3412",
+          900: "#7c2d12",
+          950: "#431407",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -107,10 +120,10 @@ const config = {
         },
         "pulse-glow": {
           "0%, 100%": {
-            boxShadow: "0 0 5px #ed54ff, 0 0 10px #ed54ff, 0 0 15px #ed54ff",
+            boxShadow: "0 0 5px #f97316, 0 0 10px #f97316, 0 0 15px #f97316",
           },
           "50%": {
-            boxShadow: "0 0 10px #ed54ff, 0 0 20px #ed54ff, 0 0 30px #ed54ff",
+            boxShadow: "0 0 10px #f97316, 0 0 20px #f97316, 0 0 30px #f97316",
           },
         },
         float: {
@@ -139,7 +152,21 @@ const config = {
         },
         blink: {
           "0%, 50%": { borderColor: "transparent" },
-          "51%, 100%": { borderColor: "#ed54ff" },
+          "51%, 100%": { borderColor: "#f97316" },
+        },
+        "calendar-bounce": {
+          "0%, 100%": { transform: "translateY(0) scale(1)" },
+          "50%": { transform: "translateY(-5px) scale(1.05)" },
+        },
+        "date-glow": {
+          "0%, 100%": { boxShadow: "0 0 5px #f97316, 0 0 10px #f97316" },
+          "50%": {
+            boxShadow: "0 0 10px #f97316, 0 0 20px #f97316, 0 0 30px #f97316",
+          },
+        },
+        "calendar-slide": {
+          "0%": { transform: "translateY(-10px)", opacity: "0" },
+          "100%": { transform: "translateY(0)", opacity: "1" },
         },
       },
       animation: {
@@ -156,13 +183,16 @@ const config = {
         confetti: "confetti 3s ease-out infinite",
         typewriter: "typewriter 2s steps(20) infinite",
         blink: "blink 1s infinite",
+        "calendar-bounce": "calendar-bounce 2s ease-in-out infinite",
+        "date-glow": "date-glow 2s ease-in-out infinite",
+        "calendar-slide": "calendar-slide 0.3s ease-out",
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
         "rainbow-gradient":
-          "linear-gradient(-45deg, #ff0080, #0080ff, #00ff80, #ffff00, #8000ff)",
+          "linear-gradient(-45deg, #f97316, #fbbf24, #ef4444, #f97316)",
         glass:
           "linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0))",
       },
@@ -174,7 +204,7 @@ const config = {
         "neon-lg":
           "0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor",
         glass: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
-        "inner-glow": "inset 0 0 10px rgba(237, 84, 255, 0.3)",
+        "inner-glow": "inset 0 0 10px rgba(249, 115, 22, 0.3)",
       },
     },
   },
