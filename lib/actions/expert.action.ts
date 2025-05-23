@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
 import { connectToDatabase } from "../mongoose";
@@ -24,9 +25,6 @@ import type {
   SubmitCodeChallengeParams,
   UpdateExpertAvailabilityParams,
   GetExpertAvailabilityParams,
-  BookConsultingSessionParams,
-  GetConsultingSessionsParams,
-  UpdateConsultingSessionParams,
   CreateExpertProfileParams,
   UpdateExpertProfileParams,
   GetExpertProfileParams,
@@ -1126,7 +1124,9 @@ export async function updateEvent(params: UpdateEventParams) {
 }
 
 // Get events with filtering and pagination
-export async function getEvents(params: GetEventsParams) {
+export async function getEvents(
+  params: GetEventsParams & { minEndDate?: Date }
+) {
   try {
     await connectToDatabase();
 
@@ -1142,6 +1142,7 @@ export async function getEvents(params: GetEventsParams) {
       eventType,
       sortBy = "startDate",
       submitterId,
+      minEndDate, // Added for filtering expired events
     } = params;
 
     // Calculate skip amount for pagination
@@ -1172,6 +1173,11 @@ export async function getEvents(params: GetEventsParams) {
 
     if (endDate) {
       query.endDate = { $lte: endDate };
+    }
+
+    // Filter for expired events
+    if (minEndDate) {
+      query.endDate = { ...query.endDate, $gte: minEndDate };
     }
 
     if (eventType) {
@@ -1470,6 +1476,209 @@ export async function getEventTechnologies() {
     return technologies;
   } catch (error) {
     console.error("Error getting event technologies:", error);
+    throw error;
+  }
+}
+
+// Get expired events
+export async function getExpiredEvents(params: {
+  page?: number;
+  pageSize?: number;
+  sortBy?: string;
+}) {
+  try {
+    await connectToDatabase();
+
+    const { page = 1, pageSize = 10, sortBy = "endDate" } = params;
+
+    // Calculate skip amount for pagination
+    const skipAmount = (page - 1) * pageSize;
+
+    // Current date
+    const currentDate = new Date();
+
+    // Prepare filter query for expired events
+    const query: FilterQuery<typeof Event> = {
+      status: "approved",
+      endDate: { $lt: currentDate },
+    };
+
+    // Prepare sort options
+    let sortOptions = {};
+    switch (sortBy) {
+      case "endDate":
+        sortOptions = { endDate: -1 }; // Most recently ended first
+        break;
+      case "popularity":
+        sortOptions = { "bookmarks.length": -1 };
+        break;
+      case "rating":
+        sortOptions = { "ratings.score": -1 };
+        break;
+      default:
+        sortOptions = { endDate: -1 };
+    }
+
+    // Get expired events with pagination
+    const events = await Event.find(query)
+      .populate("submitter", "name username picture")
+      .sort(sortOptions)
+      .skip(skipAmount)
+      .limit(pageSize);
+
+    // Get total expired events count for pagination
+    const totalEvents = await Event.countDocuments(query);
+
+    // Check if there are more events
+    const isNext = totalEvents > skipAmount + events.length;
+
+    return { events: JSON.parse(JSON.stringify(events)), isNext };
+  } catch (error) {
+    console.error("Error getting expired events:", error);
+    throw error;
+  }
+}
+
+// Get upcoming events
+export async function getUpcomingEvents(params: {
+  page?: number;
+  pageSize?: number;
+  sortBy?: string;
+}) {
+  try {
+    await connectToDatabase();
+
+    const { page = 1, pageSize = 10, sortBy = "startDate" } = params;
+
+    // Calculate skip amount for pagination
+    const skipAmount = (page - 1) * pageSize;
+
+    // Current date
+    const currentDate = new Date();
+
+    // Prepare filter query for upcoming events
+    const query: FilterQuery<typeof Event> = {
+      status: "approved",
+      startDate: { $gt: currentDate },
+    };
+
+    // Prepare sort options
+    let sortOptions = {};
+    switch (sortBy) {
+      case "startDate":
+        sortOptions = { startDate: 1 }; // Soonest first
+        break;
+      case "popularity":
+        sortOptions = { "bookmarks.length": -1 };
+        break;
+      default:
+        sortOptions = { startDate: 1 };
+    }
+
+    // Get upcoming events with pagination
+    const events = await Event.find(query)
+      .populate("submitter", "name username picture")
+      .sort(sortOptions)
+      .skip(skipAmount)
+      .limit(pageSize);
+
+    // Get total upcoming events count for pagination
+    const totalEvents = await Event.countDocuments(query);
+
+    // Check if there are more events
+    const isNext = totalEvents > skipAmount + events.length;
+
+    return { events: JSON.parse(JSON.stringify(events)), isNext };
+  } catch (error) {
+    console.error("Error getting upcoming events:", error);
+    throw error;
+  }
+}
+
+// Get currently ongoing events
+export async function getCurrentEvents(params: {
+  page?: number;
+  pageSize?: number;
+}) {
+  try {
+    await connectToDatabase();
+
+    const { page = 1, pageSize = 10 } = params;
+
+    // Calculate skip amount for pagination
+    const skipAmount = (page - 1) * pageSize;
+
+    // Current date
+    const currentDate = new Date();
+
+    // Prepare filter query for current events
+    const query: FilterQuery<typeof Event> = {
+      status: "approved",
+      startDate: { $lte: currentDate },
+      endDate: { $gte: currentDate },
+    };
+
+    // Get current events with pagination
+    const events = await Event.find(query)
+      .populate("submitter", "name username picture")
+      .sort({ endDate: 1 }) // Ending soonest first
+      .skip(skipAmount)
+      .limit(pageSize);
+
+    // Get total current events count for pagination
+    const totalEvents = await Event.countDocuments(query);
+
+    // Check if there are more events
+    const isNext = totalEvents > skipAmount + events.length;
+
+    return { events: JSON.parse(JSON.stringify(events)), isNext };
+  } catch (error) {
+    console.error("Error getting current events:", error);
+    throw error;
+  }
+}
+
+// Get related events based on technologies or event type
+export async function getRelatedEvents(params: {
+  eventId: string;
+  limit?: number;
+  includeExpired?: boolean;
+}) {
+  try {
+    await connectToDatabase();
+
+    const { eventId, limit = 3, includeExpired = false } = params;
+
+    // Find the current event
+    const event = await Event.findById(eventId);
+    if (!event) {
+      throw new Error("Event not found");
+    }
+
+    // Prepare filter query for related events
+    const query: FilterQuery<typeof Event> = {
+      status: "approved",
+      _id: { $ne: eventId }, // Exclude current event
+      $or: [
+        { technologies: { $in: event.technologies } },
+        { eventType: event.eventType },
+      ],
+    };
+
+    // If not including expired events, add date filter
+    if (!includeExpired) {
+      query.endDate = { $gte: new Date() };
+    }
+
+    // Get related events
+    const relatedEvents = await Event.find(query)
+      .populate("submitter", "name username picture")
+      .sort({ startDate: 1 })
+      .limit(limit);
+
+    return JSON.parse(JSON.stringify(relatedEvents));
+  } catch (error) {
+    console.error("Error getting related events:", error);
     throw error;
   }
 }

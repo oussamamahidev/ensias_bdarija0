@@ -1,18 +1,20 @@
 import { auth } from "@clerk/nextjs/server";
 import { getUserById } from "@/lib/actions/user.action";
 import { redirect } from "next/navigation";
-import EventDetail from "@/components/events/event-detail";
 import type { Metadata } from "next";
 import { getEventById } from "@/lib/actions/expert.action";
+import EventDetail from "@/components/events/event-detail";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 interface EventPageProps {
-    params: Promise<{ id: string }>;
+  params: Promise<{ id: string }>;
 }
 
 export async function generateMetadata({
   params,
 }: EventPageProps): Promise<Metadata> {
-    const { id } = await params;
+  const { id } = await params;
   const event = await getEventById({ eventId: id });
 
   if (!event) {
@@ -28,7 +30,7 @@ export async function generateMetadata({
 }
 
 export default async function EventPage({ params }: EventPageProps) {
-    const { id } = await params;
+  const { id } = await params;
   // Get the event
   const event = await getEventById({ eventId: id });
 
@@ -52,8 +54,17 @@ export default async function EventPage({ params }: EventPageProps) {
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <EventDetail event={event} userId={mongoUserId} />
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white dark:from-gray-900 dark:to-gray-950 py-8">
+      <div className="container mx-auto">
+        <Link
+          href="/events"
+          className="inline-flex items-center text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 mb-6 transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Events
+        </Link>
+        <EventDetail event={event} userId={mongoUserId} />
+      </div>
     </div>
   );
 }

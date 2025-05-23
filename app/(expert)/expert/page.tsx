@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CalendarDays, Code, FileText, Lightbulb, Users } from "lucide-react";
 import KnowledgeBaseEditor from "@/components/expert/KnowledgeBaseEditor";
 import CodeChallengeCreator from "@/components/expert/CodeChallengeCreator";
-import EventApproval from "@/components/events/event-approval";
+import ConsultingCalendar from "@/components/expert/ConsultingCalendar";
 import { auth } from "@clerk/nextjs/server";
 import { getUserById } from "@/lib/actions/user.action";
 import { redirect } from "next/navigation";
@@ -77,15 +77,13 @@ export default async function ExpertDashboardPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center gap-2">
               <CalendarDays className="h-5 w-5 text-green-500" />
-              DevEvents
+              Consulting
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">5 pending events</p>
-            <p className="text-2xl font-bold mt-2">42</p>
-            <p className="text-xs text-muted-foreground">
-              Approved events this month
-            </p>
+            <p className="text-sm text-muted-foreground">5 upcoming sessions</p>
+            <p className="text-2xl font-bold mt-2">$720</p>
+            <p className="text-xs text-muted-foreground">Revenue this month</p>
           </CardContent>
         </Card>
 
@@ -121,9 +119,9 @@ export default async function ExpertDashboardPage() {
             <Lightbulb className="h-4 w-4" />
             Code Challenges
           </TabsTrigger>
-          <TabsTrigger value="events" className="flex items-center gap-2">
+          <TabsTrigger value="consulting" className="flex items-center gap-2">
             <CalendarDays className="h-4 w-4" />
-            DevEvents
+            Consulting
           </TabsTrigger>
         </TabsList>
 
@@ -135,8 +133,8 @@ export default async function ExpertDashboardPage() {
           <CodeChallengeCreator mongoUserId={mongoUserId} />
         </TabsContent>
 
-        <TabsContent value="events">
-          <EventApproval />
+        <TabsContent value="consulting">
+          <ConsultingCalendar mongoUserId={mongoUserId} />
         </TabsContent>
       </Tabs>
     </div>

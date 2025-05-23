@@ -10,7 +10,7 @@ import {
   Users,
   BookOpen,
   HelpCircle,
-  UserCircle,
+  Calendar,
 } from "lucide-react";
 import HeroSection from "@/components/dashbord/HeroSection";
 import FeatureCard from "@/components/dashbord/FeatureCard";
@@ -101,13 +101,13 @@ export default function Home() {
             delay={0.5}
           />
           <FeatureCard
-            icon={<Award size={24} />}
-            title="Coding Challenges"
-            description="Sharpen your skills with real-world coding challenges and improve your problem-solving abilities."
-            link="/code-challenges"
-            linkText="Start Solving"
-            color="yellow"
-            delay={0.7}
+            icon={<Calendar size={24} />}
+            title="Tech Events"
+            description="Stay up to date with the latest tech conferences, hackathons, and developer meetups around the world."
+            link="/events"
+            linkText="Explore Events"
+            color="blue"
+            delay={0.8}
           />
         </div>
       </section>
